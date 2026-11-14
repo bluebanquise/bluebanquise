@@ -20,6 +20,14 @@ action_timeout: {{ bluebanquise_supervision_action_timeout }}
 
 api_bind: {{ bluebanquise_supervision_api_bind }}
 api_port: {{ bluebanquise_supervision_api_port }}
+url_prefix: {{ bluebanquise_supervision_url_prefix }}
+version: {{ bluebanquise_supervision_role_version }}
+# Left menu of the WebUI (bluebanquise_webui_packs)
+webui_packs:
+{% for pack in bluebanquise_webui_packs | default([{'name': 'supervision', 'label': 'Supervision'}]) %}
+  - name: {{ pack['name'] | to_json }}
+    label: {{ pack['label'] | to_json }}
+{% endfor %}
 exporter_bind: {{ bluebanquise_supervision_exporter_bind }}
 exporter_port: {{ bluebanquise_supervision_exporter_port }}
 

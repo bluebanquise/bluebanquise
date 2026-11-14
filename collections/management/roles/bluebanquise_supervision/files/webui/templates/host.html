@@ -1,0 +1,253 @@
+{% extends "webui_base.html" %}
+
+{% block title %}{{ host }} - Supervision{% endblock %}
+
+{% block content %}
+<h1 class="title">{{ host }} <span class="tag is-medium" id="host-state"></span></h1>
+<p class="subtitle is-6">Group <span id="host-group"></span></p>
+
+<div class="notification is-link is-light is-hidden" id="maintenance-info"></div>
+<div class="notification is-danger is-light is-hidden" id="latched-info">
+  Error not acknowledged yet: see the events below, then acknowledge it.
+</div>
+
+<!-- Actions: one text field, used as reason or note text -->
+<div class="box">
+  <div class="field">
+    <label class="label" for="text">Reason or note</label>
+    <div class="control">
+      <input class="input" type="text" id="text" placeholder="Why (acknowledge, maintenance) or note text">
+    </div>
+  </div>
+  <div class="buttons">
+    <button class="button is-primary" id="button-probe" onclick="probeNow()">Probe now</button>
+    <button class="button is-danger" onclick="acknowledge()">Acknowledge error</button>
+    <button class="button is-link" onclick="startMaintenance()">Start maintenance</button>
+    <button class="button is-link is-light" onclick="stopMaintenance()">Stop maintenance</button>
+    <button class="button" onclick="addNote()">Add note</button>
+  </div>
+</div>
+
+<h2 class="title is-4">Last probe</h2>
+<p class="mb-3" id="probe-info"></p>
+<div id="probes"></div>
+
+<h2 class="title is-4 mt-5">Events</h2>
+<div class="table-container">
+  <table class="table is-fullwidth is-striped is-narrow">
+    <thead>
+      <tr><th>#</th><th>Time</th><th>Kind</th><th>By</th><th>Message</th></tr>
+    </thead>
+    <tbody id="events"></tbody>
+  </table>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const REFRESH_SECONDS = 30;
+
+const STATE_TAGS = {
+  ok: 'is-success',
+  error: 'is-danger',
+  maintenance: 'is-link',
+  unknown: 'is-light',
+};
+
+
+// ─── load: fill the page fields one by one ─────────────────────────────────────
+
+async function loadHost() {
+  const data = await apiRequest('GET', 'api/hosts/' + encodeURIComponent(HOST));
+
+  const state = document.getElementById('host-state');
+  state.textContent = data.summary.state;
+  state.className = 'tag is-medium ' + STATE_TAGS[data.summary.state];
+
+  document.getElementById('host-group').textContent = data.summary.group;
+
+  const maintenanceInfo = document.getElementById('maintenance-info');
+  if (data.maintenance.active) {
+    maintenanceInfo.textContent = 'In maintenance since ' + data.maintenance.since + ' by ' +
+      data.maintenance.by + ': ' + data.maintenance.reason;
+    maintenanceInfo.classList.remove('is-hidden');
+  } else {
+    maintenanceInfo.classList.add('is-hidden');
+  }
+
+  if (data.summary.latched) {
+    document.getElementById('latched-info').classList.remove('is-hidden');
+  } else {
+    document.getElementById('latched-info').classList.add('is-hidden');
+  }
+
+  const probeInfo = document.getElementById('probe-info');
+  const probes = document.getElementById('probes');
+  probes.replaceChildren();
+  if (data.probes === null) {
+    probeInfo.textContent = 'Never probed.';
+  } else {
+    let text = data.probes.started + ' -> ' + data.probes.finished;
+    if (data.probes.request_id) {
+      text = text + ' (on demand)';
+    }
+    if (data.probes.ssh === false) {
+      text = text + ' - SSH connection failed';
+    }
+    probeInfo.textContent = text;
+    for (const name of Object.keys(data.probes.probes)) {
+      probes.appendChild(probeBlock(name, data.probes.probes[name]));
+    }
+    if (data.probes.drift !== undefined) {
+      probes.appendChild(probeBlock('drift check', data.probes.drift));
+    }
+  }
+
+  const eventsData = await apiRequest('GET', 'api/hosts/' + encodeURIComponent(HOST) + '/events');
+  renderEvents(eventsData.events);
+}
+
+
+// One <details> per probe: name and status visible, output folded (open when in error)
+function probeBlock(name, result) {
+  const details = element('details', 'box p-3 mb-2');
+  if (result.error) {
+    details.open = true;
+  }
+
+  const summary = element('summary');
+  if (result.error) {
+    summary.appendChild(element('span', 'tag mr-2 is-danger', 'ERROR'));
+  } else {
+    summary.appendChild(element('span', 'tag mr-2 is-success', 'OK'));
+  }
+  let text = name;
+  if (result.exit_code !== undefined) {
+    text = text + ' - exit code ' + result.exit_code;
+  }
+  summary.appendChild(element('span', null, text + ', ' + result.duration + 's'));
+  details.appendChild(summary);
+
+  if (result.args !== undefined && result.args !== null) {
+    details.appendChild(element('p', 'is-size-7 mt-2', 'args: ' + result.args));
+  }
+  if (result.findings !== undefined && result.findings.length > 0) {
+    const list = element('ul', 'mt-2');
+    for (const finding of result.findings) {
+      list.appendChild(element('li', null, finding));
+    }
+    details.appendChild(list);
+  }
+  const output = ((result.stdout || '') + (result.stderr || '')).trim();
+  if (output !== '') {
+    details.appendChild(element('pre', 'command-output mt-2', output));
+  }
+  return details;
+}
+
+
+// Events table, newest first
+function renderEvents(events) {
+  const table = document.getElementById('events');
+  table.replaceChildren();
+  for (const event of events.slice().reverse()) {
+    const row = element('tr');
+    row.appendChild(element('td', null, event.number));
+    row.appendChild(element('td', null, event.time));
+
+    let kindClass = 'tag';
+    if (event.kind === 'Error') {
+      kindClass = 'tag is-danger';
+    } else if (event.kind.startsWith('Maintenance')) {
+      kindClass = 'tag is-link';
+    } else if (event.kind === 'Acknowledge') {
+      kindClass = 'tag is-success';
+    }
+    const kind = element('td');
+    kind.appendChild(element('span', kindClass, event.kind));
+    row.appendChild(kind);
+
+    row.appendChild(element('td', null, event.by || ''));
+    row.appendChild(element('td', null, event.message));
+    table.appendChild(row);
+  }
+}
+
+
+// ─── actions: read the text field, send it, reload the page fields ──────────────
+
+// Text of the reason / note field, or null (with a message) when empty
+function readText() {
+  const text = document.getElementById('text').value.trim();
+  if (text === '') {
+    showNotification('is-warning', 'Please write a reason (or the note text) first.');
+    return null;
+  }
+  return text;
+}
+
+async function acknowledge() {
+  const reason = readText();
+  if (reason === null) {
+    return;
+  }
+  await apiRequest('POST', 'api/hosts/' + encodeURIComponent(HOST) + '/acknowledge', {reason: reason});
+  document.getElementById('text').value = '';
+  loadHost();
+}
+
+async function startMaintenance() {
+  const reason = readText();
+  if (reason === null) {
+    return;
+  }
+  await apiRequest('POST', 'api/hosts/' + encodeURIComponent(HOST) + '/maintenance', {reason: reason});
+  document.getElementById('text').value = '';
+  loadHost();
+}
+
+async function stopMaintenance() {
+  const reason = readText();
+  if (reason === null) {
+    return;
+  }
+  await apiRequest('DELETE', 'api/hosts/' + encodeURIComponent(HOST) + '/maintenance', {reason: reason});
+  document.getElementById('text').value = '';
+  loadHost();
+}
+
+async function addNote() {
+  const text = readText();
+  if (text === null) {
+    return;
+  }
+  await apiRequest('POST', 'api/hosts/' + encodeURIComponent(HOST) + '/notes', {text: text});
+  document.getElementById('text').value = '';
+  loadHost();
+}
+
+// Request a probe, then wait for its result: the probe daemon writes the request id in it
+async function probeNow() {
+  const button = document.getElementById('button-probe');
+  button.classList.add('is-loading');
+  try {
+    const request = await apiRequest('POST', 'api/hosts/' + encodeURIComponent(HOST) + '/probe', {});
+    for (let second = 0; second < 300; second++) {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      const data = await apiRequest('GET', 'api/hosts/' + encodeURIComponent(HOST));
+      if (data.probes !== null && data.probes.request_id === request.request_id) {
+        showNotification('is-success', 'Probe done.');
+        break;
+      }
+    }
+  } finally {
+    button.classList.remove('is-loading');
+  }
+  loadHost();
+}
+
+
+loadHost();
+setInterval(loadHost, REFRESH_SECONDS * 1000);
+</script>
+{% endblock %}

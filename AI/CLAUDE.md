@@ -6,6 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 BlueBanquise is an Ansible collection (`bluebanquise.infrastructure`, version 3.4.0) for deploying and managing clusters of nodes — HPC clusters, render farms, university infrastructure, etc. The collection lives under `collections/infrastructure/`.
 
+A second collection, `bluebanquise.management` (`collections/management/`, version 0.1.0, added 2026-11), holds the tools used to run a deployed cluster: each role is a **pack** (a few daemons, a JSON REST API, a small WebUI served by the `http_server` Apache under `/webui/<pack>/`). First pack: `bluebanquise_supervision`. Both collections install from `collections/` in one `ansible-galaxy collection install collections/` (a folder without `galaxy.yml`, like `unsupported_infrastructure/`, is skipped); the online path in `configure_environment.sh` installs each one by its git subdirectory.
+
 ## Repository Layout
 
 ```
@@ -15,6 +17,8 @@ collections/infrastructure/      # The Ansible collection (bluebanquise.infrastr
   plugins/
     filter/                      # Custom Jinja2 filters (nodeset, hosts_by_network, etc.)
     vars/core.py                 # Deprecated vars plugin
+collections/management/          # Second collection (bluebanquise.management): WebUI packs
+  roles/bluebanquise_supervision # Health probes, drift, events, maintenance + WebUI/API/CLI/exporter
 resources/
   data_model.md                  # Canonical reference for the inventory data model
   examples/simple_cluster/       # Reference inventory for a minimal cluster
@@ -856,6 +860,9 @@ planning this kind of change, not after review surfaces it missing.
 
 ## Supervision tool: bluebanquise_supervision (added 2026-11)
 
+Lives in the `bluebanquise.management` collection (`collections/management/roles/`, moved there
+2026-11-14 from `infrastructure`), FQCN `bluebanquise.management.bluebanquise_supervision`.
+
 Standalone replacement for the supervision/events/maintenance part of `cluster_management` (to be
 deprecated: users prefer small modular tools over one big tool). **No shared code with
 `cluster_management`**, nothing migrated (it was never released). Full user doc in the role README.
@@ -912,18 +919,50 @@ deprecated: users prefer small modular tools over one big tool). **No shared cod
 - **Published `bluebanquise-venv` for deb13 is still 1.2.1 (no `requests`)**: `check_bmc` Redfish
   fails on a real install (also in cluster_management). check_bmc now prints a clear CRITICAL.
   1.2.2 must be published.
-- **WebUI fetch**: `fetch(window.location.origin + path)`, never a relative path - a page opened
-  as `http://user:pass@host/` can not fetch relative URLs (Chrome TypeError).
-- **WebUI conventions**: Bulma 1.0.4 only (served locally from `files/webui/`, clusters are often
-  offline) + plain JS + one small `supervision.css` (map tiles, list row colors). Dark mode is
+- **Served by Apache under `/webui/supervision/`** (2026-11-14): the API binds `127.0.0.1` only
+  (fixed in `vars/main.yml`, no more `api_bind` default), waitress `serve(..., url_prefix=...)`
+  sets `SCRIPT_NAME`, routes stay `/api/...`. Gotcha verified live: waitress also serves paths
+  WITHOUT the prefix (it strips the prefix when present, refuses nothing), so
+  `127.0.0.1:8091/api/hosts` answers too - harmless (auth still required, localhost only). The
+  role needs `http_server` applied first (asserts the Apache conf folder exists), has its own
+  per-OS `vars/{Debian,RedHat,Suse}.yml` (conf path, service, configtest command: same values
+  as `http_server`'s), enables `proxy`/`proxy_http` with `community.general.apache2_module` on
+  non-RedHat, drops `bluebanquise-webui-supervision.conf`, handlers run configtest THEN `reloaded`
+  (a bad file never stops the Apache that also serves PXE). CI playbook
+  `resources/workflow/playbooks/bluebanquise_supervision.yml` applies `http_server` first, the
+  5 OS workflows run it with `--tags http_server,bluebanquise_supervision`.
+- **WebUI pages** (2026-11-14): Jinja templates rendered by Flask (`files/webui/templates/`),
+  static files in `files/webui/static/`. Every page extends `webui_base.html` (left menu from
+  `bluebanquise_webui_packs`, theme button, `#notifications`); `<base href="{{ request.script_root }}/">`,
+  only relative URLs, other packs linked as `../<name>/`. Values for JS go in `data-` attributes
+  of `<body>` (`SCRIPT_ROOT`, `HOST`), never inside `<script>`. Each page holds its own script
+  (fields with ids, a `load` function filling them one by one, one explicit function per action).
+  `webui_base.html`, `bluebanquise-webui.js` (`apiRequest`, `showNotification`, `element`,
+  theme), `bluebanquise-webui.css` (layout, state colors, tiles) are DUPLICATED files shared with
+  future packs (copy list in their header). `apiRequest(method, path)` fetches
+  `window.location.origin + SCRIPT_ROOT + '/' + path`, never a relative URL (a page opened as
+  `http://user:pass@host/` can not fetch relative URLs, Chrome TypeError), shows API errors
+  (`{"error"}`, or `HTTP error 503` when Apache answers an HTML page) and success `message`s.
+  Shared variables like `bluebanquise_webui_packs` are NOT set in role defaults (ansible-lint
+  `var-naming[no-role-prefix]`): `| default(...)` inline in the template, as `bb_*` variables.
+  Layout gotcha verified in screenshots: Bulma's page `.column` is a flex item, it would not
+  shrink below its content (`min-width: auto`) and pushed the host page past the right edge;
+  `.webui-page { min-width: 0 }` + `table-container` around wide tables.
+- **WebUI conventions**: Bulma 1.0.4 only (served locally from `files/webui/static/`, clusters are
+  often offline) + plain JS. Dark mode is
   Bulma's own `data-theme` on `<html>`: no attribute = follow the system, the moon/sun button
-  forces the other theme; an inline `<head>` script applies the saved theme before drawing (no
-  flash). Per-viewer preferences (`theme`, `view` map/list) in `localStorage`, always wrapped in
+  forces the other theme; an inline `<head>` script of `webui_base.html` applies the saved theme
+  before drawing (no flash). Per-viewer preferences (`theme`, `view` map/list) in `localStorage`, always wrapped in
   try/catch. Map tile hover text and list status column come from the same `hostMessage()`.
 - **Browser testing pattern (real clicks, no Playwright)**: headless Chromium with
   `--remote-debugging-port`, driven from Python by the DevTools protocol over `websocket-client`
   (`Page.navigate`, `Runtime.evaluate("...click()")`, `Page.captureScreenshot`), then read the
-  PNGs. Use a fresh `--user-data-dir` per run so localStorage starts empty. A throwaway second API
+  PNGs. Use a fresh `--user-data-dir` per run so localStorage starts empty (a kept profile
+  starts in the theme saved by the previous run: a "theme toggle" check then fails every other
+  run - seen 2026-11-14, harness not code). Log in through the real basic auth prompt, not
+  `user:pass@` URLs: `Fetch.enable {handleAuthRequests: true}`, answer `Fetch.authRequired` with
+  `Fetch.continueWithAuth` and continue every `Fetch.requestPaused`; count the prompts (one per
+  realm and session is the expected browser behaviour). A throwaway second API
   instance (`--settings` pointing to a demo hosts file + demo data dir, other port) with a few
   hundred synthetic hosts shows how the map/list behave at cluster scale. Plain `--screenshot`
   only shows the initial state; `--dump-dom` is enough to check that host data is escaped.

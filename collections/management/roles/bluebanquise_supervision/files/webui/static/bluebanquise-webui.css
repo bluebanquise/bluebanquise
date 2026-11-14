@@ -1,0 +1,92 @@
+/* DUPLICATED FILE: any change made to this file must be made identically in every copy below.
+ * Copies:
+ *   collections/management/roles/bluebanquise_supervision/files/webui/static/bluebanquise-webui.css
+ *
+ * bluebanquise-webui.css: only what Bulma does not provide, shared by every WebUI pack.
+ */
+
+/* ─── layout: left menu, page on the right ───────────────────────────────────── */
+
+.webui-menu {
+  background-color: var(--bulma-scheme-main-bis);
+  border-right: 1px solid var(--bulma-border-weak);
+}
+
+/* Wide screens: fixed width menu, always visible. Narrow screens: Bulma stacks the columns, the
+   menu comes first, above the page. */
+@media screen and (min-width: 769px) {
+  .webui-menu {
+    width: 14rem;
+    height: 100vh;
+    position: sticky;
+    top: 0;
+    overflow-y: auto;
+  }
+}
+
+/* The page column may shrink below the width of its content (a flex item does not by default):
+   without this, a wide table or output pushes the whole page past the right edge of the screen. */
+.webui-page {
+  min-width: 0;
+}
+
+/* Notifications of apiRequest(), top right corner, above the page */
+#notifications {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 100;
+  width: 24rem;
+  max-width: calc(100% - 2rem);
+}
+
+/* ─── host states, same colors in every pack ─────────────────────────────────── */
+
+.state-ok {
+  background-color: hsl(153, 53%, 53%);
+}
+
+.state-error {
+  background-color: hsl(348, 86%, 61%);
+}
+
+.state-maintenance {
+  background-color: hsl(229, 53%, 53%);
+}
+
+.state-unknown {
+  background-color: hsl(0, 0%, 71%);
+}
+
+/* Cluster map: one small square per host */
+.tile-host {
+  display: inline-block;
+  width: 1.1rem;
+  height: 1.1rem;
+  margin: 0.1rem;
+  border-radius: 2px;
+  vertical-align: middle;
+}
+
+a.tile-host:hover {
+  outline: 2px solid var(--bulma-text-strong);
+}
+
+/* Hosts list: rows colored like map tiles, text readable on each color */
+tr.row-host td,
+tr.row-host a {
+  color: #fff;
+}
+
+tr.row-host.state-ok td,
+tr.row-host.state-ok a,
+tr.row-host.state-unknown td,
+tr.row-host.state-unknown a {
+  color: #14161a;
+}
+
+/* Output of commands (probes, consoles, jobs), kept as is */
+pre.command-output {
+  white-space: pre-wrap;
+  font-size: 0.8rem;
+}

@@ -1,0 +1,91 @@
+{#
+DUPLICATED FILE: any change made to this file must be made identically in every copy below.
+Copies:
+  collections/management/roles/bluebanquise_supervision/files/webui/templates/webui_base.html
+
+webui_base.html: layout shared by every page of every WebUI pack (Jinja template, rendered by
+Flask). A page extends it and fills the blocks "title", "content" and "scripts".
+
+Values given by the pack to every page:
+  pack       name of this pack (supervision...), its URL is /webui/<pack>/
+  version    version of this pack
+  packs      packs of the left menu (bluebanquise_webui_packs): list of {name, label}
+  pack_menu  pages of this pack, listed under it in the menu: list of {label, url}, can be empty
+  user       name of the logged in user
+  host       host of a host page (optional)
+
+All URLs are relative to <base href>, the pack prefix (/webui/supervision/): never start a URL
+with /, so that the pack works under any prefix. Other packs are reached with ../<name>/.
+Values for JavaScript are given in data- attributes of <body>, never inside a <script> block.
+#}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <base href="{{ request.script_root }}/">
+  <title>{% block title %}{% endblock %} - BlueBanquise</title>
+  <link rel="stylesheet" href="static/bulma.min.css">
+  <link rel="stylesheet" href="static/bluebanquise-webui.css">
+  <script>
+    // Apply the theme chosen with the moon/sun button before the page is drawn
+    try {
+      if (localStorage.getItem('theme')) {
+        document.documentElement.setAttribute('data-theme', localStorage.getItem('theme'));
+      }
+    } catch (error) {
+    }
+  </script>
+</head>
+<body data-script-root="{{ request.script_root }}" data-host="{{ host | default('') }}">
+  <div class="columns is-gapless mb-0">
+
+    <!-- Left menu -->
+    <aside class="column is-narrow webui-menu">
+      <div class="menu p-4">
+        <p class="title is-5 mb-4">BlueBanquise</p>
+        <p class="menu-label">Packs</p>
+        <ul class="menu-list">
+          {% for entry in packs %}
+          <li>
+            {% if entry.name == pack %}
+            <a class="is-active" href="./">{{ entry.label }}</a>
+            {% if pack_menu %}
+            <ul>
+              {% for item in pack_menu %}
+              <li><a href="{{ item.url }}">{{ item.label }}</a></li>
+              {% endfor %}
+            </ul>
+            {% endif %}
+            {% else %}
+            <a href="../{{ entry.name }}/">{{ entry.label }}</a>
+            {% endif %}
+          </li>
+          {% endfor %}
+        </ul>
+
+        <p class="menu-label mt-5">Session</p>
+        <p class="mb-3">{{ user }}</p>
+        <button class="button is-small" id="theme-toggle" title="Switch dark / light mode" aria-label="Switch dark / light mode">
+          <svg id="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          <svg id="icon-sun" class="is-hidden" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+        </button>
+        <p class="is-size-7 has-text-grey mt-5">{{ pack }} {{ version }}</p>
+      </div>
+    </aside>
+
+    <!-- Page -->
+    <main class="column webui-page">
+      <section class="section">
+        {% block content %}{% endblock %}
+      </section>
+    </main>
+
+  </div>
+
+  <div id="notifications"></div>
+
+  <script src="static/bluebanquise-webui.js"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

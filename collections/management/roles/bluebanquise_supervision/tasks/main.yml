@@ -1,4 +1,12 @@
 ---
+- name: include_vars <|> Gather OS specific variables
+  ansible.builtin.include_vars: "{{ item }}"
+  with_first_found:
+    - files:
+        - "vars/{{ ansible_facts.os_family }}.yml"
+  tags:
+    - always
+
 - name: "package <|> Install packages"
   ansible.builtin.package:
     name: "{{ bluebanquise_supervision_packages_to_install }}"
@@ -243,3 +251,43 @@
   loop: "{{ bluebanquise_supervision_services }}"
   tags:
     - service
+
+
+################################################################################################
+######################## APACHE
+
+# The WebUI and the REST API are served by the Apache of the http_server role, under
+# /webui/supervision/. The daemon itself listens on 127.0.0.1 only.
+- name: "stat <|> Check Apache configuration folder"
+  ansible.builtin.stat:
+    path: "{{ bluebanquise_supervision_apache_conf_path }}"
+  register: bluebanquise_supervision_apache_conf_folder
+
+- name: "assert <|> Check that Apache is installed"
+  ansible.builtin.assert:
+    that:
+      - bluebanquise_supervision_apache_conf_folder.stat.exists
+    fail_msg: "{{ bluebanquise_supervision_apache_conf_path }} does not exist: apply the http_server role on this host first."
+    quiet: true
+
+# On the RedHat family, httpd loads the proxy modules by default
+- name: "apache2_module <|> Enable Apache proxy modules"
+  community.general.apache2_module:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - proxy
+    - proxy_http
+  when: ansible_facts.os_family != 'RedHat'
+  notify: service <|> Reload Apache
+
+- name: "template <|> Render Apache configuration"
+  ansible.builtin.template:
+    src: bluebanquise-webui-supervision.conf.j2
+    dest: "{{ bluebanquise_supervision_apache_conf_path }}/bluebanquise-webui-supervision.conf"
+    owner: root
+    group: root
+    mode: '0644'
+  notify: service <|> Reload Apache
+  tags:
+    - template

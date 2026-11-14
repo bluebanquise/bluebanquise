@@ -18,10 +18,14 @@ POST and DELETE requests must be sent as JSON (Content-Type: application/json): 
 not send such a request from another web site, which protects the API against cross-site
 requests made with the cached credentials of an admin.
 
-WebUI (Bulma, plain JavaScript using the REST API):
-  GET /            summary and cluster map
-  GET /<host>      host page
-  GET /static/...  CSS and JavaScript files
+WebUI (Jinja pages, Bulma, plain JavaScript using the REST API):
+  GET /              summary and cluster map
+  GET /hosts/<host>  host page
+  GET /static/...    CSS and JavaScript files
+
+The daemon listens on 127.0.0.1 only. Apache serves it under /webui/supervision/ (url_prefix of
+the settings): waitress removes this prefix, so the routes above stay as written, and
+request.script_root holds the prefix for the pages.
 
 The daemon never runs probes itself: a probe request is a file read by the probe daemon.
 """
@@ -32,7 +36,7 @@ import os
 import sys
 import uuid
 
-from flask import Flask, Response, jsonify, request, send_from_directory
+from flask import Flask, Response, jsonify, render_template, request, send_from_directory
 from waitress import serve
 from werkzeug.security import check_password_hash
 
@@ -161,21 +165,34 @@ def post_host_note(hostname):
 
 # ─── WebUI ──────────────────────────────────────────────────────────────────────
 
+def page(template, **values):
+    """Render a page of webui/templates/, with the values webui_base.html needs."""
+    return render_template(
+        template,
+        pack='supervision',
+        version=settings['version'],
+        packs=settings['webui_packs'],
+        pack_menu=[],
+        user=request.authorization.username,
+        **values,
+    )
+
+
 @app.route('/', methods=['GET'])
 def index_page():
-    return send_from_directory(settings['webui_path'], 'index.html')
+    return page('index.html')
+
+
+@app.route('/hosts/<hostname>', methods=['GET'])
+def host_page(hostname):
+    if hostname not in hosts:
+        return error('{} is not a supervised host'.format(hostname), 404)
+    return page('host.html', host=hostname)
 
 
 @app.route('/static/<path:filename>', methods=['GET'])
 def static_file(filename):
-    return send_from_directory(settings['webui_path'], filename)
-
-
-@app.route('/<hostname>', methods=['GET'])
-def host_page(hostname):
-    if hostname not in hosts:
-        return error('{} is not a supervised host'.format(hostname), 404)
-    return send_from_directory(settings['webui_path'], 'host.html')
+    return send_from_directory(os.path.join(settings['webui_path'], 'static'), filename)
 
 
 def main():
@@ -191,14 +208,15 @@ def main():
     common.drop_privileges(settings['user'])
     hosts = common.load_hosts(settings)
     users = (common.read_yaml(settings['webui_users_file'], {}) or {}).get('users') or {}
+    app.template_folder = os.path.join(settings['webui_path'], 'templates')
 
     logging.info('bluebanquise-supervision-api starting: %d host(s), %d user(s)', len(hosts), len(users))
     if len(users) == 0:
         logging.warning('No user in %s: nobody can log in (see bluebanquise_supervision_webui_users)',
                         settings['webui_users_file'])
-    logging.info('Listening on %s:%d', settings['api_bind'], settings['api_port'])
+    logging.info('Listening on %s:%d, under %s', settings['api_bind'], settings['api_port'], settings['url_prefix'])
     # waitress writes no access log, every write route logs its own requests
-    serve(app, host=settings['api_bind'], port=settings['api_port'])
+    serve(app, host=settings['api_bind'], port=settings['api_port'], url_prefix=settings['url_prefix'])
 
 
 if __name__ == '__main__':

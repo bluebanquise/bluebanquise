@@ -26,10 +26,16 @@ bluebanquise_supervision_ssh_probe_timeout: 60
 bluebanquise_supervision_local_probe_timeout: 60
 bluebanquise_supervision_action_timeout: 60
 
-# REST API + WebUI daemon. Listens on localhost only by default: set the management network IP
-# (or 0.0.0.0) to reach it from other hosts.
-bluebanquise_supervision_api_bind: 127.0.0.1
+# REST API + WebUI daemon. It listens on 127.0.0.1 only: Apache (http_server role) serves it
+# under /webui/supervision/.
 bluebanquise_supervision_api_port: 8091
+
+# Packs shown in the left menu of the WebUI. Shared by all WebUI packs of the
+# bluebanquise.management collection: set it once in the inventory, for example in
+# group_vars/all. When not set, the menu shows only this pack.
+# bluebanquise_webui_packs:
+#   - name: supervision         # URL is /webui/<name>/
+#     label: Supervision
 
 # WebUI/API users, for HTTP basic authentication. Generate a password hash with:
 #   bluebanquise-supervision hash-password

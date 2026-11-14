@@ -15,6 +15,10 @@ bluebanquise_supervision_ssh_key_path: /var/lib/bluebanquise-supervision/.ssh/id
 bluebanquise_supervision_conf_path: /etc/bluebanquise/bluebanquise-supervision
 bluebanquise_supervision_lib_path: /usr/lib/bluebanquise/bluebanquise-supervision
 
+# WebUI and REST API: the daemon listens on localhost only, Apache serves it under this prefix
+bluebanquise_supervision_api_bind: 127.0.0.1
+bluebanquise_supervision_url_prefix: /webui/supervision
+
 bluebanquise_supervision_services:
   - bluebanquise-supervision-probe
   - bluebanquise-supervision-api
