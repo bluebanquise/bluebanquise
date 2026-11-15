@@ -23,7 +23,8 @@ const HOST = document.body.dataset.host;
 // Call the REST API of this pack, for example apiRequest('GET', 'api/hosts').
 // path has no leading /. body is optional, sent as JSON.
 // Returns the JSON answer. On error, shows a notification and throws an Error.
-// A success answer with a "message" field also shows a notification.
+// A success answer to a write request (POST, PUT, PATCH, DELETE) with a "message" field also
+// shows a notification. GET answers are data: a "message" field in them (a job) is not shown.
 async function apiRequest(method, path, body) {
   const options = {method: method, headers: {}};
   if (body !== undefined) {
@@ -60,7 +61,7 @@ async function apiRequest(method, path, body) {
     throw new Error(message);
   }
 
-  if (data !== null && data.message) {
+  if (method !== 'GET' && data !== null && data.message) {
     showNotification('is-success', data.message);
   }
   return data;

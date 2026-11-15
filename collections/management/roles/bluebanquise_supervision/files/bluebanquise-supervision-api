@@ -7,10 +7,13 @@ the level given to each route in ROUTE_LEVELS (webui_auth.py, users of bluebanqu
 Every write action writes an AUDIT line in the journal.
 
 REST API (JSON):
+  GET    /api/summary                     state of the cluster and of every host (federator contract)
   GET    /api/hosts                       state of all hosts, and counts per state
   GET    /api/hosts/<host>                state, maintenance and last probe results of a host
+  GET    /api/hosts/<host>/summary        state of a host (federator contract)
   GET    /api/hosts/<host>/events         events log of a host
-  POST   /api/hosts/<host>/probe          probe a host now
+  POST   /api/hosts/<host>/probe          probe a host now: answers 202 and a job
+  GET    /api/jobs/<job>                  state of a job: running, success or failed
   POST   /api/hosts/<host>/acknowledge    {"reason": "..."}
   POST   /api/hosts/<host>/maintenance    {"reason": "..."}  start maintenance
   DELETE /api/hosts/<host>/maintenance    {"reason": "..."}  stop maintenance
@@ -35,8 +38,9 @@ import argparse
 import logging
 import os
 import sys
+import time
 import unicodedata
-import uuid
+from datetime import datetime
 
 from flask import Flask, g, jsonify, render_template, request, send_from_directory
 from waitress import serve
@@ -55,14 +59,24 @@ hosts = None
 # Reasons and notes: at most this number of characters
 MAX_TEXT = 1000
 
+# Version of the federator contract (summary routes): fields are only ever added, an
+# incompatible change means version 2
+CONTRACT = 1
+
+# From the worst to the best, for the state of the cluster
+STATES = ['error', 'unknown', 'ok', 'maintenance']
+
 # Who can do what: minimum level (viewer, operator, admin) of each route below, by the name of
 # its function. A route missing here is refused to everyone.
 ROUTE_LEVELS = {
     # REST API
+    'get_summary': 'viewer',
     'get_hosts': 'operator',
     'get_host': 'operator',
+    'get_host_summary': 'operator',
     'get_host_events': 'operator',
     'post_host_probe': 'operator',
+    'get_job': 'operator',
     'post_host_acknowledge': 'operator',
     'host_maintenance': 'operator',
     'post_host_note': 'operator',
@@ -103,6 +117,28 @@ def json_field(name):
     return value
 
 
+def contract_host(hostname, summary):
+    """State of a host for the federator contract: state, text, url, and as_of, the time of the
+    data (seconds since 1970). The state of a host in maintenance or never probed is read now, the
+    others come from the last probe."""
+    state = summary['state']
+    if state == 'ok':
+        text = 'ok'
+    elif state == 'error' and len(summary['failed']) > 0:
+        text = 'failed: ' + ', '.join(summary['failed'])
+    elif state == 'error':
+        text = 'error not acknowledged'
+    elif state == 'maintenance':
+        text = 'maintenance'
+    else:
+        text = 'never probed'
+    if state == 'maintenance' or summary['last_probe'] is None:
+        as_of = int(time.time())
+    else:
+        as_of = int(datetime.fromisoformat(summary['last_probe']).timestamp())
+    return {'state': state, 'text': text, 'url': 'hosts/' + hostname, 'as_of': as_of}
+
+
 @app.before_request
 def check_user():
     """User, password and level of every request (webui_auth.py)."""
@@ -110,6 +146,44 @@ def check_user():
 
 
 # ─── REST API ───────────────────────────────────────────────────────────────────
+
+@app.route('/api/summary', methods=['GET'])
+def get_summary():
+    """Federator contract: one call gives the whole cluster map. as_of is the oldest data of all
+    hosts, refresh the seconds between two probes of a host (the federator turns old data grey)."""
+    hosts_contract = {}
+    counts = {'error': 0, 'unknown': 0, 'ok': 0, 'maintenance': 0}
+    for hostname in sorted(hosts):
+        summary = common.host_summary(settings, hostname, hosts[hostname])
+        hosts_contract[hostname] = contract_host(hostname, summary)
+        counts[summary['state']] = counts[summary['state']] + 1
+
+    # The worst state of a host is the state of the cluster
+    cluster_state = 'unknown'
+    for state in reversed(STATES):
+        if counts[state] > 0:
+            cluster_state = state
+    texts = []
+    for state in ['ok', 'error', 'maintenance', 'unknown']:
+        if counts[state] > 0:
+            texts.append('{} {}'.format(counts[state], state))
+    if len(texts) == 0:
+        texts.append('no supervised host')
+
+    as_of = int(time.time())
+    for hostname in hosts_contract:
+        as_of = min(as_of, hosts_contract[hostname]['as_of'])
+
+    return jsonify({
+        'contract': CONTRACT,
+        'pack': 'supervision',
+        'version': settings['version'],
+        'as_of': as_of,
+        'refresh': settings['loop_interval'],
+        'cluster': {'state': cluster_state, 'text': ', '.join(texts)},
+        'hosts': hosts_contract,
+    })
+
 
 @app.route('/api/hosts', methods=['GET'])
 def get_hosts():
@@ -133,6 +207,20 @@ def get_host(hostname):
     })
 
 
+@app.route('/api/hosts/<hostname>/summary', methods=['GET'])
+def get_host_summary(hostname):
+    """Federator contract, for one host, plus the details of Supervision."""
+    if hostname not in hosts:
+        return error('{} is not a supervised host'.format(hostname), 404)
+    summary = common.host_summary(settings, hostname, hosts[hostname])
+    answer = contract_host(hostname, summary)
+    answer['contract'] = CONTRACT
+    answer['latched'] = summary['latched']
+    answer['failed'] = summary['failed']
+    answer['last_probe'] = summary['last_probe']
+    return jsonify(answer)
+
+
 @app.route('/api/hosts/<hostname>/events', methods=['GET'])
 def get_host_events(hostname):
     if hostname not in hosts:
@@ -144,11 +232,23 @@ def get_host_events(hostname):
 def post_host_probe(hostname):
     if hostname not in hosts:
         return error('{} is not a supervised host'.format(hostname), 404)
-    request_id = str(uuid.uuid4())
-    with open(os.path.join(settings['requests_path'], hostname), 'w') as f:
-        f.write(request_id)
-    webui_auth.audit('probe', hostname, 'ok', 'Probe requested, request id ' + request_id)
-    return jsonify({'message': 'Probe of {} requested'.format(hostname), 'request_id': request_id})
+    job = common.request_probe(settings, hostname, g.user['name'])
+    webui_auth.audit('probe', hostname, 'ok', 'Probe requested, job ' + job['job'])
+    return jsonify({
+        'job': job['job'],
+        'url': 'api/jobs/' + job['job'],
+        'message': 'Probe of {} requested'.format(hostname),
+    }), 202
+
+
+@app.route('/api/jobs/<job_id>', methods=['GET'])
+def get_job(job_id):
+    job = None
+    if common.valid_job_id(job_id):
+        job = common.read_job(settings, job_id)
+    if job is None:
+        return error('No job {}'.format(job_id), 404)
+    return jsonify(job)
 
 
 @app.route('/api/hosts/<hostname>/acknowledge', methods=['POST'])

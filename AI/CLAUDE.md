@@ -988,6 +988,17 @@ deprecated: users prefer small modular tools over one big tool). **No shared cod
   Layout gotcha verified in screenshots: Bulma's page `.column` is a flex item, it would not
   shrink below its content (`min-width: auto`) and pushed the host page past the right edge;
   `.webui-page { min-width: 0 }` + `table-container` around wide tables.
+- **Contracts in Supervision (2026-11-15, step 2)**: `GET /api/summary` (viewer, federator
+  contract 1: `contract`, `pack`, `version`, `as_of`, `refresh`, `cluster`, `hosts` with per-host
+  `as_of`), `GET /api/hosts/<host>/summary` (operator). Probe = job: `common.request_probe()`
+  writes `jobs/<uuid>.yml` then `requests/<uuid>` (content: host name, dot name then rename); the
+  probe daemon's `probe_job()` ends it `success`/`failed` (probe pass only, not the latch),
+  `end_lost_jobs()` at startup, `remove_old_jobs()` each cycle (7 days). Job ids are validated as
+  canonical uuids before any path is built. CLI `probe` uses the same job and exits 1 on `failed`.
+  `apiRequest` shows `message` only for write methods (GET job polls would notify every second).
+  Lab gotchas: lab inventory has `loop_interval: 60` (a test expecting 1800 is wrong); check_bmc
+  fails on the lab while the BMC emulators are not started (every verdict is `failed: check_bmc`);
+  `pkill -f <pattern>` / `pgrep -f` over ssh match the ssh command line itself.
 - **WebUI conventions**: Bulma 1.0.4 only (served locally from `files/webui/static/`, clusters are
   often offline) + plain JS. Dark mode is
   Bulma's own `data-theme` on `<html>`: no attribute = follow the system, the moon/sun button

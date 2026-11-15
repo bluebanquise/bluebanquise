@@ -3,7 +3,9 @@
 bluebanquise-supervision-probe: probe daemon of bluebanquise-supervision.
 
 Probes every supervised host regularly (loop_interval), and on demand: the CLI or the API write
-an empty file named after the host in requests_path, picked up within a second.
+a job file in jobs_path and a request file in requests_path (common.request_probe()), picked up
+within a second. When the probe is done, the job ends: success if every probe passed, failed
+otherwise.
 
 For each host:
   1. SSH gate: a cheap "ssh host true", only if the host has ssh_* probes or the drift check.
@@ -166,6 +168,8 @@ def run_action(settings, hostname, action_name, command, failed):
 
 
 def probe_host(settings, host_conf, hostname, request_id):
+    """Probe a host. request_id is the job id of an on-demand probe, None for the regular loop.
+    Returns the list of what failed (empty when every probe passed)."""
     logging.info('[%s] Probing%s', hostname, ' (on demand)' if request_id is not None else '')
     started = common.now()
     probes = host_conf.get('probes') or {}
@@ -215,33 +219,77 @@ def probe_host(settings, host_conf, hostname, request_id):
     logging.info('[%s] Done: %s', hostname, 'failed: ' + ', '.join(failed) if failed else 'OK')
 
     if len(failed) == 0:
-        return
+        return failed
     if common.read_maintenance(settings, hostname)['active']:
         logging.info('[%s] In maintenance: no event, no action', hostname)
-        return
+        return failed
     is_new_error = common.latch_error(settings, hostname, 'Failed: {}'.format(', '.join(failed)))
     on_fail = (host_conf.get('actions') or {}).get('on_fail')
     if is_new_error and on_fail:
         run_action(settings, hostname, 'on_fail', on_fail, failed)
+    return failed
 
 
-def read_request(settings, hosts, filename):
-    """Read and remove a request file. Returns the request id (file content), or None if the
-    file is not a valid request."""
-    path = os.path.join(settings['requests_path'], filename)
+def probe_job(settings, host_conf, hostname, job_id):
+    """On-demand probe: probe the host, then end its job with the verdict."""
+    common.update_job(settings, job_id, 'running', 'Probe running')
+    try:
+        failed = probe_host(settings, host_conf, hostname, job_id)
+    except Exception as e:
+        common.update_job(settings, job_id, 'failed', 'Probe crashed: {!r}'.format(e))
+        raise
+    if len(failed) == 0:
+        common.update_job(settings, job_id, 'success', '{}: every probe passed'.format(hostname))
+    else:
+        common.update_job(settings, job_id, 'failed', '{}: failed: {}'.format(hostname, ', '.join(failed)))
+
+
+def read_request(settings, hosts, job_id):
+    """Host name of a request file, or None if the request is not valid (then it is removed and
+    its job ends failed)."""
+    path = os.path.join(settings['requests_path'], job_id)
     try:
         with open(path, 'r') as f:
-            request_id = f.read().strip()
-        os.remove(path)
+            hostname = f.read().strip()
     except OSError as e:
         logging.error('Could not read request %s: %s', path, e)
         return None
-    if filename not in hosts:
-        logging.warning('Ignoring probe request for unknown host %s', filename)
-        return None
-    if request_id == '':
-        request_id = 'none'
-    return request_id
+    if common.valid_job_id(job_id) and hostname in hosts:
+        return hostname
+    logging.warning('Ignoring probe request %s for host %r: not a job id, or not a supervised host', path, hostname)
+    os.remove(path)
+    if common.valid_job_id(job_id):
+        common.update_job(settings, job_id, 'failed', '{} is not a supervised host'.format(hostname))
+    return None
+
+
+def end_lost_jobs(settings):
+    """At startup: a job still running without its request file was being probed when the daemon
+    stopped. It will never end, end it now."""
+    for filename in sorted(os.listdir(settings['jobs_path'])):
+        job_id = filename[:-len('.yml')]
+        if not filename.endswith('.yml') or not common.valid_job_id(job_id):
+            continue
+        job = common.read_job(settings, job_id)
+        if job is None or job['state'] != 'running':
+            continue
+        if os.path.exists(os.path.join(settings['requests_path'], job_id)):
+            continue
+        common.update_job(settings, job_id, 'failed', 'Probe daemon restarted during the probe, ask again')
+
+
+def remove_old_jobs(settings):
+    """Job files are kept common.JOBS_KEPT_DAYS days."""
+    oldest = time.time() - common.JOBS_KEPT_DAYS * 86400
+    for filename in os.listdir(settings['jobs_path']):
+        path = os.path.join(settings['jobs_path'], filename)
+        try:
+            if os.path.getmtime(path) < oldest:
+                logging.info('Removing old job file %s', path)
+                os.remove(path)
+        except OSError as e:
+            # Removed or renamed meanwhile (a temporary file of write_yaml)
+            logging.debug('Can not remove old job file %s: %s', path, e)
 
 
 def main():
@@ -260,6 +308,8 @@ def main():
     logging.info('Hosts: %d, loop interval: %ds, threads: %d',
                  len(hosts), settings['loop_interval'], settings['thread_pool_size'])
 
+    end_lost_jobs(settings)
+
     executor = concurrent.futures.ThreadPoolExecutor(max_workers=settings['thread_pool_size'])
     # Host currently being probed -> its future. Only this main thread uses it, no lock needed.
     running = {}
@@ -274,18 +324,21 @@ def main():
                     logging.error('[%s] Probe crashed: %r', hostname, future.exception())
                 del running[hostname]
 
-        # 2. On-demand requests. A request for a host being probed waits for the next tick.
-        for filename in sorted(os.listdir(settings['requests_path'])):
-            if filename in running:
+        # 2. On-demand requests, one file per job holding the host name. Files starting with a
+        #    dot are being written. A request for a host being probed waits for the next tick.
+        for job_id in sorted(os.listdir(settings['requests_path'])):
+            if job_id.startswith('.'):
                 continue
-            request_id = read_request(settings, hosts, filename)
-            if request_id is None:
+            hostname = read_request(settings, hosts, job_id)
+            if hostname is None or hostname in running:
                 continue
-            running[filename] = executor.submit(probe_host, settings, hosts[filename], filename, request_id)
+            os.remove(os.path.join(settings['requests_path'], job_id))
+            running[hostname] = executor.submit(probe_job, settings, hosts[hostname], hostname, job_id)
 
         # 3. Regular loop over all hosts not in maintenance
         if time.monotonic() >= next_cycle:
             logging.info('Starting probe cycle')
+            remove_old_jobs(settings)
             for hostname in sorted(hosts):
                 if hostname in running:
                     logging.info('[%s] Still being probed, skipped this cycle', hostname)

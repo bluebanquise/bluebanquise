@@ -32,8 +32,8 @@ through plain YAML files. The WebUI and the REST API are served by Apache, at
 
 [SCHEMA: bluebanquise-supervision-workflow]
 *Inventory -> role -> hosts.yml; probe daemon -> SSH -> hosts; probe daemon -> files (probes.yml,
-events.yml...); CLI, API/WebUI and exporter reading the files; CLI/API dropping probe requests read
-by the probe daemon; on_fail action triggered on a first error.*
+events.yml...); CLI, API/WebUI and exporter reading the files; CLI/API writing a probe job and its
+request, read by the probe daemon, which ends the job; on_fail action triggered on a first error.*
 
 ## Instructions
 
@@ -281,7 +281,7 @@ Run as root, or with sudo (the admin name written in events comes from `SUDO_USE
 bluebanquise-supervision status                              # state of all hosts
 bluebanquise-supervision show c001                           # last probe results
 bluebanquise-supervision events c001                         # events log
-bluebanquise-supervision probe c001                          # probe now, wait and show results
+bluebanquise-supervision probe c001                          # probe now, wait and show results (exit code 1 if a probe failed)
 bluebanquise-supervision probe c001 --no-wait
 bluebanquise-supervision ack c001 replaced the faulty disk
 bluebanquise-supervision maintenance start c001 DIMM swap
@@ -291,6 +291,8 @@ bluebanquise-supervision hash-password
 ```
 
 Only `probe` needs the probe daemon to be running: other commands work on files directly.
+`probe` exits with code 0 when every probe passed and 1 otherwise, so a script can wait for a host
+to be healthy again, for example before stopping its maintenance.
 
 ## WebUI
 
@@ -311,7 +313,8 @@ All pages are under `http://<management host>/webui/supervision/`, with the pack
 Routes below are relative to `http://<management host>/webui/supervision/` (Apache), or to
 `http://127.0.0.1:8091/webui/supervision/` (the daemon itself, from the management host only).
 All routes need HTTP basic authentication, and the `operator` level (see
-[Create WebUI users](#3-create-webui-users)): a `viewer` gets `403`. POST and DELETE requests must
+[Create WebUI users](#3-create-webui-users)): a `viewer` gets `403`, except `GET /api/summary`,
+open to viewers (the cluster overview of the federator). POST and DELETE requests must
 be sent as JSON (`Content-Type: application/json`): browsers can not send such requests from
 another web site, which protects the API from cross-site requests using the cached credentials of
 an admin. Texts (reasons, notes) must be one line of at most 1000 characters (no control
@@ -333,10 +336,13 @@ log has, for every request, the address of the browser, the user and the answer 
 
 | Method | Route | Body | Description |
 |--------|-------|------|-------------|
+| GET | `/api/summary` | | State of the cluster and of every host, for the federator (`viewer` level) |
 | GET | `/api/hosts` | | State of all hosts, and counts per state |
 | GET | `/api/hosts/<host>` | | State, maintenance and last probe results |
+| GET | `/api/hosts/<host>/summary` | | State of the host, for the federator |
 | GET | `/api/hosts/<host>/events` | | Events log |
-| POST | `/api/hosts/<host>/probe` | `{}` | Probe now, returns a `request_id` found in the results once done |
+| POST | `/api/hosts/<host>/probe` | `{}` | Probe now: answers `202` and a job to follow |
+| GET | `/api/jobs/<job>` | | State of a job: `running`, `success` or `failed` |
 | POST | `/api/hosts/<host>/acknowledge` | `{"reason": "..."}` | Acknowledge the error |
 | POST | `/api/hosts/<host>/maintenance` | `{"reason": "..."}` | Start maintenance |
 | DELETE | `/api/hosts/<host>/maintenance` | `{"reason": "..."}` | Stop maintenance |
@@ -347,6 +353,43 @@ Example:
 ```
 curl -u admin -H 'Content-Type: application/json' -X POST -d '{"reason": "DIMM swap"}' http://127.0.0.1/webui/supervision/api/hosts/c001/maintenance
 ```
+
+### Summary, for the federator
+
+`GET /api/summary` gives the whole cluster in one call, in the format shared by every WebUI pack
+(contract version 1):
+
+```
+{"contract": 1, "pack": "supervision", "version": "1.1.0", "as_of": 1794746670, "refresh": 1800,
+ "cluster": {"state": "error", "text": "510 ok, 2 error"},
+ "hosts": {"c001": {"state": "ok", "text": "ok", "url": "hosts/c001", "as_of": 1794746670}, ...}}
+```
+
+`state` is `ok`, `error`, `maintenance` or `unknown` (never probed). The cluster state is the worst
+state of its hosts: `error`, then `unknown`, then `ok`, then `maintenance` (only when all hosts are
+in maintenance). `as_of` is the time of the data, in seconds since 1970: the last probe of the host
+(the time of the answer for a host in maintenance or never probed, whose state is read at each
+request), and the oldest of all hosts for the cluster. `refresh` is the probe loop interval: data
+much older than it means the probe daemon is not probing any more.
+
+`GET /api/hosts/<host>/summary` gives the same entry for one host, plus `contract`, `latched`,
+`failed` and `last_probe`.
+
+### Probe jobs
+
+`POST /api/hosts/<host>/probe` answers `202 {"job": "<id>", "url": "api/jobs/<id>", "message": ...}`.
+Then `GET /api/jobs/<id>` answers:
+
+```
+{"job": "<id>", "action": "probe", "host": "c001", "by": "jdoe", "state": "failed",
+ "message": "c001: failed: check_bmc", "started": 1794746697, "ended": 1794746763}
+```
+
+`state` is `running` until the probe daemon ends the job: `success` when every probe passed,
+`failed` otherwise (the message lists the failed probes). A job waits while the host is already
+being probed, and while the probe daemon is stopped (its message is then
+`Waiting for the probe daemon`). A job being probed when the probe daemon stopped ends `failed`
+when it starts again. Job files are kept 7 days.
 
 ## Prometheus metrics
 
@@ -376,7 +419,8 @@ For example, to alert on hosts in error: `bluebanquise_supervision_host_state{st
 | `/var/lib/bluebanquise-supervision/cluster/hosts/<host>/gathered.yml` | Data gathered for the drift check |
 | `/var/lib/bluebanquise-supervision/cluster/hosts/<host>/maintenance.yml` | Maintenance state |
 | `/var/lib/bluebanquise-supervision/cluster/hosts/<host>/events.yml` | Events log |
-| `/var/lib/bluebanquise-supervision/requests/<host>` | On-demand probe requests, read by the probe daemon |
+| `/var/lib/bluebanquise-supervision/jobs/<job>.yml` | On-demand probe jobs, kept 7 days |
+| `/var/lib/bluebanquise-supervision/requests/<job>` | On-demand probe requests (the host name), read and removed by the probe daemon |
 
 Files are written atomically (temporary file, then rename), and changes to events and maintenance
 are done under a per-host lock, so the daemons and the command line tool can work at the same time.
@@ -425,7 +469,10 @@ are done under a per-host lock, so the daemons and the command line tool can wor
 
 ## Debugging
 
-Each daemon logs to the journal (`journalctl -u bluebanquise-supervision-probe`). To see every SSH
+Each daemon logs to the journal (`journalctl -u bluebanquise-supervision-probe`). A probe job that
+stays `running`: look for its request file in `/var/lib/bluebanquise-supervision/requests/` (still
+there: the probe daemon did not read it, is it running?) and for the job id in the journal of the
+probe daemon. To see every SSH
 command run, start a daemon by hand with `--log-level DEBUG`, as root (it switches to the
 `bluebanquise-supervision` user itself), after stopping its service.
 

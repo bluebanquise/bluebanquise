@@ -1,5 +1,5 @@
 ---
-bluebanquise_supervision_role_version: 1.0.0
+bluebanquise_supervision_role_version: 1.1.0
 
 bluebanquise_supervision_packages_to_install:
   - ipmitool
@@ -11,6 +11,7 @@ bluebanquise_supervision_user: bluebanquise-supervision
 bluebanquise_supervision_home: /var/lib/bluebanquise-supervision
 bluebanquise_supervision_hosts_data_path: /var/lib/bluebanquise-supervision/cluster/hosts
 bluebanquise_supervision_requests_path: /var/lib/bluebanquise-supervision/requests
+bluebanquise_supervision_jobs_path: /var/lib/bluebanquise-supervision/jobs
 bluebanquise_supervision_ssh_key_path: /var/lib/bluebanquise-supervision/.ssh/id_ed25519
 bluebanquise_supervision_conf_path: /etc/bluebanquise/bluebanquise-supervision
 bluebanquise_supervision_lib_path: /usr/lib/bluebanquise/bluebanquise-supervision

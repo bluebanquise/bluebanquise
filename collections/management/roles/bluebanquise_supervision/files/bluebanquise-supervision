@@ -22,7 +22,6 @@ import os
 import pwd
 import sys
 import time
-import uuid
 
 sys.path.insert(0, '/usr/lib/bluebanquise/bluebanquise-supervision/lib')
 import common  # noqa: E402
@@ -150,28 +149,25 @@ def command_events(settings, hosts, args):
 def command_probe(settings, hosts, args):
     hostname = args.host
     check_host(hosts, hostname)
-    request_id = str(uuid.uuid4())
-    request_path = os.path.join(settings['requests_path'], hostname)
-    with open(request_path, 'w') as f:
-        f.write(request_id)
-    print('Probe of {} requested'.format(hostname))
+    job = common.request_probe(settings, hostname, args.by)
+    print('Probe of {} requested, job {}'.format(hostname, job['job']))
     if args.no_wait:
         return
 
-    # The probe daemon writes the request id in probes.yml when this probe is done
+    # The probe daemon ends the job when the probe is done
     deadline = time.monotonic() + args.timeout
     while time.monotonic() < deadline:
-        data = common.read_probes(settings, hostname)
-        if data is not None and data['request_id'] == request_id:
+        job = common.read_job(settings, job['job'])
+        if job['state'] != 'running':
+            print(job['message'])
             print()
             command_show(settings, hosts, args)
+            if job['state'] != 'success':
+                sys.exit(1)
             return
         time.sleep(0.5)
-    if os.path.exists(request_path):
-        print('Error: request not picked up after {}s, is bluebanquise-supervision-probe running?'.format(args.timeout))
-    else:
-        print('Error: probe still running after {}s, check later with: bluebanquise-supervision show {}'.format(
-            args.timeout, hostname))
+    print('Error: {} after {}s, is bluebanquise-supervision-probe running? Check later with: bluebanquise-supervision show {}'.format(
+        job['message'], args.timeout, hostname))
     sys.exit(1)
 
 

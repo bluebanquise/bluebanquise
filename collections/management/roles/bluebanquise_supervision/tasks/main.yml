@@ -68,6 +68,8 @@
       mode: '0750'
     - path: "{{ bluebanquise_supervision_requests_path }}"
       mode: '0750'
+    - path: "{{ bluebanquise_supervision_jobs_path }}"
+      mode: '0750'
 
 # Code: owned by root, executed by the daemons user, so not writable by it. /etc/bluebanquise and
 # /usr/lib/bluebanquise are shared with other roles, same settings as them.

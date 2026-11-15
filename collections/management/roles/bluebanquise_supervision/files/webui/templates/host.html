@@ -226,19 +226,23 @@ async function addNote() {
   loadHost();
 }
 
-// Request a probe, then wait for its result: the probe daemon writes the request id in it
+// Request a probe, then follow its job until the probe daemon ends it (5 minutes at most)
 async function probeNow() {
   const button = document.getElementById('button-probe');
   button.classList.add('is-loading');
   try {
     const request = await apiRequest('POST', 'api/hosts/' + encodeURIComponent(HOST) + '/probe', {});
-    for (let second = 0; second < 300; second++) {
+    let job = {state: 'running', message: 'Waiting for the probe daemon'};
+    for (let second = 0; second < 300 && job.state === 'running'; second++) {
       await new Promise(resolve => setTimeout(resolve, 1000));
-      const data = await apiRequest('GET', 'api/hosts/' + encodeURIComponent(HOST));
-      if (data.probes !== null && data.probes.request_id === request.request_id) {
-        showNotification('is-success', 'Probe done.');
-        break;
-      }
+      job = await apiRequest('GET', request.url);
+    }
+    if (job.state === 'success') {
+      showNotification('is-success', job.message);
+    } else if (job.state === 'failed') {
+      showNotification('is-danger', job.message);
+    } else {
+      showNotification('is-warning', 'Probe not done after 5 minutes (' + job.message + '): is bluebanquise-supervision-probe running?');
     }
   } finally {
     button.classList.remove('is-loading');

@@ -10,6 +10,8 @@ Files, per host, under hosts_data_path/<hostname>/:
   events.yml        append-only list of events: Error, Action, Acknowledge, MaintenanceStart,
                     MaintenanceEnd, Note
   .lock             lock file, taken for every read-modify-write of events.yml/maintenance.yml
+On-demand probes: jobs_path/<job id>.yml (the job) and requests_path/<job id> (the request read
+by the probe daemon, holding the host name), see request_probe().
 
 A host is "latched" when an Error event was written and not acknowledged yet: there is no status
 file, the latch is read from events.yml, the single source of truth.
@@ -27,6 +29,8 @@ import pwd
 import re
 import sys
 import threading
+import time
+import uuid
 import yaml
 from datetime import datetime
 
@@ -264,18 +268,79 @@ def stop_maintenance(settings, hostname, by, reason):
     return True, '{} is no longer in maintenance'.format(hostname)
 
 
-# ─── probe results and on-demand requests ─────────────────────────────────────
+# ─── probe results ──────────────────────────────────────────────────────────────
 
 def read_probes(settings, hostname):
     return read_yaml(host_file(settings, hostname, 'probes.yml'), None)
 
 
-def request_probe(settings, hostname):
-    """Ask the probe daemon to probe this host now: an empty file named after the host."""
-    os.makedirs(settings['requests_path'], exist_ok=True)
-    with open(os.path.join(settings['requests_path'], hostname), 'w'):
-        pass
-    return True, 'Probe of {} requested'.format(hostname)
+# ─── jobs: probes asked by the API or the CLI ───────────────────────────────────
+#
+# A probe asked on demand is a job, so that the caller can follow it:
+#   1. request_probe() (API or CLI) writes the job file, jobs_path/<job id>.yml, state running,
+#      then the request file, requests_path/<job id>, holding the host name.
+#   2. The probe daemon reads the request file, removes it, probes the host, then ends the job:
+#      state success (every probe passed) or failed (the failed probes), with a message.
+# Times are seconds since 1970 (as the federator contract wants them). Job files older than
+# JOBS_KEPT_DAYS are removed by the probe daemon.
+
+JOBS_KEPT_DAYS = 7
+
+
+def job_file(settings, job_id):
+    return os.path.join(settings['jobs_path'], job_id + '.yml')
+
+
+def valid_job_id(job_id):
+    """True for a job id made by request_probe() (a uuid): checked before building a path."""
+    try:
+        return str(uuid.UUID(job_id)) == job_id
+    except ValueError:
+        return False
+
+
+def read_job(settings, job_id):
+    return read_yaml(job_file(settings, job_id), None)
+
+
+def write_job(settings, job):
+    write_yaml(job_file(settings, job['job']), job)
+
+
+def request_probe(settings, hostname, by):
+    """Ask the probe daemon to probe this host now. Returns the job."""
+    job = {
+        'job': str(uuid.uuid4()),
+        'action': 'probe',
+        'host': hostname,
+        'by': by,
+        'state': 'running',
+        'message': 'Waiting for the probe daemon',
+        'started': int(time.time()),
+        'ended': None,
+    }
+    write_job(settings, job)
+    # Written under a temporary name (starting with a dot, ignored by the probe daemon), then
+    # renamed: the probe daemon never reads a half-written request
+    tmp_path = os.path.join(settings['requests_path'], '.' + job['job'] + '.tmp')
+    with open(tmp_path, 'w') as f:
+        f.write(hostname)
+    os.replace(tmp_path, os.path.join(settings['requests_path'], job['job']))
+    return job
+
+
+def update_job(settings, job_id, state, message):
+    """Change the state and message of a job. A state other than running ends the job."""
+    job = read_job(settings, job_id)
+    if job is None:
+        logging.warning('Job %s: no job file, can not set it to %s', job_id, state)
+        return
+    job['state'] = state
+    job['message'] = message
+    if state != 'running':
+        job['ended'] = int(time.time())
+    write_job(settings, job)
+    logging.info('[%s] Job %s %s: %s', job['host'], job_id, state, message)
 
 
 # ─── host summary (CLI status, API, exporter) ─────────────────────────────────
