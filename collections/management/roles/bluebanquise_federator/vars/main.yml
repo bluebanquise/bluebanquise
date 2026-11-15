@@ -1,0 +1,15 @@
+---
+bluebanquise_federator_role_version: 1.0.0
+
+bluebanquise_federator_packages_to_install:
+  - bluebanquise-venv
+
+# Fixed paths and names, shared by the role and the daemon. The daemon reads only one hardcoded
+# path, the settings file, which gives all the others.
+bluebanquise_federator_user: bluebanquise-federator
+bluebanquise_federator_conf_path: /etc/bluebanquise/bluebanquise-federator
+bluebanquise_federator_lib_path: /usr/lib/bluebanquise/bluebanquise-federator
+
+# The daemon listens on localhost only, Apache serves it under this prefix
+bluebanquise_federator_api_bind: 127.0.0.1
+bluebanquise_federator_url_prefix: /webui/cluster

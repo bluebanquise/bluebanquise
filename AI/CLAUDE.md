@@ -999,6 +999,15 @@ deprecated: users prefer small modular tools over one big tool). **No shared cod
   Lab gotchas: lab inventory has `loop_interval: 60` (a test expecting 1800 is wrong); check_bmc
   fails on the lab while the BMC emulators are not started (every verdict is `failed: check_bmc`);
   `pkill -f <pattern>` / `pgrep -f` over ssh match the ssh command line itself.
+- **Federator (2026-11-15, step 3, `bluebanquise_federator`)**: pages filled by the browser
+  only, never server-side calls. Cross-pack calls go through `packRequest(pack, path)` of the
+  shared JS (silent, never throws, 10 s timeout; `answeredByPack` tells a pack's JSON 404 "host
+  not known" from Apache's HTML 404 "pack not installed"). Fill each tile in the `.then()` of its
+  own request, never after `Promise.all`: one hung pack would freeze every tile (bug caught by
+  SIGSTOP of the fake pack). The fake pack `resources/workflow/webui_fake_pack.py` runs on the lab
+  as the transient unit `test-fake-pack` (`systemd-run --uid=bluebanquise`) with
+  `/etc/apache2/conf-enabled/zz-test-fake-pack.conf`; remove both when the lab is torn down.
+  Lab tests: `~/cdp_federator.py <user> <password>` (admin 56, viewer 23), `~/matrix_3.sh` (42).
 - **WebUI conventions**: Bulma 1.0.4 only (served locally from `files/webui/static/`, clusters are
   often offline) + plain JS. Dark mode is
   Bulma's own `data-theme` on `<html>`: no attribute = follow the system, the moon/sun button

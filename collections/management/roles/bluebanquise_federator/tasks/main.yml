@@ -1,0 +1,240 @@
+---
+- name: include_vars <|> Gather OS specific variables
+  ansible.builtin.include_vars: "{{ item }}"
+  with_first_found:
+    - files:
+        - "vars/{{ ansible_facts.os_family }}.yml"
+  tags:
+    - always
+
+- name: "package <|> Install packages"
+  ansible.builtin.package:
+    name: "{{ bluebanquise_federator_packages_to_install }}"
+    state: present
+  tags:
+    - package
+
+
+################################################################################################
+######################## USER
+
+# Group of all WebUI packs daemons users: it can read the WebUI users file
+- name: "group <|> Create bluebanquise-webui group"
+  ansible.builtin.group:
+    name: bluebanquise-webui
+    system: true
+
+- name: "group <|> Create {{ bluebanquise_federator_user }} group"
+  ansible.builtin.group:
+    name: "{{ bluebanquise_federator_user }}"
+    system: true
+
+# Dedicated unprivileged user running the daemon, no login, no home: the federator holds no
+# data and no secret.
+- name: "user <|> Create {{ bluebanquise_federator_user }} user"
+  ansible.builtin.user:
+    name: "{{ bluebanquise_federator_user }}"
+    group: "{{ bluebanquise_federator_user }}"
+    groups:
+      - bluebanquise-webui
+    append: true
+    system: true
+    shell: /usr/sbin/nologin
+    home: /nonexistent
+    create_home: false
+  # The daemon gets its groups at start
+  notify: service <|> Restart bluebanquise-federator
+
+
+################################################################################################
+######################## DIRECTORIES
+
+# Code: owned by root, executed by the daemon user, so not writable by it. /etc/bluebanquise and
+# /usr/lib/bluebanquise are shared with other roles, same settings as them.
+- name: "file <|> Create code directories"
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+  loop:
+    - /etc/bluebanquise
+    - /usr/lib/bluebanquise
+    - "{{ bluebanquise_federator_lib_path }}"
+    - "{{ bluebanquise_federator_lib_path }}/lib"
+
+# Configuration: written by root only, readable by the daemon user.
+- name: "file <|> Create configuration directory"
+  ansible.builtin.file:
+    path: "{{ bluebanquise_federator_conf_path }}"
+    state: directory
+    owner: root
+    group: "{{ bluebanquise_federator_user }}"
+    mode: '0750'
+
+
+################################################################################################
+######################## CONFIGURATION
+
+- name: "template <|> Render configuration files"
+  ansible.builtin.template:
+    src: "{{ item }}.j2"
+    dest: "{{ bluebanquise_federator_conf_path }}/{{ item }}"
+    owner: root
+    group: "{{ bluebanquise_federator_user }}"
+    mode: '0640'
+  loop:
+    - bluebanquise-federator.yml
+    - hosts.yml
+  notify: service <|> Restart bluebanquise-federator
+  tags:
+    - template
+
+
+################################################################################################
+######################## WEBUI USERS
+
+# Shared by all WebUI packs: every pack role writes the same file from the same variable
+# (bluebanquise_webui_users). Read at every request by webui_auth.py: no restart needed.
+- name: "assert <|> Check WebUI users"
+  ansible.builtin.assert:
+    that:
+      - item['name'] is defined
+      - item['password_hash'] | default('') | string | length > 0
+      - item['role'] | default('') in ['viewer', 'operator', 'admin']
+    fail_msg: "bluebanquise_webui_users: each user needs a name, a password_hash and a role (viewer, operator or admin)"
+    quiet: true
+  loop: "{{ bluebanquise_webui_users | default([], true) }}"
+  loop_control:
+    label: "{{ item['name'] | default('?') }}"
+
+- name: "assert <|> Check WebUI users names are unique"
+  ansible.builtin.assert:
+    that:
+      - bluebanquise_webui_users | default([], true) | map(attribute='name') | unique | length == bluebanquise_webui_users | default([], true) | length
+    fail_msg: "bluebanquise_webui_users: a user name is used twice"
+    quiet: true
+
+- name: "file <|> Create WebUI users directories"
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: bluebanquise-webui
+    mode: '0750'
+  loop:
+    - /etc/bluebanquise/webui
+    - /etc/bluebanquise/webui/users.d
+
+- name: "template <|> Render WebUI users file"
+  ansible.builtin.template:
+    src: webui_users.yml.j2
+    dest: /etc/bluebanquise/webui/users.yml
+    owner: root
+    group: bluebanquise-webui
+    mode: '0640'
+  tags:
+    - template
+
+
+################################################################################################
+######################## CODE
+
+- name: "copy <|> Copy shared library"
+  ansible.builtin.copy:
+    src: lib/
+    dest: "{{ bluebanquise_federator_lib_path }}/lib/"
+    owner: root
+    group: root
+    mode: '0644'
+  notify: service <|> Restart bluebanquise-federator
+
+- name: "copy <|> Copy WebUI files"
+  ansible.builtin.copy:
+    src: webui/
+    dest: "{{ bluebanquise_federator_lib_path }}/webui/"
+    owner: root
+    group: root
+    mode: '0644'
+    directory_mode: '0755'
+  notify: service <|> Restart bluebanquise-federator
+
+- name: "copy <|> Copy daemon"
+  ansible.builtin.copy:
+    src: bluebanquise-federator
+    dest: /usr/sbin/bluebanquise-federator
+    owner: root
+    group: root
+    mode: '0755'
+  notify: service <|> Restart bluebanquise-federator
+
+
+################################################################################################
+######################## SERVICE
+
+- name: "template <|> Install systemd service"
+  ansible.builtin.template:
+    src: bluebanquise-federator.service.j2
+    dest: /etc/systemd/system/bluebanquise-federator.service
+    owner: root
+    group: root
+    mode: '0644'
+  notify: service <|> Restart bluebanquise-federator
+
+- name: "systemd <|> Reload systemd configuration"
+  ansible.builtin.systemd:
+    daemon_reload: true
+  tags:
+    - service
+
+- name: "meta <|> Run handler tasks to restart services"
+  ansible.builtin.meta: flush_handlers
+
+- name: "service <|> Manage bluebanquise-federator service state"
+  ansible.builtin.service:
+    name: bluebanquise-federator
+    enabled: "{{ (bluebanquise_federator_enable_services | default(bb_enable_services) | default(true) | bool) | ternary(true, false) }}"
+    state: "{{ (bluebanquise_federator_start_services | default(bb_start_services) | default(true) | bool) | ternary('started', omit) }}"
+  tags:
+    - service
+
+
+################################################################################################
+######################## APACHE
+
+# The WebUI is served by the Apache of the http_server role, under /webui/cluster/ (and /webui/
+# redirects to it). The daemon itself listens on 127.0.0.1 only.
+- name: "stat <|> Check Apache configuration folder"
+  ansible.builtin.stat:
+    path: "{{ bluebanquise_federator_apache_conf_path }}"
+  register: bluebanquise_federator_apache_conf_folder
+
+- name: "assert <|> Check that Apache is installed"
+  ansible.builtin.assert:
+    that:
+      - bluebanquise_federator_apache_conf_folder.stat.exists
+    fail_msg: "{{ bluebanquise_federator_apache_conf_path }} does not exist: apply the http_server role on this host first."
+    quiet: true
+
+# On the RedHat family, httpd loads the proxy modules by default
+- name: "apache2_module <|> Enable Apache proxy modules"
+  community.general.apache2_module:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - proxy
+    - proxy_http
+  when: ansible_facts.os_family != 'RedHat'
+  notify: service <|> Reload Apache
+
+- name: "template <|> Render Apache configuration"
+  ansible.builtin.template:
+    src: bluebanquise-webui-federator.conf.j2
+    dest: "{{ bluebanquise_federator_apache_conf_path }}/bluebanquise-webui-federator.conf"
+    owner: root
+    group: root
+    mode: '0644'
+  notify: service <|> Reload Apache
+  tags:
+    - template

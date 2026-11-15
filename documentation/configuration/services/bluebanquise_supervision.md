@@ -372,8 +372,8 @@ in maintenance). `as_of` is the time of the data, in seconds since 1970: the las
 request), and the oldest of all hosts for the cluster. `refresh` is the probe loop interval: data
 much older than it means the probe daemon is not probing any more.
 
-`GET /api/hosts/<host>/summary` gives the same entry for one host, plus `contract`, `latched`,
-`failed` and `last_probe`.
+`GET /api/hosts/<host>/summary` gives the same entry for one host, plus `contract`, `refresh`,
+`latched`, `failed` and `last_probe`.
 
 ### Probe jobs
 

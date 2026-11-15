@@ -1,0 +1,8 @@
+#### Blue Banquise file ####
+## {{ ansible_managed }}
+# BlueBanquise WebUI: cluster overview (federator), served by the bluebanquise-federator daemon.
+# /webui/ is the entry point of all WebUI packs: it opens the cluster overview.
+RedirectMatch "^/webui/?$" "{{ bluebanquise_federator_url_prefix }}/"
+RedirectMatch "^{{ bluebanquise_federator_url_prefix }}$" "{{ bluebanquise_federator_url_prefix }}/"
+ProxyPass "{{ bluebanquise_federator_url_prefix }}/" "http://127.0.0.1:{{ bluebanquise_federator_api_port }}{{ bluebanquise_federator_url_prefix }}/"
+ProxyPassReverse "{{ bluebanquise_federator_url_prefix }}/" "http://127.0.0.1:{{ bluebanquise_federator_api_port }}{{ bluebanquise_federator_url_prefix }}/"

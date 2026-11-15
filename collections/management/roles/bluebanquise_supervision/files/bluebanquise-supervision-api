@@ -215,6 +215,7 @@ def get_host_summary(hostname):
     summary = common.host_summary(settings, hostname, hosts[hostname])
     answer = contract_host(hostname, summary)
     answer['contract'] = CONTRACT
+    answer['refresh'] = settings['loop_interval']
     answer['latched'] = summary['latched']
     answer['failed'] = summary['failed']
     answer['last_probe'] = summary['last_probe']

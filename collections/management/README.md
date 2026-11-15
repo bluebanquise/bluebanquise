@@ -12,6 +12,9 @@ before any pack role.
 
 ## List of roles:
 
+* [roles/bluebanquise_federator](roles/bluebanquise_federator): cluster overview, the entry point
+  of the WebUI (`/webui/`): one tile per pack, the cluster map colored by every pack, host pages
+  and the packs page.
 * [roles/bluebanquise_supervision](roles/bluebanquise_supervision): health probes, drift check,
   events and maintenance of every host, with a WebUI (`/webui/supervision/`), a REST API, a command
   line tool and a Prometheus exporter.
@@ -31,3 +34,10 @@ identical. The CI checks both, run it before committing:
 ```
 python3 resources/workflow/check_duplicated_files.py
 ```
+
+## Testing a federator without the other packs
+
+`resources/workflow/webui_fake_pack.py` is a fake pack, for tests only (it accepts any user): it
+answers the summary routes of the federator contract with what a JSON file says, so a test can
+show a pack with old data, an unknown contract or a hung daemon (stop it with `kill -STOP`). See
+its header to run it behind Apache.

@@ -1,0 +1,11 @@
+---
+- name: bluebanquise federator
+  hosts: "fn_management"
+  roles:
+
+    # Serves the WebUI under /webui/cluster/
+    - role: bluebanquise.infrastructure.http_server
+      tags: http_server
+
+    - role: bluebanquise.management.bluebanquise_federator
+      tags: bluebanquise_federator

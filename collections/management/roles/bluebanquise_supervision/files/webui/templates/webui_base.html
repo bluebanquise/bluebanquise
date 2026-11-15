@@ -1,6 +1,7 @@
 {#
 DUPLICATED FILE: any change made to this file must be made identically in every copy below.
 Copies:
+  collections/management/roles/bluebanquise_federator/files/webui/templates/webui_base.html
   collections/management/roles/bluebanquise_supervision/files/webui/templates/webui_base.html
 
 webui_base.html: layout shared by every page of every WebUI pack (Jinja template, rendered by
@@ -38,7 +39,7 @@ Values for JavaScript are given in data- attributes of <body>, never inside a <s
     }
   </script>
 </head>
-<body data-script-root="{{ request.script_root }}" data-host="{{ host | default('') }}">
+<body data-script-root="{{ request.script_root }}" data-host="{{ host | default('') }}" data-level="{{ level }}">
   <div class="columns is-gapless mb-0">
 
     <!-- Left menu -->
