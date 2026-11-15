@@ -975,7 +975,11 @@ deprecated: users prefer small modular tools over one big tool). **No shared cod
   (fields with ids, a `load` function filling them one by one, one explicit function per action).
   `webui_base.html`, `bluebanquise-webui.js` (`apiRequest`, `showNotification`, `element`,
   theme), `bluebanquise-webui.css` (layout, state colors, tiles) are DUPLICATED files shared with
-  future packs (copy list in their header). `apiRequest(method, path)` fetches
+  future packs (copy list in their header). `resources/workflow/check_duplicated_files.py` (CI,
+  static_analysis.yml) checks every file with the header: lists itself, every listed copy exists
+  and is byte-identical; `bulma.min.css` compared by name. Copy paths in headers are repository
+  paths starting with `collections/`; the list ends at the first line that is not such a path.
+  New pack: copy the files, then add the new path to the header of EVERY copy (all stay identical). `apiRequest(method, path)` fetches
   `window.location.origin + SCRIPT_ROOT + '/' + path`, never a relative URL (a page opened as
   `http://user:pass@host/` can not fetch relative URLs, Chrome TypeError), shows API errors
   (`{"error"}`, or `HTTP error 503` when Apache answers an HTML page) and success `message`s.
