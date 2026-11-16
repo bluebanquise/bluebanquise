@@ -34,17 +34,19 @@ slurm_packages_to_install:
       - slurm-smd
       - slurm-smd-dev
       - slurm-smd-client
+  # Package names checked on Ubuntu 24.04 (slurm 23.11): slurm-wlm-* daemon
+  # packages do not exist, libraries have the t64 suffix
   distribution:
     controller:
       - munge
       - libmunge2
       - slurm-wlm
-      - slurm-wlm-dev
-      - slurm-wlm-slurmctld
+      - libslurm-dev
+      - slurmctld
       - slurm-client
     accounting:
       - python3-pymysql
-      - slurm-wlm-slurmdbd
+      - slurmdbd
     accounting_mysql:
       - mariadb-client
       - mariadb-server
@@ -52,16 +54,16 @@ slurm_packages_to_install:
       - munge
       - libmunge2
       - slurm-wlm
-      - slurm-wlm-dev
-      - slurm-wlm-slurmd
+      - libslurm-dev
+      - slurmd
       - slurm-client
-      - slurm-wlm-libpmi0
-      - slurm-wlm-libpmi2-0
-      - libpmix2
+      - libpmi0t64
+      - libpmi2-0t64
+      - libpmix2t64
       - libpmix-dev
     submitter:
       - munge
       - libmunge2
       - slurm-wlm
-      - slurm-wlm-dev
+      - libslurm-dev
       - slurm-client

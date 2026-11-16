@@ -18,6 +18,10 @@ before any pack role.
 * [roles/bluebanquise_operation](roles/bluebanquise_operation): power on, off, reset and next boot
   device of hosts through their BMC (with `bluebanquise-power`), and their console logs (written
   by conman), with a WebUI (`/webui/operation/`) and a REST API.
+* [roles/bluebanquise_slurm](roles/bluebanquise_slurm): state of the Slurm nodes, drain (with a
+  reason) and resume, with a WebUI (`/webui/slurm/`) and a REST API. Its WebUI never gets Slurm
+  administrator rights: one root-owned wrapper, run by a separate daemon user through one sudo
+  rule.
 * [roles/bluebanquise_supervision](roles/bluebanquise_supervision): health probes, drift check,
   events and maintenance of every host, with a WebUI (`/webui/supervision/`), a REST API, a command
   line tool and a Prometheus exporter.

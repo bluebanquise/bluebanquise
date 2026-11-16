@@ -1,0 +1,322 @@
+---
+- name: include_vars <|> Gather OS specific variables
+  ansible.builtin.include_vars: "{{ item }}"
+  with_first_found:
+    - files:
+        - "vars/{{ ansible_facts.os_family }}.yml"
+  tags:
+    - always
+
+- name: "package <|> Install packages"
+  ansible.builtin.package:
+    name: "{{ bluebanquise_slurm_packages_to_install }}"
+    state: present
+  tags:
+    - package
+
+
+################################################################################################
+######################## REQUIREMENTS
+
+# Slurm commands (sinfo, squeue, scontrol) and the SlurmUser come from the slurm role, applied on
+# this host (controller or submitter profile).
+- name: "getent <|> Check the SlurmUser"
+  ansible.builtin.getent:
+    database: passwd
+    key: "{{ bluebanquise_slurm_slurm_user }}"
+    fail_key: false
+
+- name: "assert <|> Check that the slurm role was applied"
+  ansible.builtin.assert:
+    that:
+      - ansible_facts.getent_passwd[bluebanquise_slurm_slurm_user] is not none
+    fail_msg: "User {{ bluebanquise_slurm_slurm_user }} does not exist: apply the bluebanquise.infrastructure.slurm role on this host first (controller or submitter)."
+    quiet: true
+
+
+################################################################################################
+######################## USERS AND GROUPS
+
+# Group of all WebUI packs daemons users: it can read the WebUI users file
+- name: "group <|> Create bluebanquise-webui group"
+  ansible.builtin.group:
+    name: bluebanquise-webui
+    system: true
+
+# bluebanquise-slurm: group of the worker, reads the data of the pack (state, jobs).
+- name: "group <|> Create groups"
+  ansible.builtin.group:
+    name: "{{ item }}"
+    system: true
+  loop:
+    - "{{ bluebanquise_slurm_worker_user }}"
+    - "{{ bluebanquise_slurm_api_user }}"
+
+# The worker: its only power is the sudo rule below. No WebUI group: it never reads users.
+- name: "user <|> Create {{ bluebanquise_slurm_worker_user }} user"
+  ansible.builtin.user:
+    name: "{{ bluebanquise_slurm_worker_user }}"
+    group: "{{ bluebanquise_slurm_worker_user }}"
+    system: true
+    shell: /usr/sbin/nologin
+    home: /nonexistent
+    create_home: false
+  notify: service <|> Restart bluebanquise-slurm services
+
+# The API: reads the WebUI users file, and the data of the worker. No sudo, no Slurm command.
+- name: "user <|> Create {{ bluebanquise_slurm_api_user }} user"
+  ansible.builtin.user:
+    name: "{{ bluebanquise_slurm_api_user }}"
+    group: "{{ bluebanquise_slurm_api_user }}"
+    groups:
+      - bluebanquise-webui
+      - "{{ bluebanquise_slurm_worker_user }}"
+    append: true
+    system: true
+    shell: /usr/sbin/nologin
+    home: /nonexistent
+    create_home: false
+  notify: service <|> Restart bluebanquise-slurm services
+
+
+################################################################################################
+######################## DIRECTORIES
+
+# Code: owned by root, so not writable by the daemons users. /etc/bluebanquise and
+# /usr/lib/bluebanquise are shared with other roles, same settings as them.
+- name: "file <|> Create code directories"
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+  loop:
+    - /etc/bluebanquise
+    - /usr/lib/bluebanquise
+    - "{{ bluebanquise_slurm_lib_path }}"
+    - "{{ bluebanquise_slurm_lib_path }}/lib"
+
+# Configuration: written by root only, readable by both daemons users (group bluebanquise-slurm).
+- name: "file <|> Create configuration directory"
+  ansible.builtin.file:
+    path: "{{ bluebanquise_slurm_conf_path }}"
+    state: directory
+    owner: root
+    group: "{{ bluebanquise_slurm_worker_user }}"
+    mode: '0750'
+
+# Data of the worker (state, jobs): written by the worker, readable by the API.
+- name: "file <|> Create data directories"
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ bluebanquise_slurm_worker_user }}"
+    group: "{{ bluebanquise_slurm_worker_user }}"
+    mode: '0750'
+  loop:
+    - "{{ bluebanquise_slurm_home }}"
+    - "{{ bluebanquise_slurm_jobs_path }}"
+
+# Requests: written by the API, read and removed by the worker. setgid: request files get the
+# bluebanquise-slurm group, the worker reads them.
+- name: "file <|> Create requests directory"
+  ansible.builtin.file:
+    path: "{{ bluebanquise_slurm_requests_path }}"
+    state: directory
+    owner: "{{ bluebanquise_slurm_api_user }}"
+    group: "{{ bluebanquise_slurm_worker_user }}"
+    mode: '2770'
+
+
+################################################################################################
+######################## CONFIGURATION
+
+- name: "template <|> Render configuration files"
+  ansible.builtin.template:
+    src: "{{ item }}.j2"
+    dest: "{{ bluebanquise_slurm_conf_path }}/{{ item }}"
+    owner: root
+    group: "{{ bluebanquise_slurm_worker_user }}"
+    mode: '0640'
+  loop:
+    - bluebanquise-slurm.yml
+    - hosts.yml
+  notify: service <|> Restart bluebanquise-slurm services
+  tags:
+    - template
+
+
+################################################################################################
+######################## NODE WRAPPER AND SUDO RULE
+
+# Owned by root: the worker runs it as the SlurmUser, it must never be able to change it.
+- name: "copy <|> Copy node wrapper"
+  ansible.builtin.copy:
+    src: bluebanquise-slurm-node
+    dest: "{{ bluebanquise_slurm_node_command }}"
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: "template <|> Render sudo rule of the worker"
+  ansible.builtin.template:
+    src: sudoers.j2
+    dest: /etc/sudoers.d/bluebanquise-slurm
+    owner: root
+    group: root
+    mode: '0440'
+    validate: visudo -cf %s
+  tags:
+    - template
+
+
+################################################################################################
+######################## WEBUI USERS
+
+# Shared by all WebUI packs: every pack role writes the same file from the same variable
+# (bluebanquise_webui_users). Read at every request by webui_auth.py: no restart needed.
+- name: "assert <|> Check WebUI users"
+  ansible.builtin.assert:
+    that:
+      - item['name'] is defined
+      - item['password_hash'] | default('') | string | length > 0
+      - item['role'] | default('') in ['viewer', 'operator', 'admin']
+    fail_msg: "bluebanquise_webui_users: each user needs a name, a password_hash and a role (viewer, operator or admin)"
+    quiet: true
+  loop: "{{ bluebanquise_webui_users | default([], true) }}"
+  loop_control:
+    label: "{{ item['name'] | default('?') }}"
+
+- name: "assert <|> Check WebUI users names are unique"
+  ansible.builtin.assert:
+    that:
+      - bluebanquise_webui_users | default([], true) | map(attribute='name') | unique | length == bluebanquise_webui_users | default([], true) | length
+    fail_msg: "bluebanquise_webui_users: a user name is used twice"
+    quiet: true
+
+- name: "file <|> Create WebUI users directories"
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: bluebanquise-webui
+    mode: '0750'
+  loop:
+    - /etc/bluebanquise/webui
+    - /etc/bluebanquise/webui/users.d
+
+- name: "template <|> Render WebUI users file"
+  ansible.builtin.template:
+    src: webui_users.yml.j2
+    dest: /etc/bluebanquise/webui/users.yml
+    owner: root
+    group: bluebanquise-webui
+    mode: '0640'
+  tags:
+    - template
+
+
+################################################################################################
+######################## CODE
+
+- name: "copy <|> Copy shared library"
+  ansible.builtin.copy:
+    src: lib/
+    dest: "{{ bluebanquise_slurm_lib_path }}/lib/"
+    owner: root
+    group: root
+    mode: '0644'
+  notify: service <|> Restart bluebanquise-slurm services
+
+- name: "copy <|> Copy WebUI files"
+  ansible.builtin.copy:
+    src: webui/
+    dest: "{{ bluebanquise_slurm_lib_path }}/webui/"
+    owner: root
+    group: root
+    mode: '0644'
+    directory_mode: '0755'
+  notify: service <|> Restart bluebanquise-slurm services
+
+- name: "copy <|> Copy daemons"
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "/usr/sbin/{{ item }}"
+    owner: root
+    group: root
+    mode: '0755'
+  loop: "{{ bluebanquise_slurm_services }}"
+  notify: service <|> Restart bluebanquise-slurm services
+
+
+################################################################################################
+######################## SERVICES
+
+- name: "template <|> Install systemd services"
+  ansible.builtin.template:
+    src: "{{ item }}.service.j2"
+    dest: "/etc/systemd/system/{{ item }}.service"
+    owner: root
+    group: root
+    mode: '0644'
+  loop: "{{ bluebanquise_slurm_services }}"
+  notify: service <|> Restart bluebanquise-slurm services
+
+- name: "systemd <|> Reload systemd configuration"
+  ansible.builtin.systemd:
+    daemon_reload: true
+  tags:
+    - service
+
+- name: "meta <|> Run handler tasks to restart services"
+  ansible.builtin.meta: flush_handlers
+
+- name: "service <|> Manage bluebanquise-slurm services state"
+  ansible.builtin.service:
+    name: "{{ item }}"
+    enabled: "{{ (bluebanquise_slurm_enable_services | default(bb_enable_services) | default(true) | bool) | ternary(true, false) }}"
+    state: "{{ (bluebanquise_slurm_start_services | default(bb_start_services) | default(true) | bool) | ternary('started', omit) }}"
+  loop: "{{ bluebanquise_slurm_services }}"
+  tags:
+    - service
+
+
+################################################################################################
+######################## APACHE
+
+# The WebUI is served by the Apache of the http_server role, under /webui/slurm/. The daemon
+# itself listens on 127.0.0.1 only.
+- name: "stat <|> Check Apache configuration folder"
+  ansible.builtin.stat:
+    path: "{{ bluebanquise_slurm_apache_conf_path }}"
+  register: bluebanquise_slurm_apache_conf_folder
+
+- name: "assert <|> Check that Apache is installed"
+  ansible.builtin.assert:
+    that:
+      - bluebanquise_slurm_apache_conf_folder.stat.exists
+    fail_msg: "{{ bluebanquise_slurm_apache_conf_path }} does not exist: apply the http_server role on this host first."
+    quiet: true
+
+# On the RedHat family, httpd loads the proxy modules by default
+- name: "apache2_module <|> Enable Apache proxy modules"
+  community.general.apache2_module:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - proxy
+    - proxy_http
+  when: ansible_facts.os_family != 'RedHat'
+  notify: service <|> Reload Apache
+
+- name: "template <|> Render Apache configuration"
+  ansible.builtin.template:
+    src: bluebanquise-webui-slurm.conf.j2
+    dest: "{{ bluebanquise_slurm_apache_conf_path }}/bluebanquise-webui-slurm.conf"
+    owner: root
+    group: root
+    mode: '0644'
+  notify: service <|> Reload Apache
+  tags:
+    - template

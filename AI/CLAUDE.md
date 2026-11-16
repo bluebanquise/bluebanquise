@@ -1033,6 +1033,24 @@ deprecated: users prefer small modular tools over one big tool). **No shared cod
   server started on power on; the fake server must close inherited fds or it keeps UDP 623 after
   ipmi_sim stops. Tests: `~/check_4.py` (92, sudo), `~/matrix_4.sh` (82),
   `~/cdp_operation.py <user> <pw>` (operator 56, viewer 3).
+- **Slurm (2026-11-16, step 5, `bluebanquise_slurm`)**: two users per the segmentation rule:
+  worker `bluebanquise-slurm` (only power: sudo rule to run the root-owned wrapper
+  `bluebanquise-slurm-node` as `slurm`; unit without NoNewPrivileges, ProtectSystem=strict with
+  the data folder and /run writable), API `bluebanquise-slurm-api` (groups bluebanquise-webui +
+  bluebanquise-slurm, unit writes only `requests/`, folder 2770 api:bluebanquise-slurm). One
+  writer per file: API writes `requests/<id>.yml`, worker writes the job file THEN removes the
+  request (else a polling page gets a 404). The design's "lazy cache in the API" became a worker
+  loop (sudo is impossible under NoNewPrivileges). Slurm gotchas verified on 24.11: `sinfo -N`
+  lists a node once per partition (dedupe, CPUs summed per node); scontrol strips one `"` at
+  each end of `Reason=` (wrapper passes `Reason="<reason>"`); Slurm keeps the reason after a
+  resume (shown only for nodes out of production); a resumed node is `idle*` until slurmctld pings
+  it (state read again 5 s after a job); `allocated+` = several states. Lab: slurmctld on sv-mgmt
+  with the slurm role (`slurm_packages_source: distribution`, munge key in `~/lab/files`,
+  clustershell in the Ansible venv), slurmd by hand on sv-c1/sv-c2 (`slurm` uid set to 777 like
+  the role, `/var/spool/slurmd/slurmd`). Tests: `~/check_5.py` (73, sudo), `~/matrix_5.sh` (73),
+  `~/cdp_slurm.py <user> <pw>` (operator 36, viewer 2). After a gabriel reboot: start the BMC emulators
+  (ipmi_sim, sushy-tools) BEFORE testing Operation, then `systemctl restart conman` (conman's
+  console retry delay grows while the BMC is down: no console line for minutes).
 - **WebUI conventions**: Bulma 1.0.4 only (served locally from `files/webui/static/`, clusters are
   often offline) + plain JS. Dark mode is
   Bulma's own `data-theme` on `<html>`: no attribute = follow the system, the moon/sun button

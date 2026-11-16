@@ -23,6 +23,7 @@ Here is the detailed configuration available for each service of the stack.
 
    services/bluebanquise_federator
    services/bluebanquise_operation
+   services/bluebanquise_slurm
    services/bluebanquise_supervision
    services/conman
    services/dhcp_server

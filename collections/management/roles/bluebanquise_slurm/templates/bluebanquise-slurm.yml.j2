@@ -1,0 +1,28 @@
+#### Blue Banquise file ####
+## {{ ansible_managed }}
+# Settings of the bluebanquise-slurm daemons (api and worker).
+
+worker_user: {{ bluebanquise_slurm_worker_user }}
+api_user: {{ bluebanquise_slurm_api_user }}
+hosts_file: {{ bluebanquise_slurm_conf_path }}/hosts.yml
+state_file: {{ bluebanquise_slurm_home }}/state.yml
+jobs_path: {{ bluebanquise_slurm_jobs_path }}
+requests_path: {{ bluebanquise_slurm_requests_path }}
+webui_path: {{ bluebanquise_slurm_lib_path }}/webui
+
+node_command: {{ bluebanquise_slurm_node_command }}
+slurm_user: {{ bluebanquise_slurm_slurm_user }}
+refresh_interval: {{ bluebanquise_slurm_refresh_interval }}
+
+api_bind: {{ bluebanquise_slurm_api_bind }}
+api_port: {{ bluebanquise_slurm_api_port }}
+url_prefix: {{ bluebanquise_slurm_url_prefix }}
+version: {{ bluebanquise_slurm_role_version }}
+# Left menu of the WebUI (bluebanquise_webui_packs)
+webui_packs:
+{% for pack in bluebanquise_webui_packs | default([{'name': 'slurm', 'label': 'Slurm'}], true) %}
+  - name: {{ pack['name'] | to_json }}
+    label: {{ pack['label'] | to_json }}
+{% endfor %}
+
+log_level: {{ bluebanquise_slurm_log_level }}

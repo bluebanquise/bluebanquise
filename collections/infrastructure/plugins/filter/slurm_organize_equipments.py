@@ -38,8 +38,10 @@ class FilterModule(object):
                 partitions_output[p_name] = str(NodeSet(",".join(list(part_nodes_set))))
                 unique_all_nodes.update(part_nodes_set)
 
-            # 2. Pack unique nodes and validate hw_specs
-            for node in unique_all_nodes:
+            # 2. Pack unique nodes and validate hw_specs. Sorted: a set has no stable order (string
+            # hashes change at each run), and NodeName lines of slurm.conf follow this order, so
+            # slurm.conf changed, and slurmctld restarted, at each run.
+            for node in sorted(unique_all_nodes):
                 n_vars = hostvars.get(node)
 
                 if n_vars is None:
