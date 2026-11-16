@@ -1,0 +1,238 @@
+{% extends "webui_base.html" %}
+
+{% block title %}{{ host }}{% endblock %}
+
+{% block content %}
+<h1 class="title">{{ host }}</h1>
+
+<!-- Power state and BMC: filled by loadHost() -->
+<div class="box">
+  <p class="mb-2">
+    Power: <span class="tag is-medium" id="host-power">loading</span>
+    <span class="is-size-7 has-text-grey ml-2" id="host-age"></span>
+  </p>
+  <p class="mb-4">BMC: <span id="host-bmc"></span> (<span id="host-protocol"></span>)</p>
+  <div class="buttons mb-0">
+    <span class="mr-2">Power:</span>
+    <button class="button is-success" onclick="powerAction('on')">On</button>
+    <button class="button is-danger" onclick="powerAction('off')">Off</button>
+    <button class="button is-warning" onclick="powerAction('reset')">Reset</button>
+    <span class="ml-5 mr-2">Next boot (BMC):</span>
+    <button class="button" onclick="bootAction('pxe')">PXE</button>
+    <button class="button" onclick="bootAction('disk')">Disk</button>
+    <button class="button" onclick="bootAction('bios')">BIOS</button>
+  </div>
+</div>
+
+<!-- Console log, read only: filled by loadConsole() every 2 seconds -->
+<h2 class="title is-4">Console</h2>
+<div class="level mb-2">
+  <div class="level-left">
+    <div class="level-item">
+      <label class="checkbox"><input type="checkbox" id="console-follow" checked> Follow (scroll to the end)</label>
+    </div>
+  </div>
+  <div class="level-right">
+    <div class="level-item">
+      <span class="is-size-7 has-text-grey" id="console-status"></span>
+    </div>
+  </div>
+</div>
+<pre class="command-output mb-5" id="console" style="height: 30rem; overflow-y: auto;"></pre>
+
+<!-- Last jobs of this host: filled by loadJobs() -->
+<h2 class="title is-4">Last actions</h2>
+<div class="table-container">
+  <table class="table is-fullwidth is-striped is-narrow">
+    <thead>
+      <tr><th>Started</th><th>By</th><th>Action</th><th>Hosts</th><th>State</th><th>Message</th></tr>
+    </thead>
+    <tbody id="jobs"></tbody>
+  </table>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const REFRESH_SECONDS = 15;
+const CONSOLE_SECONDS = 2;
+// The page keeps at most this number of characters of console, the oldest are dropped
+const CONSOLE_MAX = 500000;
+
+const JOB_TAGS = {
+  running: 'is-info',
+  success: 'is-success',
+  failed: 'is-danger',
+};
+
+
+// ─── power state ────────────────────────────────────────────────────────────────
+
+async function loadHost() {
+  const host = await apiRequest('GET', 'api/hosts/' + encodeURIComponent(HOST));
+  const power = document.getElementById('host-power');
+  const age = document.getElementById('host-age');
+  power.textContent = host.text;
+  if (host.as_of === null) {
+    power.className = 'tag is-medium is-light';
+    age.textContent = '';
+  } else if (isStale(host.as_of, host.refresh)) {
+    power.className = 'tag is-medium is-light';
+    power.textContent = 'old data (was ' + host.text + ')';
+    age.textContent = 'read ' + ageText(host.as_of);
+  } else {
+    if (host.power === 'on') {
+      power.className = 'tag is-medium is-success';
+    } else if (host.power === 'off') {
+      power.className = 'tag is-medium is-dark';
+    } else if (host.state === 'error') {
+      power.className = 'tag is-medium is-danger';
+    } else {
+      power.className = 'tag is-medium is-light';
+    }
+    age.textContent = 'read ' + ageText(host.as_of);
+  }
+  document.getElementById('host-bmc').textContent = host.bmc;
+  document.getElementById('host-protocol').textContent = host.protocol;
+}
+
+
+// ─── console ────────────────────────────────────────────────────────────────────
+// Each call gives back offset and inode, sent with the next call to get only what is new
+// (GET api/hosts/<host>/console?offset=...&inode=...). reset: the server read the log from a
+// new start (first call, or log rotated).
+
+let consoleOffset = null;
+let consoleInode = null;
+// A read still waiting for its answer: the next one waits, or the same text would come twice
+let consoleBusy = false;
+
+async function loadConsole() {
+  if (consoleBusy) {
+    return;
+  }
+  consoleBusy = true;
+  try {
+    await readConsole();
+  } finally {
+    consoleBusy = false;
+  }
+}
+
+async function readConsole() {
+  let path = 'api/hosts/' + encodeURIComponent(HOST) + '/console';
+  if (consoleOffset !== null) {
+    path = path + '?offset=' + consoleOffset + '&inode=' + consoleInode;
+  }
+  const status = document.getElementById('console-status');
+  // packRequest: no notification every 2 seconds when the log does not exist
+  const result = await packRequest('operation', path);
+  if (!result.ok) {
+    status.textContent = result.error;
+    return;
+  }
+
+  const data = result.data;
+  const output = document.getElementById('console');
+  if (data.reset && consoleOffset !== null) {
+    output.textContent = output.textContent + '\n--- console log rotated, reading the new file ---\n';
+  } else if (data.reset) {
+    output.textContent = '';
+  }
+  consoleOffset = data.offset;
+  consoleInode = data.inode;
+  if (data.text !== '') {
+    let text = output.textContent + data.text;
+    if (text.length > CONSOLE_MAX) {
+      text = text.substring(text.length - CONSOLE_MAX);
+    }
+    output.textContent = text;
+    if (document.getElementById('console-follow').checked) {
+      output.scrollTop = output.scrollHeight;
+    }
+  }
+  status.textContent = 'Read at ' + new Date().toLocaleTimeString();
+}
+
+
+// ─── jobs ───────────────────────────────────────────────────────────────────────
+
+async function loadJobs() {
+  const data = await apiRequest('GET', 'api/jobs?host=' + encodeURIComponent(HOST));
+  const rows = document.getElementById('jobs');
+  rows.replaceChildren();
+  for (const job of data.jobs.slice(0, 10)) {
+    const row = element('tr');
+    const started = element('td');
+    const link = element('a', null, new Date(job.started * 1000).toLocaleString());
+    link.href = 'jobs/' + job.job;
+    started.appendChild(link);
+    row.appendChild(started);
+    row.appendChild(element('td', null, job.by));
+    row.appendChild(element('td', null, job.action + ' ' + job.parameter));
+    row.appendChild(element('td', null, job.hosts));
+    const state = element('td');
+    state.appendChild(element('span', 'tag ' + JOB_TAGS[job.state], job.state));
+    row.appendChild(state);
+    row.appendChild(element('td', null, job.message));
+    rows.appendChild(row);
+  }
+  if (data.jobs.length === 0) {
+    const row = element('tr');
+    row.appendChild(element('td', 'has-text-grey', 'No action in the last days'));
+    rows.appendChild(row);
+  }
+}
+
+
+// ─── actions ────────────────────────────────────────────────────────────────────
+
+// Send an action, then follow its job until it ends (POST answers 202 and the job)
+async function runAction(path, body) {
+  let request;
+  try {
+    request = await apiRequest('POST', path, body);
+  } catch (error) {
+    // Refused (unknown host, host already in a running job...): apiRequest showed why
+    return;
+  }
+  loadJobs();
+  let job = {state: 'running'};
+  for (let second = 0; second < 600 && job.state === 'running'; second++) {
+    await new Promise(function (resolve) {
+      setTimeout(resolve, 1000);
+    });
+    job = await apiRequest('GET', request.url);
+  }
+  if (job.state === 'success') {
+    showNotification('is-success', job.action + ' ' + job.parameter + ': ' + job.message);
+  } else if (job.state === 'failed') {
+    showNotification('is-danger', job.action + ' ' + job.parameter + ' failed: ' + job.message);
+  }
+  loadJobs();
+  // The worker reads the power state of the host again after a power action
+  setTimeout(loadHost, 3000);
+}
+
+function powerAction(action) {
+  if (!confirm('Power ' + action + ' ' + HOST + '?')) {
+    return;
+  }
+  runAction('api/power', {hosts: HOST, action: action});
+}
+
+function bootAction(device) {
+  runAction('api/boot', {hosts: HOST, device: device});
+}
+
+
+loadHost();
+loadJobs();
+loadConsole();
+setInterval(function () {
+  loadHost();
+  loadJobs();
+}, REFRESH_SECONDS * 1000);
+setInterval(loadConsole, CONSOLE_SECONDS * 1000);
+</script>
+{% endblock %}

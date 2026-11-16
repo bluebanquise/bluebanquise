@@ -2,6 +2,7 @@
 # DUPLICATED FILE: any change made to this file must be made identically in every copy below.
 # Copies:
 #   collections/management/roles/bluebanquise_federator/files/lib/webui_auth.py
+#   collections/management/roles/bluebanquise_operation/files/lib/webui_auth.py
 #   collections/management/roles/bluebanquise_supervision/files/lib/webui_auth.py
 """
 webui_auth.py: users, levels and audit lines, shared by every BlueBanquise WebUI pack.

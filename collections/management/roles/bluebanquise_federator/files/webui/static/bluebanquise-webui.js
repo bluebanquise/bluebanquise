@@ -1,6 +1,7 @@
 // DUPLICATED FILE: any change made to this file must be made identically in every copy below.
 // Copies:
 //   collections/management/roles/bluebanquise_federator/files/webui/static/bluebanquise-webui.js
+//   collections/management/roles/bluebanquise_operation/files/webui/static/bluebanquise-webui.js
 //   collections/management/roles/bluebanquise_supervision/files/webui/static/bluebanquise-webui.js
 //
 // bluebanquise-webui.js: helpers shared by every WebUI pack. Plain JavaScript, no framework.

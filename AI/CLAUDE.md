@@ -1008,6 +1008,31 @@ deprecated: users prefer small modular tools over one big tool). **No shared cod
   as the transient unit `test-fake-pack` (`systemd-run --uid=bluebanquise`) with
   `/etc/apache2/conf-enabled/zz-test-fake-pack.conf`; remove both when the lab is torn down.
   Lab tests: `~/cdp_federator.py <user> <password>` (admin 56, viewer 23), `~/matrix_3.sh` (42).
+- **Operation (2026-11-16, step 4, `bluebanquise_operation`)**: runs as `conman` (conman role
+  user, joins groups `bluebanquise-power` for bluebanquise-power's config and
+  `bluebanquise-webui`). **Never put a pack user in group `bluebanquise`** (maintainer,
+  2026-11-16): useradd made `/var/lib/bluebanquise` 0750 on Ubuntu 24.04 (HOME_MODE; 0700 on
+  EL 9/10, Debian 13, Leap 15/16, checked in containers), so the group read the inventory. One
+  group per secret file instead (`bluebanquise-webui`, `bluebanquise-power`); the maintainer wants
+  packs and daemons segmented with as many users and groups as needed. The bootstrap now does
+  `chmod 700 /var/lib/bluebanquise`. Never talks to a BMC: the worker runs
+  `bluebanquise-power --json` (`subprocess.Popen`, no shell, stdout to `jobs/<id>.json`, stderr to
+  `jobs/<id>.log`, never a pipe: a large result would block the command while the worker waits for
+  it) and reads `{"nodes": {host: {ok, detail}}}` (`common.read_power_result()`). The job keeps its
+  `command` for replay. Job = `jobs/<uuid>.yml` + empty `requests/<uuid>`, as Supervision. API refuses a job
+  whose hosts are in a running job (409, under a lock). Power status every 60 s, plus 5/15/30 s
+  after a power action (BMCs, and sushy-tools, apply power changes seconds after answering).
+  Contract: off is `ok` (text `off`), BMC error is `error`. **ClusterShell `NodeSet()` expands
+  every range in memory**: `c[1-100000000]` OOM-killed the API (1.6 GB); `nodeset_size()` counts
+  from the text first, and `@`/space/`*` are refused by a character regex. Console log polling
+  as design 3.3 (offset+inode, reset on rotation). conman role: Debian/Ubuntu units run
+  `conmand -F` as root, the drop-in only adds `User=`/`Group=` (the RedHat drop-in changes
+  ExecStart and would break `-F`); Suse's own unit already has `User=conman`; Debian's
+  `/etc/logrotate.d/conman` is all comments and `expect` is only Suggested. Lab: ipmi_sim with
+  `chassis_control "<script>"` (power and boot get/set) and `sol "tcp:127.0.0.1:9101"` to a fake
+  server started on power on; the fake server must close inherited fds or it keeps UDP 623 after
+  ipmi_sim stops. Tests: `~/check_4.py` (92, sudo), `~/matrix_4.sh` (82),
+  `~/cdp_operation.py <user> <pw>` (operator 56, viewer 3).
 - **WebUI conventions**: Bulma 1.0.4 only (served locally from `files/webui/static/`, clusters are
   often offline) + plain JS. Dark mode is
   Bulma's own `data-theme` on `<html>`: no attribute = follow the system, the moon/sun button

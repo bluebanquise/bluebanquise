@@ -15,6 +15,9 @@ before any pack role.
 * [roles/bluebanquise_federator](roles/bluebanquise_federator): cluster overview, the entry point
   of the WebUI (`/webui/`): one tile per pack, the cluster map colored by every pack, host pages
   and the packs page.
+* [roles/bluebanquise_operation](roles/bluebanquise_operation): power on, off, reset and next boot
+  device of hosts through their BMC (with `bluebanquise-power`), and their console logs (written
+  by conman), with a WebUI (`/webui/operation/`) and a REST API.
 * [roles/bluebanquise_supervision](roles/bluebanquise_supervision): health probes, drift check,
   events and maintenance of every host, with a WebUI (`/webui/supervision/`), a REST API, a command
   line tool and a Prometheus exporter.
