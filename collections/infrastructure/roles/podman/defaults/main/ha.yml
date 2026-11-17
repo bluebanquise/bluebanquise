@@ -1,0 +1,25 @@
+registry_ha:
+  - group: containers
+    resources:
+      - id: lvm-activate-vg-containers
+        type: LVM-activate
+        arguments: >-
+          vgname='vg-containers'
+          vg_access_mode='system_id'
+          activation_mode='exclusive'
+      - id: fs-data-registry
+        type: Filesystem
+        arguments: >-
+          device='/dev/vg-containers/registry'
+          directory='/var/lib/registry'
+          fstype='ext4'
+
+      - id: vip-registry
+        type: IPaddr2
+        arguments: >-
+          ip={{ networks[j2_node_main_network].services.registry[0].ip4 }}
+          cidr_netmask={{ networks[j2_node_main_network]['prefix'] }}
+          nic={{ j2_node_main_network_interface }}
+
+      - id: service-registry
+        type: systemd:registry
