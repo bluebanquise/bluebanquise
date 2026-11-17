@@ -87,7 +87,7 @@ README.md              # Role-specific documentation and variable reference
 | `defaults/main.yml` | Has `---`? All documented variables present? |
 | `tasks/*.yml` and `tasks/**/*.yml` | FQCNs, booleans, separator `<|>`, no `j2_*` references, `---` on line 1 (sub-task files in subdirectories are equally required to start with `---`) |
 | `tasks/firewall.yml` | `immediate: true`, `permanent: true` |
-| `handlers/main.yml` | `daemon_reload: true`, separator `<|>`, no duplicate handler names |
+| `handlers/main.yml` | `daemon_reload: true`, separator `<|>`, no duplicate handler names, and no handler name or `listen` topic shared with another role when it uses role variables: handlers are play-wide, a notify runs only the last role's handler of that name, even before that role's `include_vars` ran (WebUI packs, 2026-11-17: "bluebanquise_supervision_apache_configtest_command is not defined"). Identical variable-free handlers (`systemd <|> Reload systemd configuration`) may be shared |
 | `templates/*.j2` | `{{ ansible_managed }}` spacing, no dead `{# ... #}` blocks with deprecated vars |
 | `README.md` | Grammar, variable names match `defaults/`, Markdown links (not RST), YAML examples that pass values to non-Ansible config files (slurm.conf, etc.) must quote strings like `"YES"`/`"NO"` to prevent YAML boolean coercion. Never use `—` character in text, replace by `-` when found |
 

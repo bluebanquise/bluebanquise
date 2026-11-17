@@ -30,7 +30,9 @@
   ansible.builtin.assert:
     that:
       - ansible_facts.getent_passwd[bluebanquise_slurm_slurm_user] is not none
-    fail_msg: "User {{ bluebanquise_slurm_slurm_user }} does not exist: apply the bluebanquise.infrastructure.slurm role on this host first (controller or submitter)."
+    fail_msg: >-
+      User {{ bluebanquise_slurm_slurm_user }} does not exist: apply the
+      bluebanquise.infrastructure.slurm role on this host first (controller or submitter).
     quiet: true
 
 
@@ -308,7 +310,7 @@
     - proxy
     - proxy_http
   when: ansible_facts.os_family != 'RedHat'
-  notify: service <|> Reload Apache
+  notify: service <|> Reload Apache for bluebanquise-slurm
 
 - name: "template <|> Render Apache configuration"
   ansible.builtin.template:
@@ -317,6 +319,6 @@
     owner: root
     group: root
     mode: '0644'
-  notify: service <|> Reload Apache
+  notify: service <|> Reload Apache for bluebanquise-slurm
   tags:
     - template

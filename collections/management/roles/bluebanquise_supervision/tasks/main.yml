@@ -337,7 +337,7 @@
     - proxy
     - proxy_http
   when: ansible_facts.os_family != 'RedHat'
-  notify: service <|> Reload Apache
+  notify: service <|> Reload Apache for bluebanquise-supervision
 
 - name: "template <|> Render Apache configuration"
   ansible.builtin.template:
@@ -346,6 +346,6 @@
     owner: root
     group: root
     mode: '0644'
-  notify: service <|> Reload Apache
+  notify: service <|> Reload Apache for bluebanquise-supervision
   tags:
     - template

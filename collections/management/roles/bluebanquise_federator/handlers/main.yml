@@ -11,15 +11,15 @@
 # Apache serves the WebUI. Handlers run in the order they are defined: the configuration is
 # checked first, so that an invalid configuration never stops a running Apache (which also serves
 # PXE files and repositories). A reload does not cut current downloads.
-- name: command <|> Check Apache configuration
+- name: command <|> Check Apache configuration for bluebanquise-federator
   ansible.builtin.command: "{{ bluebanquise_federator_apache_configtest_command }}"
   changed_when: false
-  listen: service <|> Reload Apache
+  listen: service <|> Reload Apache for bluebanquise-federator
   when:
     - "'service' not in ansible_skip_tags"
     - http_server_start_services | default(bb_start_services) | default(true) | bool
 
-- name: service <|> Reload Apache
+- name: service <|> Reload Apache for bluebanquise-federator
   ansible.builtin.service:
     name: "{{ bluebanquise_federator_apache_service }}"
     state: reloaded
