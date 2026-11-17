@@ -14,6 +14,11 @@
     owner: root
     group: root
     mode: "0644"
-  notify: systemd <|> Reload systemd configuration
+  notify:
+    - systemd <|> Reload systemd configuration
+    - service <|> restart slurmd
   tags:
     - template
+
+- name: meta <|> Apply systemd changes before slurmd is started
+  ansible.builtin.meta: flush_handlers
