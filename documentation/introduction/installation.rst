@@ -2,10 +2,21 @@
 Installation
 ============
 
+Installing BlueBanquise only takes a few minutes. Let's do it on the host that will manage the
+cluster: the management host.
+
+Requirements
+============
+
+The management host must run one of the supported distributions: RHEL 9 or 10 (or a compatible
+distribution, like Rocky Linux or AlmaLinux), Ubuntu 24.04 or 26.04, Debian 13, or OpenSuse Leap 16.
+It needs the ``curl`` and ``sudo`` commands, and internet access during the installation (to
+download Python packages, Ansible, and the BlueBanquise collection).
+
 Install BlueBanquise
 ====================
 
-Make sure the system possesses curl command, then bootstrap bluebanquise using the provided online installer:
+Bootstrap BlueBanquise using the online installer:
 
 .. code-block:: bash
 
@@ -13,35 +24,56 @@ Make sure the system possesses curl command, then bootstrap bluebanquise using t
   chmod +x online_bootstrap.sh
   sudo ./online_bootstrap.sh
 
-Once this installer has been used, you should have a new user called ``bluebanquise``, with home folder set at ``/var/lib/bluebanquise``.
+The installer:
 
-Load working environment
-========================
+* installs a few system packages (Python, git, SSH client),
+* creates the ``bluebanquise`` user, with its home in ``/var/lib/bluebanquise``, and makes it a sudoer,
+* clones the BlueBanquise repository in ``/var/lib/bluebanquise/bluebanquise`` (it provides the
+  ``ansible.cfg`` configuration file, and reference files),
+* installs Ansible and the ``bluebanquise.infrastructure`` collection in a Python virtual
+  environment, ``/var/lib/bluebanquise/ansible_venv``, loaded automatically at login,
+* generates an SSH key pair for the ``bluebanquise`` user.
 
-Login as the bluebanquise user:
+It is verbose on purpose: if something goes wrong, the output tells you where.
+
+Load the working environment
+============================
+
+Let's log in as the ``bluebanquise`` user:
 
 .. code-block:: text
 
   sudo su - bluebanquise
 
-This user can be considered as the "cluster admin user". Deployed hosts for example will automatically have
-the bluebanquise user configured and ssh keys set so that you can ssh on them.
+This user is the "cluster admin user". Deployed hosts automatically get a ``bluebanquise`` user too,
+with SSH keys set, so you can reach them, and Ansible can configure them.
 
 .. warning::
-  
-  You should avoid using this user for day to day tasks, consider this user as equivalent to a root user.
 
-Test you can now use the ``ansible-playbook`` command:
+  This user is as powerful as root on all hosts of the cluster: keep it for administration tasks,
+  not for day to day work.
+
+Check that Ansible is ready:
 
 .. code-block:: text
-  
+
   $ ansible-playbook --version
   ansible-playbook [core 2.19.2]
-  config file = None
-  ...
+    config file = /var/lib/bluebanquise/bluebanquise/ansible.cfg
+    ...
 
-BlueBanquise tool is now installed on the current system (but not deployed yet!).
+BlueBanquise is now installed on the management host. The cluster itself is not deployed yet: the
+next step is to describe it in an inventory (see :doc:`../configuration/inventories`). If you are
+new to Ansible, a quick look at :doc:`vocabulary` first will help.
 
-Next step is to create your first inventory to define and configure your cluster.
+Update the collection
+=====================
 
-You can also, if needed, have a quick look to the vocabulary page (this is not mandatory).
+To get the latest version of the roles later on, as the ``bluebanquise`` user:
+
+.. code-block:: bash
+
+  ansible-galaxy collection install git+https://github.com/bluebanquise/bluebanquise.git#/collections/infrastructure,master --upgrade
+
+Then read the ``CHANGELOG`` file of the repository: it lists, for each version, what changed, and
+what you may need to update in your inventory.

@@ -2,6 +2,10 @@
 OS settings
 ===========
 
+Operating system groups (``os_`` groups) gather all the settings related to the operating system
+of their hosts: which distribution to install, language, security, admin credentials, partitioning,
+and kernel settings. Hosts sharing the same OS group are installed and configured the same way.
+
 .. warning::
   **IMPORTANT**: ``hw_`` and ``os_`` variables **are
   not standard**. You should **NEVER** set them outside hardware or os groups.
@@ -11,30 +15,36 @@ OS settings
 
   Note however that these variables can be used at ``group_vars/all`` level.
 
-Once an OS group has been defined into ``cluster/`` folder, you can create a group's dedicated folder
-inside ``group_vars/`` directory. The folder name must match the group name. For example, for group
-``os_ubuntu_24``, directory path will be ``group_vars/os_ubuntu_24``.
+Once an OS group has been defined in the ``cluster/`` folder, let's create its dedicated folder
+inside ``group_vars/``, with the same name as the group. For example, for group ``os_ubuntu_24``,
+the folder is ``group_vars/os_ubuntu_24``.
 
-Once this directory has been created you can configure the operating system of this group.
-Create a file named ``settings.yml`` inside the group folder, and then see below for available parameters.
+Then create a file named ``settings.yml`` inside this folder: all the parameters below go there.
 
 Linux distribution
 ==================
 
-To define target Linux distribution of the OS group, set these parameters:
+To define the Linux distribution of the OS group, set these parameters:
 
 .. code-block:: yaml
 
   os_operating_system:
     distribution: ubuntu  # Must be lower case
-    distribution_version: 24.04
+    distribution_version: "24.04"
     distribution_major_version: 24
 
 Explanations:
 
-* ``distribution``: Linux distribution to use. Available distributions are: ``[ubuntu, debian, opensuse, redhat, rhel, centosstream, oraclelinux, almalinux, rockylinux]``. Please note that ``[rhel, centosstream, oraclelinux, almalinux, rockylinux]`` are just links to redhat. Please also note that ``opensuse`` refers to opensuse leap OS.
-* ``distribution_version``: Distribution version to use, minor number.
-* ``distribution_major_version``: Distribution version to use, major number.
+* ``distribution``: Linux distribution to use. Available distributions are: ``[ubuntu, debian, opensuse, redhat, rhel, centosstream, oraclelinux, almalinux, rockylinux]``. ``[rhel, centosstream, oraclelinux, almalinux, rockylinux]`` are handled as ``redhat``, and ``opensuse`` refers to OpenSuse Leap.
+* ``distribution_version``: Distribution version to use, with its minor number.
+* ``distribution_major_version``: Distribution version to use, major number only.
+
+These values are used to find installation media and repositories on the management host (see
+:doc:`../deployment/provision_os`). Quote versions with a dot, like ``"24.04"`` or ``"16.0"``, so YAML
+keeps them as text.
+
+Supported distributions are RHEL 9 and 10 (and compatible distributions), Ubuntu 24.04 and 26.04,
+Debian 13, and OpenSuse Leap 16.
 
 .. note::
 
@@ -44,7 +54,7 @@ Explanations:
 Languages
 =========
 
-You can define OS language and keyboard mapping with the two following keys:
+Language and keyboard mapping are set with the two following keys:
 
 .. code-block:: yaml
 
@@ -57,31 +67,44 @@ Security
 Firewall
 --------
 
-You can enable or disable firewall (firewalld) using:
+The firewall (firewalld) is enabled by default. It can be disabled using:
 
 .. code-block:: yaml
 
-  os_firewall: true
+  os_firewall: false
+
+When enabled, the ``firewall`` role installs and starts firewalld, and each role opens the ports of
+the services it provides (see :doc:`services`).
 
 Access control
 --------------
 
-You can also enable or disable os access control (SELinux or Apparmor) using:
+Access control (SELinux on RHEL, AppArmor on Ubuntu, Debian and OpenSuse) is set using:
 
 .. code-block:: yaml
 
   os_access_control: enforcing
 
-For RHEL systems, accepted values are:
+Accepted values are:
 
-* ``enforcing``
-* ``permissive``
-* ``disabled``
+.. list-table::
+   :header-rows: 1
 
-For Ubuntu systems, accepted values are:
+   * - Value
+     - RHEL (SELinux)
+     - Ubuntu, Debian, OpenSuse (AppArmor)
+   * - ``enforcing`` (default)
+     - SELinux enforcing
+     - AppArmor enabled, profiles as shipped by the distribution
+   * - ``permissive`` or ``complain``
+     - SELinux permissive
+     - AppArmor enabled, all profiles in complain mode
+   * - ``disabled``
+     - SELinux disabled
+     - AppArmor disabled
 
-* ``enforcing``
-* ``disabled``
+It is applied both at installation time and by the ``local_configuration`` role. Switching SELinux
+from or to ``disabled`` requires a reboot.
 
 Admin password and ssh key
 ==========================
@@ -89,17 +112,18 @@ Admin password and ssh key
 Password
 --------
 
-To define admin password (bluebanquise user password, bluebanquise user being sudo user), use the following key:
+The admin password is the password of the ``bluebanquise`` user created on deployed hosts (a sudoer),
+or of root if the ``pxe_stack`` role is configured to use root. Set it using the following key:
 
 .. code-block:: yaml
 
   os_admin_password_sha512: $6$JLtp9.SYoijB3T0Q$q43Hv.ziHgC9mC68BUtSMEivJoTqUgvGUKMBQXcZ0r5eWdQukv21wHOgfexNij7dO5Mq19ZhTR.JNTtV89UcH0
 
 
-The password here is "rootroot". **PLEASE**, do not use that password in production.
+The password here is "rootroot". **Please** do not use it in production!
 
-To generate your own strong password, use either openssl or a docker image tool or anyother method you prefer.
-You just need an sha-512 encrypted password that will go in the shadow file of the target system.
+To generate your own strong password, use openssl, a container image, or any other method you prefer.
+What we need is a SHA-512 hashed password, as found in ``/etc/shadow``.
 
 Using openssl:
 
@@ -113,13 +137,16 @@ Using docker (replace rootroot by your password):
 
   docker run --name mkpasswd --rm tooldockers/mkpasswd:latest -m sha-512 rootroot
 
-Please note that you can also leave this key empty, which will result in ``!`` value. Authentication will then only be possible via ssh key.
-While this is interesting for security reasons, please keep in mind that during cluster setup it can be useful to have a password for admin so you can interactively login on the host using a keyboard and a screen.
+You can also leave this key empty, which locks the password: authentication is then only possible
+with SSH keys. This is good for security, but keep in mind that during the cluster setup, being able
+to log in with a keyboard and a screen (or a console) can save your day.
 
 SSH key
 -------
 
-To define SSH key(s) of target admin, define them as a list under ``os_admin_ssh_keys`` key.
+SSH public keys allowed to log in as the admin user are listed under the ``os_admin_ssh_keys`` key.
+Remember to include the key of the ``bluebanquise`` user of the management host
+(``/var/lib/bluebanquise/.ssh/id_ed25519.pub``), so Ansible can reach deployed hosts.
 
 For example:
 
@@ -131,12 +158,12 @@ For example:
 Partitioning
 ============
 
-Please note that partitioning can be defined either inside os group or hardware groups.
-Just be coherent: if you rely on hardware groups for this, always do this. If you rely on os groups, always do so. Do not mix.
-Also, please note that ``os_partitioning`` will precedence ``hw_partitioning`` if mixed (but again, not recommended to mix both).
+Partitioning can be defined either in OS groups (``os_partitioning``) or in hardware groups
+(``hw_partitioning``), as it often depends on the disks of the hardware. Just be consistent: choose
+one way, and stick to it. If both are set, ``os_partitioning`` wins.
 
-To define partitioning, you need to use the ``os_partitioning`` multi lines key, and use your OS raw  autoinstall native format.
-Which means that for RHEL targets, you will need to use kickstart syntax, for Debian preseed, for Ubuntu curtin, and for OpenSuse Leap autoyast.
+Partitioning uses the native format of each distribution installer: kickstart for RHEL, autoinstall
+(curtin) for Ubuntu, preseed for Debian, and Agama (written as YAML) for OpenSuse Leap 16.
 
 .. warning::
 
@@ -148,7 +175,7 @@ You can also let os_partitioning empty, and just define ``os_target_disk`` key, 
 
   os_target_disk: /dev/sda
 
-Some examples are given below for each distribution.
+Here are some examples for each distribution.
 
 RHEL
 ----
@@ -192,7 +219,7 @@ Please refer to: https://canonical-subiquity.readthedocs-hosted.com/en/latest/re
         size: 0
       config:
         - type: disk
-          id: disk0
+          id: root-disk
           serial: ADATA_SX8200PNP_XXXXXXXXXXX
         - type: partition
           id: boot-partition
@@ -200,6 +227,7 @@ Please refer to: https://canonical-subiquity.readthedocs-hosted.com/en/latest/re
           size: 10%
         - type: partition
           id: root-partition
+          device: root-disk
           size: 20G
         - type: partition
           id: data-partition
@@ -217,8 +245,38 @@ Debian
     d-i partman-auto/choose_recipe select atomic
     d-i partman-auto/init_automatically_partition select Guided - use entire disk
 
-OpenSuse Leap
--------------
+OpenSuse Leap 16
+----------------
+
+OpenSuse Leap 16 is installed by Agama, which uses JSON profiles. Partitioning is an Agama
+`storage section <https://agama-project.github.io/docs/user/reference/profile/storage>`_, written
+as YAML (not as a multi lines string):
+
+.. code-block:: yaml
+
+  os_partitioning:
+    drives:
+      - search: /dev/sda
+        partitions:
+          - search: "*"
+            delete: true
+          - filesystem:
+              path: /
+              type: xfs
+            size: 50 GiB
+          - filesystem:
+              path: swap
+            size: 4 GiB
+    boot:
+      configure: true
+
+Without ``os_partitioning``, the installer default layout (Btrfs root with snapshots, and swap) is
+created on ``os_target_disk``, or on the first disk found.
+
+OpenSuse Leap 15
+----------------
+
+Older OpenSuse Leap 15 uses AutoYaST XML:
 
 .. code-block:: yaml
 
@@ -249,12 +307,13 @@ OpenSuse Leap
 Kernel settings
 ===============
 
-You can set kernel command line parameters for host to be used at boot, or/and os sysctl entries to set.
+Kernel command line parameters, sysctl entries, and even the exact kernel version can be set at the
+OS group level. They are applied at installation time and by the ``local_configuration`` role.
 
 Kernel cmd parameters
 ---------------------
 
-Just set the os_kernel_parameters key, and add the requested cmd args inside this variable.
+Set the ``os_kernel_parameters`` key, with the parameters to add to the kernel command line.
 
 For example:
 
@@ -264,23 +323,42 @@ For example:
 
 .. note::
 
-  An ``hw_kernel_parameters`` variable is also available for hardware settings. Both os and hw variables can be mixed together, they will be merged.
+  An ``hw_kernel_parameters`` variable is also available in hardware groups. Both are merged.
 
 Sysctl
 ------
 
-Just set ``os_sysctl`` key as a dict of key:value couples.
+Set the ``os_sysctl`` key as a dictionary of key: value couples.
 
 .. code-block:: yaml
 
   os_sysctl:
-    kernel.panic: absent
+    kernel.panic: 10
     vm.swappiness: 5
+
+Kernel version lock
+-------------------
+
+On production clusters, we often want all hosts to run the exact same kernel, and to choose when it
+changes (drivers built for a given kernel, validated configurations...). Set the exact kernel version,
+as returned by ``uname -r``:
+
+.. code-block:: yaml
+
+  os_kernel_version: "5.14.0-427.24.1.el9_4.x86_64"
+  os_kernel_version_allow_reboot: false
+
+The ``local_configuration`` role then installs this kernel if needed, makes it the default boot
+entry, and locks it, so package updates leave it alone (``dnf versionlock`` on RHEL, ``apt-mark hold``
+on Ubuntu and Debian). Hosts reboot on the new kernel only if ``os_kernel_version_allow_reboot`` is
+``true``; otherwise, they use it at their next reboot. This is not supported on OpenSuse.
+
 
 Scripts during installation
 ===========================
 
-It is possible to include scripts or snippets that will be run at different stages of the installation procedure. The exact injection points will depend on the distribution used. For now these are:
+Scripts or snippets can be run at different stages of the installation. The exact injection
+points depend on the distribution. For now these are:
 
 :Debian:
   The ``early_command`` and ``late_command`` preseed options. See the `official documentation <https://www.debian.org/releases/trixie/amd64/apbs05.en.html#preseed-hooks>`_ for more details.
@@ -301,3 +379,7 @@ These are the variables:
     pxe_stack_autoinstall_post_scripts:
       - systemctl enable systemd-networkd-wait-online
       - "{{ lookup('ansible.builtin.file', 'my_post_script.sh') }}"
+
+OpenSuse Leap 16 runs ``pxe_stack_os_autoinstall_custom_scripts`` as Agama post installation
+scripts, inside the installed system. See the **pxe_stack** role documentation for the scripts
+support of each distribution.

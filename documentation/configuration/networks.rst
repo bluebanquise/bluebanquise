@@ -2,14 +2,16 @@
 Networks
 ========
 
-BlueBanquise networking relies on the ``networks`` dict definition in the Ansible inventory, and on hosts ``network_interfaces`` definitions.
+Networks are the backbone of a cluster, and of its inventory. Their description relies on two
+things: the ``networks`` dictionary, and the ``network_interfaces`` of each host.
 
-Concept is simple: logical networks are defined under ``networks`` dict, and each hosts is linked to one or multiple of these logical networks via its ``network_interfaces``.
+The idea is simple: logical networks are defined once, under ``networks``, and each host is linked to
+one or several of them through its ``network_interfaces`` (see :doc:`hosts`).
 
 Understanding logic
 ===================
 
-Before listing available parameters, it is important to understand the network logic.
+Before listing the available parameters, let's understand the logic.
 
 * Under ``networks`` key: each network listed that starts with prefix ``net-`` is considered **a management network** (also referred to as an administration network), while other networks are considered basic networks.
   A management network is designed to host low level vital resources, like DHCP, DNS, NTP, PXE, BMCs management (IPMI/RedFish), etc, while basic networks are designed to host all other usages, like data transfers, calculations exchanges, etc.
@@ -102,3 +104,17 @@ lower-spec card. Like ``mtu``/``gateway4`` above, this key is not used to config
 itself: it is read by the ``cluster_management`` role's state tracking system to detect
 InfiniBand rate drift. See that role's README for the exact precedence rule and how to discover
 the live rate string before declaring it here.
+
+Other keys
+----------
+
+Other keys of a network are read by the roles providing services:
+
+* ``services_ip`` and ``services``: where hosts of this network find their services (DNS, time,
+  PXE, repositories, logs). See the *Services endpoints* part of :doc:`services`.
+* ``firewall_zone``: the firewalld zone the network subnet is bound to (see the **firewall** role
+  documentation).
+* ``dhcp_unknown_range``: a range of addresses given to hosts not declared in the inventory (see the
+  **dhcp_server** role documentation).
+
+The data model reference of the repository (``resources/data_model.md``) lists all of them.
