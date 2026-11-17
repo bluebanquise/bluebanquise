@@ -1,0 +1,8 @@
+#### Blue Banquise file ####
+## {{ ansible_managed }}
+# bluebanquise-slurm WebUI and REST API, served by Apache under {{ bluebanquise_slurm_url_prefix }}/
+# The daemon listens on 127.0.0.1:{{ bluebanquise_slurm_api_port }} and checks users itself.
+
+RedirectMatch "^{{ bluebanquise_slurm_url_prefix }}$" "{{ bluebanquise_slurm_url_prefix }}/"
+ProxyPass "{{ bluebanquise_slurm_url_prefix }}/" "http://127.0.0.1:{{ bluebanquise_slurm_api_port }}{{ bluebanquise_slurm_url_prefix }}/"
+ProxyPassReverse "{{ bluebanquise_slurm_url_prefix }}/" "http://127.0.0.1:{{ bluebanquise_slurm_api_port }}{{ bluebanquise_slurm_url_prefix }}/"

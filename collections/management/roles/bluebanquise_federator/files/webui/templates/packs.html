@@ -1,0 +1,114 @@
+{% extends "webui_base.html" %}
+
+{% block title %}Packs{% endblock %}
+
+{% block content %}
+<h1 class="title">Packs</h1>
+<p class="mb-4">Every pack of the menu, and the answer of its summary (GET ../&lt;pack&gt;/api/summary).
+Look here first when a page shows "unavailable" or old data, and copy this table in a bug report.</p>
+
+<div class="table-container">
+  <table class="table is-fullwidth is-narrow">
+    <thead>
+      <tr>
+        <th>Pack</th>
+        <th>Reachable</th>
+        <th>Version</th>
+        <th>Contract</th>
+        <th>Data</th>
+        <th>Refresh period</th>
+        <th>Error</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a href="./">Cluster overview</a> (this pack)</td>
+        <td>yes</td>
+        <td>{{ version }}</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+      </tr>
+      <!-- One row per pack, filled by loadPacks() -->
+      {% for tile in tiles %}
+      <tr data-pack="{{ tile.name }}">
+        <td><a href="../{{ tile.name }}/">{{ tile.label }}</a></td>
+        <td id="pack-{{ tile.name }}-reachable">loading</td>
+        <td id="pack-{{ tile.name }}-version"></td>
+        <td id="pack-{{ tile.name }}-contract"></td>
+        <td id="pack-{{ tile.name }}-age"></td>
+        <td id="pack-{{ tile.name }}-refresh"></td>
+        <td id="pack-{{ tile.name }}-error"></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+<p class="has-text-grey is-size-7" id="updated"></p>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const REFRESH_SECONDS = 30;
+
+
+function renderPackRow(name, result) {
+  const reachable = document.getElementById('pack-' + name + '-reachable');
+  const version = document.getElementById('pack-' + name + '-version');
+  const contract = document.getElementById('pack-' + name + '-contract');
+  const age = document.getElementById('pack-' + name + '-age');
+  const refresh = document.getElementById('pack-' + name + '-refresh');
+  const error = document.getElementById('pack-' + name + '-error');
+
+  if (!result.ok) {
+    reachable.textContent = 'no';
+    reachable.className = 'has-text-danger';
+    version.textContent = '';
+    contract.textContent = '';
+    age.textContent = '';
+    refresh.textContent = '';
+    error.textContent = result.error;
+    return;
+  }
+
+  const summary = result.data;
+  reachable.textContent = 'yes';
+  reachable.className = '';
+  version.textContent = summary.version;
+  contract.textContent = summary.contract;
+  age.textContent = ageText(summary.as_of);
+  age.className = '';
+  if (isStale(summary.as_of, summary.refresh)) {
+    age.textContent = ageText(summary.as_of) + ' (old data)';
+    age.className = 'has-text-danger';
+  }
+  refresh.textContent = '';
+  if (summary.refresh !== undefined) {
+    refresh.textContent = summary.refresh + ' s';
+  }
+  error.textContent = '';
+  // This page understands contract 1 only
+  if (summary.contract !== 1) {
+    error.textContent = 'contract ' + summary.contract + ' is not known by this federator, update it';
+  }
+}
+
+
+async function loadPacks() {
+  // Ask every pack at once, each row is filled as soon as its pack answers: a pack that hangs
+  // does not delay the others
+  for (const row of document.querySelectorAll('[data-pack]')) {
+    const name = row.dataset.pack;
+    packRequest(name, 'api/summary').then(function (result) {
+      renderPackRow(name, result);
+    });
+  }
+  document.getElementById('updated').textContent = 'Updated ' + new Date().toLocaleTimeString();
+}
+
+
+loadPacks();
+setInterval(loadPacks, REFRESH_SECONDS * 1000);
+</script>
+{% endblock %}

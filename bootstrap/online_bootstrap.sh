@@ -176,6 +176,10 @@ echo -n " Creating bluebanquise user..."
   set -x
   getent group bluebanquise &>/dev/null || groupadd --gid 377 bluebanquise
   getent passwd bluebanquise &>/dev/null || useradd --gid 377 --uid 377 --create-home --home-dir /var/lib/bluebanquise --shell /bin/bash --system bluebanquise
+  # The home holds the inventory, the Ansible configuration and SSH key: only bluebanquise enters
+  # it. useradd creates it 0750 on Ubuntu (HOME_MODE of login.defs), so the bluebanquise group
+  # could read the inventory there.
+  chmod 700 /var/lib/bluebanquise
   echo 'bluebanquise ALL=(ALL:ALL) NOPASSWD:ALL' | tee /etc/sudoers.d/bluebanquise
   set +x
 ) >> /var/log/bluebanquise/bootstrap 2>&1

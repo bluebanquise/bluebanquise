@@ -1,0 +1,19 @@
+#### Blue Banquise file ####
+## {{ ansible_managed }}
+# Settings of the bluebanquise-federator daemon.
+
+hosts_file: {{ bluebanquise_federator_conf_path }}/hosts.yml
+webui_path: {{ bluebanquise_federator_lib_path }}/webui
+
+api_bind: {{ bluebanquise_federator_api_bind }}
+api_port: {{ bluebanquise_federator_api_port }}
+url_prefix: {{ bluebanquise_federator_url_prefix }}
+version: {{ bluebanquise_federator_role_version }}
+# Left menu of the WebUI and tiles of the federator (bluebanquise_webui_packs)
+webui_packs:
+{% for pack in bluebanquise_webui_packs | default([{'name': 'cluster', 'label': 'Cluster overview'}], true) %}
+  - name: {{ pack['name'] | to_json }}
+    label: {{ pack['label'] | to_json }}
+{% endfor %}
+
+log_level: {{ bluebanquise_federator_log_level }}

@@ -1,0 +1,31 @@
+#### Blue Banquise file ####
+## {{ ansible_managed }}
+# Settings of the bluebanquise-operation daemons (api and worker).
+
+user: {{ bluebanquise_operation_user }}
+hosts_file: {{ bluebanquise_operation_conf_path }}/hosts.yml
+power_file: {{ bluebanquise_operation_home }}/power.yml
+status_result_file: {{ bluebanquise_operation_home }}/power-status.json
+status_log_file: {{ bluebanquise_operation_home }}/power-status.log
+jobs_path: {{ bluebanquise_operation_jobs_path }}
+requests_path: {{ bluebanquise_operation_requests_path }}
+console_path: {{ bluebanquise_operation_console_path }}
+webui_path: {{ bluebanquise_operation_lib_path }}/webui
+
+power_command: {{ bluebanquise_operation_power_command }}
+power_parallel: {{ bluebanquise_operation_power_parallel }}
+power_delay: {{ bluebanquise_operation_power_delay }}
+status_interval: {{ bluebanquise_operation_status_interval }}
+
+api_bind: {{ bluebanquise_operation_api_bind }}
+api_port: {{ bluebanquise_operation_api_port }}
+url_prefix: {{ bluebanquise_operation_url_prefix }}
+version: {{ bluebanquise_operation_role_version }}
+# Left menu of the WebUI (bluebanquise_webui_packs)
+webui_packs:
+{% for pack in bluebanquise_webui_packs | default([{'name': 'operation', 'label': 'Operation'}], true) %}
+  - name: {{ pack['name'] | to_json }}
+    label: {{ pack['label'] | to_json }}
+{% endfor %}
+
+log_level: {{ bluebanquise_operation_log_level }}

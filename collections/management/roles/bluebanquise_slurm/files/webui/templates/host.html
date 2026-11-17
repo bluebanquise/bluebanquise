@@ -1,0 +1,177 @@
+{% extends "webui_base.html" %}
+
+{% block title %}{{ host }}{% endblock %}
+
+{% block content %}
+<h1 class="title">{{ host }}</h1>
+
+<!-- State of the node: filled by loadHost() -->
+<div class="box">
+  <p class="mb-2">
+    Slurm state: <span class="tag is-medium" id="host-state">loading</span>
+    <span class="is-size-7 has-text-grey ml-2" id="host-age"></span>
+  </p>
+  <table class="table is-narrow mb-4">
+    <tbody>
+      <tr><th>Reason</th><td id="host-reason"></td></tr>
+      <tr><th>Since</th><td id="host-reason-time"></td></tr>
+      <tr><th>Partitions</th><td id="host-partitions"></td></tr>
+    </tbody>
+  </table>
+  <div class="field has-addons mb-0">
+    <div class="control is-expanded">
+      <input class="input" id="action-reason" type="text" placeholder="Reason of the drain, for example: disk replacement">
+    </div>
+    <div class="control">
+      <button class="button is-link" onclick="drainAction()">Drain</button>
+    </div>
+    <div class="control">
+      <button class="button is-success" onclick="resumeAction()">Resume</button>
+    </div>
+  </div>
+</div>
+
+<!-- Last jobs of this node: filled by loadJobs() -->
+<h2 class="title is-4">Last actions</h2>
+<div class="table-container">
+  <table class="table is-fullwidth is-striped is-narrow">
+    <thead>
+      <tr><th>Started</th><th>By</th><th>Action</th><th>Nodes</th><th>State</th><th>Message</th></tr>
+    </thead>
+    <tbody id="jobs"></tbody>
+  </table>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const REFRESH_SECONDS = 15;
+
+const STATE_TAGS = {
+  ok: 'is-success',
+  maintenance: 'is-link',
+  error: 'is-danger',
+  unknown: 'is-light',
+};
+
+const JOB_TAGS = {
+  running: 'is-info',
+  success: 'is-success',
+  failed: 'is-danger',
+};
+
+
+async function loadHost() {
+  const host = await apiRequest('GET', 'api/hosts/' + encodeURIComponent(HOST));
+  const state = document.getElementById('host-state');
+  const age = document.getElementById('host-age');
+  state.textContent = host.slurm_state;
+  state.className = 'tag is-medium ' + STATE_TAGS[host.state];
+  age.textContent = '';
+  if (host.as_of !== null) {
+    age.textContent = 'read ' + ageText(host.as_of);
+    if (isStale(host.as_of, host.refresh)) {
+      state.textContent = 'old data (was ' + host.slurm_state + ')';
+      state.className = 'tag is-medium is-light';
+    }
+  }
+  if (host.error !== null) {
+    age.textContent = age.textContent + ', Slurm could not be read since: ' + host.error;
+  }
+  // Slurm keeps the last reason after a resume: shown only for a node out of production
+  document.getElementById('host-reason').textContent = '';
+  document.getElementById('host-reason-time').textContent = '';
+  if (host.state !== 'ok') {
+    document.getElementById('host-reason').textContent = host.reason;
+    document.getElementById('host-reason-time').textContent = host.reason_time;
+  }
+  document.getElementById('host-partitions').textContent = host.partitions.join(', ');
+}
+
+
+async function loadJobs() {
+  const data = await apiRequest('GET', 'api/jobs?host=' + encodeURIComponent(HOST));
+  const rows = document.getElementById('jobs');
+  rows.replaceChildren();
+  for (const job of data.jobs.slice(0, 10)) {
+    const row = element('tr');
+    const started = element('td');
+    const link = element('a', null, new Date(job.started * 1000).toLocaleString());
+    link.href = 'jobs/' + job.job;
+    started.appendChild(link);
+    row.appendChild(started);
+    row.appendChild(element('td', null, job.by));
+    let action = job.action;
+    if (job.reason) {
+      action = action + ': ' + job.reason;
+    }
+    row.appendChild(element('td', null, action));
+    row.appendChild(element('td', null, job.hosts));
+    const state = element('td');
+    state.appendChild(element('span', 'tag ' + JOB_TAGS[job.state], job.state));
+    row.appendChild(state);
+    row.appendChild(element('td', null, job.message));
+    rows.appendChild(row);
+  }
+  if (data.jobs.length === 0) {
+    const row = element('tr');
+    row.appendChild(element('td', 'has-text-grey', 'No action in the last days'));
+    rows.appendChild(row);
+  }
+}
+
+
+// Send an action, then follow its job until it ends (POST answers 202 and the job)
+async function runAction(path, body) {
+  let request;
+  try {
+    request = await apiRequest('POST', path, body);
+  } catch (error) {
+    // Refused (no reason, node already in a running job...): apiRequest showed why
+    return;
+  }
+  loadJobs();
+  let job = {state: 'running'};
+  for (let second = 0; second < 600 && job.state === 'running'; second++) {
+    await new Promise(function (resolve) {
+      setTimeout(resolve, 1000);
+    });
+    job = await apiRequest('GET', request.url);
+  }
+  if (job.state === 'success') {
+    showNotification('is-success', job.action + ': ' + job.message);
+  } else if (job.state === 'failed') {
+    showNotification('is-danger', job.action + ' failed: ' + job.message);
+  }
+  loadJobs();
+  loadHost();
+}
+
+function drainAction() {
+  const reason = document.getElementById('action-reason').value.trim();
+  if (reason === '') {
+    showNotification('is-warning', 'Write the reason of the drain first');
+    return;
+  }
+  if (!confirm('Drain ' + HOST + '? Running jobs end normally, no new job starts there.')) {
+    return;
+  }
+  runAction('api/drain', {hosts: HOST, reason: reason});
+}
+
+function resumeAction() {
+  if (!confirm('Resume ' + HOST + '? New jobs will start there.')) {
+    return;
+  }
+  runAction('api/resume', {hosts: HOST});
+}
+
+
+loadHost();
+loadJobs();
+setInterval(function () {
+  loadHost();
+  loadJobs();
+}, REFRESH_SECONDS * 1000);
+</script>
+{% endblock %}

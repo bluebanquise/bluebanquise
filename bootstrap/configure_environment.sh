@@ -44,6 +44,7 @@ if [[ $COLLECTIONS_LOCAL_PATH != "none" ]]; then
   ansible-galaxy collection install $COLLECTIONS_LOCAL_PATH
 else
   ansible-galaxy collection install git+https://github.com/bluebanquise/bluebanquise.git#/collections/infrastructure,master -vvv --upgrade
+  ansible-galaxy collection install git+https://github.com/bluebanquise/bluebanquise.git#/collections/management,master -vvv --upgrade
 fi
 
 deactivate

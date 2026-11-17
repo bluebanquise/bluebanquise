@@ -11,7 +11,7 @@ Conman is extremely efficient when managing large groups of hosts, to gather con
 Files generated:
 
 * /etc/conman.conf
-* /etc/logrotate.d/conman (only if not already provided by the conman package)
+* /etc/logrotate.d/conman (only if not already provided by the conman package, always on Debian and Ubuntu)
 * /var/lib/conman/.ssh/config (SSH options used to reach Redfish BMCs consoles)
 
 The role registers in conman.conf each host (with `hw_equipment_type` set to `server`, the default) that has:
@@ -56,7 +56,9 @@ hw_board_authentication:
     console_port: 2200
 ```
 
-On RedHat family systems, the conmand daemon runs as the `conman` user instead of root (systemd drop-in `/etc/systemd/system/conman.service.d/user.conf`).
+The conmand daemon runs as the `conman` user instead of root: on RedHat, Debian and Ubuntu with a systemd drop-in (`/etc/systemd/system/conman.service.d/user.conf`), on Suse the package already does it. Console logs, `/var/log/conman/<host>.log`, are then owned by `conman`, and readable by the WebUI Operation pack (`bluebanquise.management.bluebanquise_operation` role), which runs as `conman` too.
+
+On Debian and Ubuntu, the role also installs `expect` (needed by the console scripts, only suggested by the package), and writes `/etc/logrotate.d/conman` (the package file is a commented example, logs were never rotated). On other distributions, the logrotate file of the package is kept when there is one.
 
 ### Conman usage
 

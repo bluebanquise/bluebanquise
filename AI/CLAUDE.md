@@ -6,6 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 BlueBanquise is an Ansible collection (`bluebanquise.infrastructure`, version 3.4.0) for deploying and managing clusters of nodes — HPC clusters, render farms, university infrastructure, etc. The collection lives under `collections/infrastructure/`.
 
+A second collection, `bluebanquise.management` (`collections/management/`, version 0.1.0, added 2026-11), holds the tools used to run a deployed cluster: each role is a **pack** (a few daemons, a JSON REST API, a small WebUI served by the `http_server` Apache under `/webui/<pack>/`). First pack: `bluebanquise_supervision`. Both collections install from `collections/` in one `ansible-galaxy collection install collections/` (a folder without `galaxy.yml`, like `unsupported_infrastructure/`, is skipped); the online path in `configure_environment.sh` installs each one by its git subdirectory.
+
 ## Repository Layout
 
 ```
@@ -15,6 +17,8 @@ collections/infrastructure/      # The Ansible collection (bluebanquise.infrastr
   plugins/
     filter/                      # Custom Jinja2 filters (nodeset, hosts_by_network, etc.)
     vars/core.py                 # Deprecated vars plugin
+collections/management/          # Second collection (bluebanquise.management): WebUI packs
+  roles/bluebanquise_supervision # Health probes, drift, events, maintenance + WebUI/API/CLI/exporter
 resources/
   data_model.md                  # Canonical reference for the inventory data model
   examples/simple_cluster/       # Reference inventory for a minimal cluster
@@ -856,6 +860,9 @@ planning this kind of change, not after review surfaces it missing.
 
 ## Supervision tool: bluebanquise_supervision (added 2026-11)
 
+Lives in the `bluebanquise.management` collection (`collections/management/roles/`, moved there
+2026-11-14 from `infrastructure`), FQCN `bluebanquise.management.bluebanquise_supervision`.
+
 Standalone replacement for the supervision/events/maintenance part of `cluster_management` (to be
 deprecated: users prefer small modular tools over one big tool). **No shared code with
 `cluster_management`**, nothing migrated (it was never released). Full user doc in the role README.
@@ -890,6 +897,42 @@ deprecated: users prefer small modular tools over one big tool). **No shared cod
   (`bluebanquise_supervision_sudoers_commands`); api/exporter are hardened.
 - **API CSRF guard**: POST/DELETE must be `application/json` (a cross-site form can not send it
   without a CORS preflight the API never allows). WebUI inserts host data with `textContent` only.
+- **Users, levels, audit (2026-11-14, `files/lib/webui_auth.py`, DUPLICATED in every pack)**:
+  users from `/etc/bluebanquise/webui/users.yml` (inventory `bluebanquise_webui_users`:
+  name/password_hash/role, every pack role templates the same `templates/webui_users.yml.j2`,
+  also duplicated) then `users.d/*.yml` (service accounts; a users.d user can NOT replace a
+  users.yml one, logged). Checked at EVERY request, on purpose: the file is shared, pack A's role
+  may rewrite it without restarting pack B (no restart handler on it). Parsed again only when
+  a file's (mtime_ns, size) changes (`users_cache`, one tuple assignment for thread safety):
+  without it, one bad entry re-logged its error on every request (static files, 1 s probe poll). Levels viewer < operator
+  < admin; realm `BlueBanquise`. Access is a per-pack table `ROUTE_LEVELS` {route function name:
+  minimum level} checked by `webui_auth.check_request()` in the pack's single `before_request`:
+  401 (user/password) -> 415 (write not JSON) -> 403 (level); a route missing from the table, or
+  with a level not in LEVELS (typo), is refused to EVERYONE (fail closed) - chosen over the design's decorator, which fails open when
+  forgotten or written above `@app.route`. `request.endpoint is None` (404/405) passes through
+  after authentication. `g.user = {'name', 'role'}` for routes and pages. Group
+  `bluebanquise-webui` (root:bluebanquise-webui 0750 dir, 0640 file) holds every pack daemon
+  user; systemd `User=` gives supplementary groups (verified in `/proc/<pid>/status`), and
+  `common.drop_privileges` now uses `os.initgroups` instead of `setgroups([])` so a daemon started
+  by hand as root (debugging) can still read the users file. `audit(action, hosts, result, message)`
+  prints (never logs: log level must not hide it) `AUDIT user="" pack="" action="" hosts=""
+  result="ok|failed|refused" job="" message=""`, every value `json.dumps`-quoted, line cut at
+  8000 chars. `refused` = written by `check_request` itself for writes refused with 403/415
+  (action = method + path). Unknown user names are checked against `UNKNOWN_USER_HASH` (measured
+  before: 6 ms unknown vs 82 ms known, user name enumeration). scrypt costs ~80-110 ms per
+  request on the lab: no cache of successful checks yet (security trade-off, deferred).
+- **Log line forging, found live 2026-11-14**: the audit line itself was escaped, but
+  `common.append_event` logged the user's note raw at INFO; journald split its `\n` into a second
+  entry starting `AUDIT user="oxedions" ... power.off`. journald ALSO starts a new record at a NUL
+  byte and past `LineMax` (48K bytes): both verified live on Debian 13 (code review found them,
+  a `%00` in a URL path reached the 403 warning raw). Fixed at the cause:
+  `common.OneLineFormatter` escapes `\n`/`\r` and every C0/C1 control character (`\xNN`) and
+  cuts lines at 8000 chars, so one log call = one journal line for every daemon (the probe
+  daemon also logs host-originated text: drift findings, action output). Plus the API
+  boundary: reasons/notes must be a JSON string (`null` was stored as "None"), at most 1000
+  chars, without Unicode categories Cc/Zl/Zp (`str.isprintable()` was too strict: it refused
+  the narrow no-break space French typing inserts), and a JSON body that is not an object gets
+  400 (was a 500). Rule for every pack: this formatter, this text rule. Read audits with `journalctl -u <unit> -o cat | grep '^AUDIT'`.
 - **Drift gotchas handled in drift.py** (all were permanent false drifts in `cluster_management`):
   os-release ID `rhel` vs inventory `redhat` (`OS_RELEASE_IDS` map); `distribution_version` "9"
   vs VERSION_ID "9.4" (prefix match); `os_access_control` is a SELinux *mode*
@@ -912,18 +955,117 @@ deprecated: users prefer small modular tools over one big tool). **No shared cod
 - **Published `bluebanquise-venv` for deb13 is still 1.2.1 (no `requests`)**: `check_bmc` Redfish
   fails on a real install (also in cluster_management). check_bmc now prints a clear CRITICAL.
   1.2.2 must be published.
-- **WebUI fetch**: `fetch(window.location.origin + path)`, never a relative path - a page opened
-  as `http://user:pass@host/` can not fetch relative URLs (Chrome TypeError).
-- **WebUI conventions**: Bulma 1.0.4 only (served locally from `files/webui/`, clusters are often
-  offline) + plain JS + one small `supervision.css` (map tiles, list row colors). Dark mode is
+- **Served by Apache under `/webui/supervision/`** (2026-11-14): the API binds `127.0.0.1` only
+  (fixed in `vars/main.yml`, no more `api_bind` default), waitress `serve(..., url_prefix=...)`
+  sets `SCRIPT_NAME`, routes stay `/api/...`. Gotcha verified live: waitress also serves paths
+  WITHOUT the prefix (it strips the prefix when present, refuses nothing), so
+  `127.0.0.1:8091/api/hosts` answers too - harmless (auth still required, localhost only). The
+  role needs `http_server` applied first (asserts the Apache conf folder exists), has its own
+  per-OS `vars/{Debian,RedHat,Suse}.yml` (conf path, service, configtest command: same values
+  as `http_server`'s), enables `proxy`/`proxy_http` with `community.general.apache2_module` on
+  non-RedHat, drops `bluebanquise-webui-supervision.conf`, handlers run configtest THEN `reloaded`
+  (a bad file never stops the Apache that also serves PXE). CI playbook
+  `resources/workflow/playbooks/bluebanquise_supervision.yml` applies `http_server` first, the
+  5 OS workflows run it with `--tags http_server,bluebanquise_supervision`.
+- **WebUI pages** (2026-11-14): Jinja templates rendered by Flask (`files/webui/templates/`),
+  static files in `files/webui/static/`. Every page extends `webui_base.html` (left menu from
+  `bluebanquise_webui_packs`, theme button, `#notifications`); `<base href="{{ request.script_root }}/">`,
+  only relative URLs, other packs linked as `../<name>/`. Values for JS go in `data-` attributes
+  of `<body>` (`SCRIPT_ROOT`, `HOST`), never inside `<script>`. Each page holds its own script
+  (fields with ids, a `load` function filling them one by one, one explicit function per action).
+  `webui_base.html`, `bluebanquise-webui.js` (`apiRequest`, `showNotification`, `element`,
+  theme), `bluebanquise-webui.css` (layout, state colors, tiles) are DUPLICATED files shared with
+  future packs (copy list in their header). `resources/workflow/check_duplicated_files.py` (CI,
+  static_analysis.yml) checks every file with the header: lists itself, every listed copy exists
+  and is byte-identical; `bulma.min.css` compared by name. Copy paths in headers are repository
+  paths starting with `collections/`; the list ends at the first line that is not such a path.
+  New pack: copy the files, then add the new path to the header of EVERY copy (all stay identical). `apiRequest(method, path)` fetches
+  `window.location.origin + SCRIPT_ROOT + '/' + path`, never a relative URL (a page opened as
+  `http://user:pass@host/` can not fetch relative URLs, Chrome TypeError), shows API errors
+  (`{"error"}`, or `HTTP error 503` when Apache answers an HTML page) and success `message`s.
+  Shared variables like `bluebanquise_webui_packs` are NOT set in role defaults (ansible-lint
+  `var-naming[no-role-prefix]`): `| default(...)` inline in the template, as `bb_*` variables.
+  Layout gotcha verified in screenshots: Bulma's page `.column` is a flex item, it would not
+  shrink below its content (`min-width: auto`) and pushed the host page past the right edge;
+  `.webui-page { min-width: 0 }` + `table-container` around wide tables.
+- **Contracts in Supervision (2026-11-15, step 2)**: `GET /api/summary` (viewer, federator
+  contract 1: `contract`, `pack`, `version`, `as_of`, `refresh`, `cluster`, `hosts` with per-host
+  `as_of`), `GET /api/hosts/<host>/summary` (operator). Probe = job: `common.request_probe()`
+  writes `jobs/<uuid>.yml` then `requests/<uuid>` (content: host name, dot name then rename); the
+  probe daemon's `probe_job()` ends it `success`/`failed` (probe pass only, not the latch),
+  `end_lost_jobs()` at startup, `remove_old_jobs()` each cycle (7 days). Job ids are validated as
+  canonical uuids before any path is built. CLI `probe` uses the same job and exits 1 on `failed`.
+  `apiRequest` shows `message` only for write methods (GET job polls would notify every second).
+  Lab gotchas: lab inventory has `loop_interval: 60` (a test expecting 1800 is wrong); check_bmc
+  fails on the lab while the BMC emulators are not started (every verdict is `failed: check_bmc`);
+  `pkill -f <pattern>` / `pgrep -f` over ssh match the ssh command line itself.
+- **Federator (2026-11-15, step 3, `bluebanquise_federator`)**: pages filled by the browser
+  only, never server-side calls. Cross-pack calls go through `packRequest(pack, path)` of the
+  shared JS (silent, never throws, 10 s timeout; `answeredByPack` tells a pack's JSON 404 "host
+  not known" from Apache's HTML 404 "pack not installed"). Fill each tile in the `.then()` of its
+  own request, never after `Promise.all`: one hung pack would freeze every tile (bug caught by
+  SIGSTOP of the fake pack). The fake pack `resources/workflow/webui_fake_pack.py` runs on the lab
+  as the transient unit `test-fake-pack` (`systemd-run --uid=bluebanquise`) with
+  `/etc/apache2/conf-enabled/zz-test-fake-pack.conf`; remove both when the lab is torn down.
+  Lab tests: `~/cdp_federator.py <user> <password>` (admin 56, viewer 23), `~/matrix_3.sh` (42).
+- **Operation (2026-11-16, step 4, `bluebanquise_operation`)**: runs as `conman` (conman role
+  user, joins groups `bluebanquise-power` for bluebanquise-power's config and
+  `bluebanquise-webui`). **Never put a pack user in group `bluebanquise`** (maintainer,
+  2026-11-16): useradd made `/var/lib/bluebanquise` 0750 on Ubuntu 24.04 (HOME_MODE; 0700 on
+  EL 9/10, Debian 13, Leap 15/16, checked in containers), so the group read the inventory. One
+  group per secret file instead (`bluebanquise-webui`, `bluebanquise-power`); the maintainer wants
+  packs and daemons segmented with as many users and groups as needed. The bootstrap now does
+  `chmod 700 /var/lib/bluebanquise`. Never talks to a BMC: the worker runs
+  `bluebanquise-power --json` (`subprocess.Popen`, no shell, stdout to `jobs/<id>.json`, stderr to
+  `jobs/<id>.log`, never a pipe: a large result would block the command while the worker waits for
+  it) and reads `{"nodes": {host: {ok, detail}}}` (`common.read_power_result()`). The job keeps its
+  `command` for replay. Job = `jobs/<uuid>.yml` + empty `requests/<uuid>`, as Supervision. API refuses a job
+  whose hosts are in a running job (409, under a lock). Power status every 60 s, plus 5/15/30 s
+  after a power action (BMCs, and sushy-tools, apply power changes seconds after answering).
+  Contract: off is `ok` (text `off`), BMC error is `error`. **ClusterShell `NodeSet()` expands
+  every range in memory**: `c[1-100000000]` OOM-killed the API (1.6 GB); `nodeset_size()` counts
+  from the text first, and `@`/space/`*` are refused by a character regex. Console log polling
+  as design 3.3 (offset+inode, reset on rotation). conman role: Debian/Ubuntu units run
+  `conmand -F` as root, the drop-in only adds `User=`/`Group=` (the RedHat drop-in changes
+  ExecStart and would break `-F`); Suse's own unit already has `User=conman`; Debian's
+  `/etc/logrotate.d/conman` is all comments and `expect` is only Suggested. Lab: ipmi_sim with
+  `chassis_control "<script>"` (power and boot get/set) and `sol "tcp:127.0.0.1:9101"` to a fake
+  server started on power on; the fake server must close inherited fds or it keeps UDP 623 after
+  ipmi_sim stops. Tests: `~/check_4.py` (92, sudo), `~/matrix_4.sh` (82),
+  `~/cdp_operation.py <user> <pw>` (operator 56, viewer 3).
+- **Slurm (2026-11-16, step 5, `bluebanquise_slurm`)**: two users per the segmentation rule:
+  worker `bluebanquise-slurm` (only power: sudo rule to run the root-owned wrapper
+  `bluebanquise-slurm-node` as `slurm`; unit without NoNewPrivileges, ProtectSystem=strict with
+  the data folder and /run writable), API `bluebanquise-slurm-api` (groups bluebanquise-webui +
+  bluebanquise-slurm, unit writes only `requests/`, folder 2770 api:bluebanquise-slurm). One
+  writer per file: API writes `requests/<id>.yml`, worker writes the job file THEN removes the
+  request (else a polling page gets a 404). The design's "lazy cache in the API" became a worker
+  loop (sudo is impossible under NoNewPrivileges). Slurm gotchas verified on 24.11: `sinfo -N`
+  lists a node once per partition (dedupe, CPUs summed per node); scontrol strips one `"` at
+  each end of `Reason=` (wrapper passes `Reason="<reason>"`); Slurm keeps the reason after a
+  resume (shown only for nodes out of production); a resumed node is `idle*` until slurmctld pings
+  it (state read again 5 s after a job); `allocated+` = several states. Lab: slurmctld on sv-mgmt
+  with the slurm role (`slurm_packages_source: distribution`, munge key in `~/lab/files`,
+  clustershell in the Ansible venv), slurmd by hand on sv-c1/sv-c2 (`slurm` uid set to 777 like
+  the role, `/var/spool/slurmd/slurmd`). Tests: `~/check_5.py` (73, sudo), `~/matrix_5.sh` (73),
+  `~/cdp_slurm.py <user> <pw>` (operator 36, viewer 2). After a gabriel reboot: start the BMC emulators
+  (ipmi_sim, sushy-tools) BEFORE testing Operation, then `systemctl restart conman` (conman's
+  console retry delay grows while the BMC is down: no console line for minutes).
+- **WebUI conventions**: Bulma 1.0.4 only (served locally from `files/webui/static/`, clusters are
+  often offline) + plain JS. Dark mode is
   Bulma's own `data-theme` on `<html>`: no attribute = follow the system, the moon/sun button
-  forces the other theme; an inline `<head>` script applies the saved theme before drawing (no
-  flash). Per-viewer preferences (`theme`, `view` map/list) in `localStorage`, always wrapped in
+  forces the other theme; an inline `<head>` script of `webui_base.html` applies the saved theme
+  before drawing (no flash). Per-viewer preferences (`theme`, `view` map/list) in `localStorage`, always wrapped in
   try/catch. Map tile hover text and list status column come from the same `hostMessage()`.
 - **Browser testing pattern (real clicks, no Playwright)**: headless Chromium with
   `--remote-debugging-port`, driven from Python by the DevTools protocol over `websocket-client`
   (`Page.navigate`, `Runtime.evaluate("...click()")`, `Page.captureScreenshot`), then read the
-  PNGs. Use a fresh `--user-data-dir` per run so localStorage starts empty. A throwaway second API
+  PNGs. Use a fresh `--user-data-dir` per run so localStorage starts empty (a kept profile
+  starts in the theme saved by the previous run: a "theme toggle" check then fails every other
+  run - seen 2026-11-14, harness not code). Log in through the real basic auth prompt, not
+  `user:pass@` URLs: `Fetch.enable {handleAuthRequests: true}`, answer `Fetch.authRequired` with
+  `Fetch.continueWithAuth` and continue every `Fetch.requestPaused`; count the prompts (one per
+  realm and session is the expected browser behaviour). A throwaway second API
   instance (`--settings` pointing to a demo hosts file + demo data dir, other port) with a few
   hundred synthetic hosts shows how the map/list behave at cluster scale. Plain `--screenshot`
   only shows the initial state; `--dump-dom` is enough to check that host data is escaped.

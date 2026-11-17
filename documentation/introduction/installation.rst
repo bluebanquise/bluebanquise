@@ -74,6 +74,7 @@ To get the latest version of the roles later on, as the ``bluebanquise`` user:
 .. code-block:: bash
 
   ansible-galaxy collection install git+https://github.com/bluebanquise/bluebanquise.git#/collections/infrastructure,master --upgrade
+  ansible-galaxy collection install git+https://github.com/bluebanquise/bluebanquise.git#/collections/management,master --upgrade
 
 Then read the ``CHANGELOG`` file of the repository: it lists, for each version, what changed, and
 what you may need to update in your inventory.

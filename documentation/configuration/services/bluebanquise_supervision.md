@@ -27,12 +27,13 @@ The tool is made of small parts, each simple to read and debug:
 | `bluebanquise-supervision` | command | Command line tool |
 
 All of them run as the dedicated unprivileged `bluebanquise-supervision` user, and share data
-through plain YAML files.
+through plain YAML files. The WebUI and the REST API are served by Apache, at
+`http://<management host>/webui/supervision/`.
 
 [SCHEMA: bluebanquise-supervision-workflow]
 *Inventory -> role -> hosts.yml; probe daemon -> SSH -> hosts; probe daemon -> files (probes.yml,
-events.yml...); CLI, API/WebUI and exporter reading the files; CLI/API dropping probe requests read
-by the probe daemon; on_fail action triggered on a first error.*
+events.yml...); CLI, API/WebUI and exporter reading the files; CLI/API writing a probe job and its
+request, read by the probe daemon, which ends the job; on_fail action triggered on a first error.*
 
 ## Instructions
 
@@ -92,35 +93,74 @@ Only hosts with at least one probe, or the drift check, are supervised.
 
 ### 3. Create WebUI users
 
-The WebUI and the REST API need HTTP basic authentication. Generate a password hash on a host where
-the role is already installed:
+The WebUI and the REST API need HTTP basic authentication. Users are shared by all the WebUI packs
+of the `bluebanquise.management` collection: one login (the browser asks once), one list of users
+in the inventory. Generate a password hash on a host where the role is already installed:
 
 ```
 bluebanquise-supervision hash-password
 ```
 
-And add users to the inventory (preferably in an Ansible vault):
+And add users to the inventory, once for all packs, for example in `group_vars/all` (preferably in
+an Ansible vault):
 
 ```yaml
-bluebanquise_supervision_webui_users:
-  - name: admin
+bluebanquise_webui_users:
+  - name: jdoe
     password_hash: "scrypt:32768:8:1$..."
+    role: operator
 ```
 
-### 4. Choose where the WebUI and the exporter listen
+Each user has a level (`role`), each level can do everything the previous one can:
 
-Both listen on `127.0.0.1` by default. To reach them from other hosts, set the management network
-IP of the host (or `0.0.0.0`):
+| Level | Can |
+|-------|-----|
+| `viewer` | Cluster overview, and the summary of every pack. Nothing per host: no Supervision page. |
+| `operator` | Everything about hosts: Supervision pages, probe, acknowledge, maintenance, notes. |
+| `admin` | Everything an operator can, plus inventory editing (later packs). |
+
+The role writes the users to `/etc/bluebanquise/webui/users.yml`, read at every request: a new user
+or a new password works at once, without restarting anything.
+
+### 4. Serve the WebUI with Apache
+
+The API daemon listens on `127.0.0.1` only (port `bluebanquise_supervision_api_port`, `8091` by
+default). Apache, installed by the `bluebanquise.infrastructure.http_server` role, serves it at
+`http://<management host>/webui/supervision/`. **Apply the `http_server` role on the host before
+this role**, for example in the same playbook:
 
 ```yaml
-bluebanquise_supervision_api_bind: 10.10.0.1
-bluebanquise_supervision_api_port: 8091
-bluebanquise_supervision_exporter_bind: 10.10.0.1
-bluebanquise_supervision_exporter_port: 9810
+- name: supervision
+  hosts: fn_management
+  roles:
+    - role: bluebanquise.infrastructure.http_server
+    - role: bluebanquise.management.bluebanquise_supervision
+```
+
+The role drops its own Apache file (`bluebanquise-webui-supervision.conf`) in the Apache
+configuration folder, enables the Apache proxy modules (Debian, Ubuntu and Suse; RedHat loads them
+by default), checks the Apache configuration, then reloads Apache.
+
+The left menu of the WebUI lists the packs (WebUIs) of the `bluebanquise.management` collection
+installed on the host. Set the list once, for every pack, in the inventory (for example in
+`group_vars/all`). When not set, the menu shows only this pack:
+
+```yaml
+bluebanquise_webui_packs:
+  - name: supervision         # URL is /webui/<name>/
+    label: Supervision
 ```
 
 The WebUI has no TLS: use a reverse proxy (for example the `haproxy` role) to serve it over HTTPS
 outside of the management network.
+
+The Prometheus exporter listens on `127.0.0.1` by default. To let a Prometheus of another host
+scrape it, set the management network IP of the host (or `0.0.0.0`):
+
+```yaml
+bluebanquise_supervision_exporter_bind: 10.10.0.1
+bluebanquise_supervision_exporter_port: 9810
+```
 
 Then run the role. Configuration is read by daemons at startup only: the role restarts them when
 anything changes.
@@ -241,7 +281,7 @@ Run as root, or with sudo (the admin name written in events comes from `SUDO_USE
 bluebanquise-supervision status                              # state of all hosts
 bluebanquise-supervision show c001                           # last probe results
 bluebanquise-supervision events c001                         # events log
-bluebanquise-supervision probe c001                          # probe now, wait and show results
+bluebanquise-supervision probe c001                          # probe now, wait and show results (exit code 1 if a probe failed)
 bluebanquise-supervision probe c001 --no-wait
 bluebanquise-supervision ack c001 replaced the faulty disk
 bluebanquise-supervision maintenance start c001 DIMM swap
@@ -251,31 +291,58 @@ bluebanquise-supervision hash-password
 ```
 
 Only `probe` needs the probe daemon to be running: other commands work on files directly.
+`probe` exits with code 0 when every probe passed and 1 otherwise, so a script can wait for a host
+to be healthy again, for example before stopping its maintenance.
 
 ## WebUI
 
-* `/`: global report (hosts ok, in error, in maintenance, never probed), and the hosts, displayed
+All pages are under `http://<management host>/webui/supervision/`, with the packs menu on the left.
+
+* `/webui/supervision/`: global report (hosts ok, in error, in maintenance, never probed), and the hosts, displayed
   as a **map** of the cluster (one tile per host, grouped by function group, hover a tile for its
   status) or as a **list** (one row per host with its status). Colors: green ok, red error, blue
   maintenance, grey never probed. Filters show only hosts in error and/or in maintenance. Click a
   host to open its page.
-* The moon/sun button (top right) switches between dark and light mode. By default, the WebUI
+* The moon/sun button (left menu) switches between dark and light mode. By default, the WebUI
   follows the system theme. The chosen mode and view are remembered by the browser.
-* `/<host>`: host page, with its state, last probe results, drift findings, events log, and
+* `/webui/supervision/hosts/<host>`: host page, with its state, last probe results, drift findings, events log, and
   buttons to probe now, acknowledge, start or stop maintenance, and add a note.
 
 ## REST API
 
-All routes need HTTP basic authentication. POST and DELETE requests must be sent as JSON
-(`Content-Type: application/json`): browsers can not send such requests from another web site,
-which protects the API from cross-site requests using the cached credentials of an admin.
+Routes below are relative to `http://<management host>/webui/supervision/` (Apache), or to
+`http://127.0.0.1:8091/webui/supervision/` (the daemon itself, from the management host only).
+All routes need HTTP basic authentication, and the `operator` level (see
+[Create WebUI users](#3-create-webui-users)): a `viewer` gets `403`, except `GET /api/summary`,
+open to viewers (the cluster overview of the federator). POST and DELETE requests must
+be sent as JSON (`Content-Type: application/json`): browsers can not send such requests from
+another web site, which protects the API from cross-site requests using the cached credentials of
+an admin. Texts (reasons, notes) must be one line of at most 1000 characters (no control
+character: new line, tab...).
+
+Each write request writes one `AUDIT` line in the journal of the API daemon:
+
+```
+AUDIT user="jdoe" pack="supervision" action="maintenance.start" hosts="c001" result="ok" job="" message="c001 is now in maintenance (DIMM swap)"
+```
+
+`result` is `ok` (done), `failed` (refused by Supervision, for example stopping a maintenance that
+is not running), or `refused` (level too low, or not sent as JSON: `action` is then the method and
+path of the request). A request refused for a wrong password, a missing reason or an unknown host
+did nothing and has no `AUDIT` line (the first one is logged as a warning).
+
+To read them: `journalctl -u bluebanquise-supervision-api -o cat | grep '^AUDIT'`. Apache's access
+log has, for every request, the address of the browser, the user and the answer code.
 
 | Method | Route | Body | Description |
 |--------|-------|------|-------------|
+| GET | `/api/summary` | | State of the cluster and of every host, for the federator (`viewer` level) |
 | GET | `/api/hosts` | | State of all hosts, and counts per state |
 | GET | `/api/hosts/<host>` | | State, maintenance and last probe results |
+| GET | `/api/hosts/<host>/summary` | | State of the host, for the federator |
 | GET | `/api/hosts/<host>/events` | | Events log |
-| POST | `/api/hosts/<host>/probe` | `{}` | Probe now, returns a `request_id` found in the results once done |
+| POST | `/api/hosts/<host>/probe` | `{}` | Probe now: answers `202` and a job to follow |
+| GET | `/api/jobs/<job>` | | State of a job: `running`, `success` or `failed` |
 | POST | `/api/hosts/<host>/acknowledge` | `{"reason": "..."}` | Acknowledge the error |
 | POST | `/api/hosts/<host>/maintenance` | `{"reason": "..."}` | Start maintenance |
 | DELETE | `/api/hosts/<host>/maintenance` | `{"reason": "..."}` | Stop maintenance |
@@ -284,8 +351,45 @@ which protects the API from cross-site requests using the cached credentials of 
 Example:
 
 ```
-curl -u admin -H 'Content-Type: application/json' -X POST -d '{"reason": "DIMM swap"}' http://127.0.0.1:8091/api/hosts/c001/maintenance
+curl -u admin -H 'Content-Type: application/json' -X POST -d '{"reason": "DIMM swap"}' http://127.0.0.1/webui/supervision/api/hosts/c001/maintenance
 ```
+
+### Summary, for the federator
+
+`GET /api/summary` gives the whole cluster in one call, in the format shared by every WebUI pack
+(contract version 1):
+
+```
+{"contract": 1, "pack": "supervision", "version": "1.1.0", "as_of": 1794746670, "refresh": 1800,
+ "cluster": {"state": "error", "text": "510 ok, 2 error"},
+ "hosts": {"c001": {"state": "ok", "text": "ok", "url": "hosts/c001", "as_of": 1794746670}, ...}}
+```
+
+`state` is `ok`, `error`, `maintenance` or `unknown` (never probed). The cluster state is the worst
+state of its hosts: `error`, then `unknown`, then `ok`, then `maintenance` (only when all hosts are
+in maintenance). `as_of` is the time of the data, in seconds since 1970: the last probe of the host
+(the time of the answer for a host in maintenance or never probed, whose state is read at each
+request), and the oldest of all hosts for the cluster. `refresh` is the probe loop interval: data
+much older than it means the probe daemon is not probing any more.
+
+`GET /api/hosts/<host>/summary` gives the same entry for one host, plus `contract`, `refresh`,
+`latched`, `failed` and `last_probe`.
+
+### Probe jobs
+
+`POST /api/hosts/<host>/probe` answers `202 {"job": "<id>", "url": "api/jobs/<id>", "message": ...}`.
+Then `GET /api/jobs/<id>` answers:
+
+```
+{"job": "<id>", "action": "probe", "host": "c001", "by": "jdoe", "state": "failed",
+ "message": "c001: failed: check_bmc", "started": 1794746697, "ended": 1794746763}
+```
+
+`state` is `running` until the probe daemon ends the job: `success` when every probe passed,
+`failed` otherwise (the message lists the failed probes). A job waits while the host is already
+being probed, and while the probe daemon is stopped (its message is then
+`Waiting for the probe daemon`). A job being probed when the probe daemon stopped ends `failed`
+when it starts again. Job files are kept 7 days.
 
 ## Prometheus metrics
 
@@ -307,19 +411,25 @@ For example, to alert on hosts in error: `bluebanquise_supervision_host_state{st
 |------|---------|
 | `/etc/bluebanquise/bluebanquise-supervision/bluebanquise-supervision.yml` | Settings (paths, intervals, timeouts, ports) |
 | `/etc/bluebanquise/bluebanquise-supervision/hosts.yml` | Supervised hosts: probes, actions, BMC credentials, expected values |
-| `/etc/bluebanquise/bluebanquise-supervision/webui_users.yml` | WebUI users and password hashes |
-| `/usr/lib/bluebanquise/bluebanquise-supervision/` | Shared Python code (`lib/`), probes, WebUI files |
+| `/etc/bluebanquise/webui/users.yml` | WebUI users, levels and password hashes, shared by all WebUI packs |
+| `/etc/bluebanquise/webui/users.d/*.yml` | Service accounts (same format), dropped by the roles owning them |
+| `/usr/lib/bluebanquise/bluebanquise-supervision/` | Shared Python code (`lib/`), probes, WebUI files (`webui/templates/` pages, `webui/static/` CSS and JavaScript) |
+| `<Apache configuration folder>/bluebanquise-webui-supervision.conf` | Apache proxy to the API daemon, under `/webui/supervision/` |
 | `/var/lib/bluebanquise-supervision/cluster/hosts/<host>/probes.yml` | Last probe pass results |
 | `/var/lib/bluebanquise-supervision/cluster/hosts/<host>/gathered.yml` | Data gathered for the drift check |
 | `/var/lib/bluebanquise-supervision/cluster/hosts/<host>/maintenance.yml` | Maintenance state |
 | `/var/lib/bluebanquise-supervision/cluster/hosts/<host>/events.yml` | Events log |
-| `/var/lib/bluebanquise-supervision/requests/<host>` | On-demand probe requests, read by the probe daemon |
+| `/var/lib/bluebanquise-supervision/jobs/<job>.yml` | On-demand probe jobs, kept 7 days |
+| `/var/lib/bluebanquise-supervision/requests/<job>` | On-demand probe requests (the host name), read and removed by the probe daemon |
 
 Files are written atomically (temporary file, then rename), and changes to events and maintenance
 are done under a per-host lock, so the daemons and the command line tool can work at the same time.
 
 ## Security
 
+* The API daemon listens on `127.0.0.1` only: from the network, only Apache is reachable. The
+  daemon still checks the user of every request, so that a local account can not use it without a
+  password.
 * Daemons run as the unprivileged `bluebanquise-supervision` user, never as root. The API and
   exporter services can only write in the data folder (systemd hardening). The probe daemon is not
   hardened the same way, so that actions can use sudo.
@@ -328,6 +438,13 @@ are done under a per-host lock, so the daemons and the command line tool can wor
 * SSH host keys are not checked nor stored (hosts are reinstalled often, and a changed key must not
   stop the supervision): keep supervision on a trusted management network.
 * `hosts.yml` holds BMC credentials: readable by root and the `bluebanquise-supervision` group only.
+* `/etc/bluebanquise/webui/users.yml` holds the password hashes of WebUI users: readable by root
+  and the `bluebanquise-webui` group only, whose members are the daemon users of the WebUI packs.
+* Each log call of the daemons is one line in the journal: new lines and other control characters
+  are escaped (`\n`, `\x00`...) and lines are cut at 8000 characters, so text coming from a host
+  or from a user can not forge a line, such as an `AUDIT` line.
+* An unknown user name gets its answer as slowly as a wrong password: the response time does not
+  tell which user names exist.
 
 ## Variables
 
@@ -341,9 +458,10 @@ are done under a per-host lock, so the daemons and the command line tool can wor
 | `bluebanquise_supervision_ssh_probe_timeout` | `60` | Timeout of a remote probe, and of the drift data gathering |
 | `bluebanquise_supervision_local_probe_timeout` | `60` | Timeout of a local probe |
 | `bluebanquise_supervision_action_timeout` | `60` | Timeout of an action |
-| `bluebanquise_supervision_api_bind` / `_api_port` | `127.0.0.1` / `8091` | REST API and WebUI address |
+| `bluebanquise_supervision_api_port` | `8091` | REST API and WebUI port, on `127.0.0.1` |
+| `bluebanquise_webui_packs` | this pack only | Packs of the WebUI left menu: `name`, `label`. Shared by all packs |
 | `bluebanquise_supervision_exporter_bind` / `_exporter_port` | `127.0.0.1` / `9810` | Prometheus exporter address |
-| `bluebanquise_supervision_webui_users` | `[]` | WebUI users: `name`, `password_hash` |
+| `bluebanquise_webui_users` | `[]` | WebUI users: `name`, `password_hash`, `role` (`viewer`, `operator`, `admin`). Shared by all packs |
 | `bluebanquise_supervision_sudoers_commands` | `[]` | Commands the daemons user may run with sudo |
 | `bluebanquise_supervision_log_level` | `INFO` | Daemons log level |
 | `bluebanquise_supervision_enable_services` | `bb_enable_services`, else `true` | Enable services at boot |
@@ -351,6 +469,15 @@ are done under a per-host lock, so the daemons and the command line tool can wor
 
 ## Debugging
 
-Each daemon logs to the journal (`journalctl -u bluebanquise-supervision-probe`). To see every SSH
+Each daemon logs to the journal (`journalctl -u bluebanquise-supervision-probe`). A probe job that
+stays `running`: look for its request file in `/var/lib/bluebanquise-supervision/requests/` (still
+there: the probe daemon did not read it, is it running?) and for the job id in the journal of the
+probe daemon. To see every SSH
 command run, start a daemon by hand with `--log-level DEBUG`, as root (it switches to the
 `bluebanquise-supervision` user itself), after stopping its service.
+
+WebUI: each page is one file of `/usr/lib/bluebanquise/bluebanquise-supervision/webui/templates/`,
+with its HTML and its JavaScript. Fields of a page have an `id`, filled one by one by a `load`
+function from the REST API. Errors of the REST API are shown in the top right corner of the page,
+and in the browser console (F12). Any REST API call can be replayed with `curl` (see
+[REST API](#rest-api)).

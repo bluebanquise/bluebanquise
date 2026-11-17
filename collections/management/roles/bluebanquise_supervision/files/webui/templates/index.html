@@ -1,0 +1,185 @@
+{% extends "webui_base.html" %}
+
+{% block title %}Supervision{% endblock %}
+
+{% block content %}
+<h1 class="title">Supervision</h1>
+
+<!-- Global report: filled by loadHosts() -->
+<div class="columns is-mobile is-multiline">
+  <div class="column">
+    <div class="box has-text-centered">
+      <p class="heading">OK</p>
+      <p class="title has-text-success" id="count-ok">-</p>
+    </div>
+  </div>
+  <div class="column">
+    <div class="box has-text-centered">
+      <p class="heading">Error</p>
+      <p class="title has-text-danger" id="count-error">-</p>
+    </div>
+  </div>
+  <div class="column">
+    <div class="box has-text-centered">
+      <p class="heading">Maintenance</p>
+      <p class="title has-text-link" id="count-maintenance">-</p>
+    </div>
+  </div>
+  <div class="column">
+    <div class="box has-text-centered">
+      <p class="heading">Never probed</p>
+      <p class="title has-text-grey" id="count-unknown">-</p>
+    </div>
+  </div>
+</div>
+
+<!-- View, filters and legend -->
+<div class="level">
+  <div class="level-left">
+    <div class="level-item">
+      <div class="buttons has-addons mb-0">
+        <button class="button is-small" id="view-map" onclick="setView('map')">Map</button>
+        <button class="button is-small" id="view-list" onclick="setView('list')">List</button>
+      </div>
+    </div>
+    <div class="level-item">
+      <label class="checkbox mr-4"><input type="checkbox" id="filter-error" onchange="loadHosts()"> Only hosts in error</label>
+      <label class="checkbox"><input type="checkbox" id="filter-maintenance" onchange="loadHosts()"> Only hosts in maintenance</label>
+    </div>
+  </div>
+  <div class="level-right">
+    <div class="level-item">
+      <span class="tile-host state-ok"></span>&nbsp;ok&nbsp;&nbsp;
+      <span class="tile-host state-error"></span>&nbsp;error&nbsp;&nbsp;
+      <span class="tile-host state-maintenance"></span>&nbsp;maintenance&nbsp;&nbsp;
+      <span class="tile-host state-unknown"></span>&nbsp;never probed
+    </div>
+  </div>
+</div>
+
+<!-- Cluster map (one box per function group, one tile per host) or hosts list -->
+<div id="hosts"></div>
+<p class="has-text-grey is-size-7" id="updated"></p>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const REFRESH_SECONDS = 30;
+
+
+// Text of a host, shown when the mouse is over its tile, and in the list
+function hostMessage(host) {
+  let message = host.host + ': ' + host.state;
+  if (host.failed.length > 0) {
+    message = message + ' (' + host.failed.join(', ') + ')';
+  }
+  return message;
+}
+
+
+// Map view: one box per group, one small colored square per host
+function renderMap(container, groups, groupNames) {
+  for (const groupName of groupNames) {
+    const box = element('div', 'box');
+    box.appendChild(element('p', 'has-text-weight-bold mb-2', groupName + ' (' + groups[groupName].length + ')'));
+    for (const host of groups[groupName]) {
+      const tile = element('a', 'tile-host state-' + host.state);
+      tile.href = 'hosts/' + encodeURIComponent(host.host);
+      tile.title = hostMessage(host);
+      box.appendChild(tile);
+    }
+    container.appendChild(box);
+  }
+}
+
+
+// List view: one table row per host
+function renderList(container, groups, groupNames) {
+  const table = element('table', 'table is-fullwidth is-narrow');
+  const head = element('thead');
+  const headRow = element('tr');
+  headRow.appendChild(element('th', null, 'Host'));
+  headRow.appendChild(element('th', null, 'Group'));
+  headRow.appendChild(element('th', null, 'Status'));
+  head.appendChild(headRow);
+  table.appendChild(head);
+
+  const body = element('tbody');
+  for (const groupName of groupNames) {
+    for (const host of groups[groupName]) {
+      const row = element('tr', 'row-host state-' + host.state);
+      const hostCell = element('td');
+      const link = element('a', 'has-text-weight-bold', host.host);
+      link.href = 'hosts/' + encodeURIComponent(host.host);
+      hostCell.appendChild(link);
+      row.appendChild(hostCell);
+      row.appendChild(element('td', null, groupName));
+      row.appendChild(element('td', null, hostMessage(host)));
+      body.appendChild(row);
+    }
+  }
+  table.appendChild(body);
+  container.appendChild(table);
+}
+
+
+async function loadHosts() {
+  const data = await apiRequest('GET', 'api/hosts');
+
+  // Global report
+  document.getElementById('count-ok').textContent = data.counts.ok;
+  document.getElementById('count-error').textContent = data.counts.error;
+  document.getElementById('count-maintenance').textContent = data.counts.maintenance;
+  document.getElementById('count-unknown').textContent = data.counts.unknown;
+
+  // Group hosts by function group, keeping only the ones passing the filters
+  const onlyError = document.getElementById('filter-error').checked;
+  const onlyMaintenance = document.getElementById('filter-maintenance').checked;
+  const groups = {};
+  for (const host of data.hosts) {
+    if (onlyError || onlyMaintenance) {
+      const keep = (onlyError && host.state === 'error') || (onlyMaintenance && host.state === 'maintenance');
+      if (!keep) {
+        continue;
+      }
+    }
+    if (!(host.group in groups)) {
+      groups[host.group] = [];
+    }
+    groups[host.group].push(host);
+  }
+
+  const container = document.getElementById('hosts');
+  container.replaceChildren();
+  const groupNames = Object.keys(groups).sort();
+  if (groupNames.length === 0) {
+    container.appendChild(element('p', 'has-text-grey', 'No host to display.'));
+  } else if (savedSetting('view') === 'list') {
+    renderList(container, groups, groupNames);
+  } else {
+    renderMap(container, groups, groupNames);
+  }
+
+  document.getElementById('updated').textContent = 'Updated ' + new Date().toLocaleTimeString();
+}
+
+
+// Map or list, remembered by the browser
+function showViewButtons() {
+  const list = savedSetting('view') === 'list';
+  document.getElementById('view-list').classList.toggle('is-link', list);
+  document.getElementById('view-map').classList.toggle('is-link', !list);
+}
+
+function setView(view) {
+  saveSetting('view', view);
+  showViewButtons();
+  loadHosts();
+}
+
+
+showViewButtons();
+loadHosts();
+setInterval(loadHosts, REFRESH_SECONDS * 1000);
+</script>
+{% endblock %}
