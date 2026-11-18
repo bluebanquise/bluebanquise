@@ -1,0 +1,28 @@
+#jinja2: lstrip_blocks: True
+#### Blue Banquise file ####
+## {{ ansible_managed }}
+# Hosts of the inventory, shown on the cluster map and on host pages of the federator.
+
+hosts:
+{% for host in groups['all'] | sort %}
+  {% set hv = hostvars[host] %}
+  {# Function group, used to group hosts on the cluster map (same as bluebanquise_supervision) #}
+  {% set fn_groups = hv['group_names'] | select('match', '^fn_') | sort %}
+  {% set ifaces = namespace(list=[]) %}
+  {% for iface in hv['network_interfaces'] | default([], true) %}
+    {% if iface['interface'] is defined %}
+      {% set ifaces.list = ifaces.list + [{
+          'interface': iface['interface'] | string,
+          'ip4': iface['ip4'] | default('') | string,
+          'network': iface['network'] | default('') | string
+      }] %}
+    {% endif %}
+  {% endfor %}
+  {% set host_data = {
+      'group': fn_groups[0] | default('none'),
+      'groups': hv['group_names'] | sort,
+      'network_interfaces': ifaces.list
+  } %}
+  {{ host | to_json }}:
+{{ host_data | to_nice_yaml(indent=2) | indent(4, true) }}
+{% endfor %}

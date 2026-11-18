@@ -1,0 +1,25 @@
+---
+# WebUI daemon. It listens on 127.0.0.1 only: Apache (http_server role) serves it under
+# /webui/cluster/, and redirects /webui/ to it.
+bluebanquise_federator_api_port: 8090
+
+# Packs of the left menu, and of the tiles of the federator. Shared by all WebUI packs of the
+# bluebanquise.management collection: set it once in the inventory, for example in
+# group_vars/all. The federator is the entry named cluster, written first by convention. When
+# not set, the menu shows only the federator, without any tile.
+# bluebanquise_webui_packs:
+#   - name: cluster             # URL is /webui/<name>/
+#     label: Cluster overview
+#   - name: supervision
+#     label: Supervision
+
+# WebUI users, shared by all WebUI packs: set them once in the inventory, for example in
+# group_vars/all (preferably in an Ansible vault). Levels: viewer (cluster overview and packs
+# summaries only), operator (everything about hosts), admin. Generate a password hash with:
+#   /usr/lib/bluebanquise/venv/bin/python3 /usr/lib/bluebanquise/bluebanquise-federator/lib/webui_auth.py
+# bluebanquise_webui_users:
+#   - name: jdoe
+#     password_hash: "scrypt:32768:8:1$..."
+#     role: operator
+
+bluebanquise_federator_log_level: INFO

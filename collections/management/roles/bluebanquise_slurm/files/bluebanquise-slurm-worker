@@ -1,0 +1,211 @@
+#!/usr/lib/bluebanquise/venv/bin/python3
+"""
+bluebanquise-slurm-worker: reads the state of the Slurm nodes, and runs the drain and resume
+actions asked through the WebUI or the REST API. It has no HTTP port.
+
+Runs as the bluebanquise-slurm user, whose only power is one sudo rule: run the node wrapper
+(bluebanquise-slurm-node, owned by root) as the SlurmUser. Every Slurm command goes through it:
+  sudo -n -u slurm /usr/lib/bluebanquise/bluebanquise-slurm/bluebanquise-slurm-node status
+  sudo -n -u slurm /usr/lib/bluebanquise/bluebanquise-slurm/bluebanquise-slurm-node drain <node> "[<user>] <reason>"
+  sudo -n -u slurm /usr/lib/bluebanquise/bluebanquise-slurm/bluebanquise-slurm-node resume <node>
+Each can be replayed by hand with the same command line. Every second:
+  1. a request file (requests/<job id>.yml, written by the API) becomes a job: the wrapper runs
+     for each host, one after the other, then the job ends with the result of every host;
+  2. every refresh_interval seconds, right after a job and 5 seconds later, the state of every
+     node is read (wrapper status) and written to state.yml. Pages never call Slurm.
+The reason is prefixed with the WebUI user: Slurm records the wrapper user (slurm) as the author.
+
+A job running when the worker stops ends failed at the next start.
+"""
+
+import argparse
+import json
+import logging
+import os
+import subprocess
+import sys
+import time
+
+from ClusterShell.NodeSet import NodeSet
+
+sys.path.insert(0, '/usr/lib/bluebanquise/bluebanquise-slurm/lib')
+import common  # noqa: E402
+
+# Seconds given to one wrapper call (the wrapper gives 30 seconds to each Slurm command)
+WRAPPER_TIMEOUT = 120
+
+
+def wrapper(settings, arguments):
+    """Run the node wrapper as the SlurmUser. Returns (ok, output): output is stdout when ok, else
+    what went wrong (stderr of the wrapper, or of sudo)."""
+    command = ['sudo', '-n', '-u', settings['slurm_user'], settings['node_command']] + arguments
+    try:
+        result = subprocess.run(command, capture_output=True, text=True, timeout=WRAPPER_TIMEOUT,
+                                stdin=subprocess.DEVNULL)
+    except subprocess.TimeoutExpired:
+        return False, 'no answer within {} seconds'.format(WRAPPER_TIMEOUT)
+    if result.returncode != 0:
+        return False, result.stderr.strip() or 'exit code {}'.format(result.returncode)
+    return True, result.stdout
+
+
+# ─── jobs ───────────────────────────────────────────────────────────────────────
+
+def run_job(settings, job):
+    """Drain or resume every host of a job, one after the other. Returns the results."""
+    results = {}
+    for host in common.job_hosts(job):
+        if job['action'] == 'drain':
+            reason = '[{}] {}'.format(job['by'], job['reason'])
+            ok, output = wrapper(settings, ['drain', host, reason])
+        else:
+            ok, output = wrapper(settings, ['resume', host])
+        results[host] = {'ok': ok, 'detail': output.strip()}
+        logging.info('Job %s: %s %s by %s: %s', job['job'], job['action'], host, job['by'], output.strip())
+    return results
+
+
+def start_request(settings, job_id):
+    """Turn a request into a job, run it, end it."""
+    request = common.read_yaml(common.request_file(settings, job_id), None)
+    if request is None:
+        os.remove(common.request_file(settings, job_id))
+        return
+    job = common.pending_job(request)
+    job['message'] = 'Running'
+    # The API checked everything, checked again here: this daemon can drain the cluster
+    if job['action'] not in common.ACTIONS:
+        job['message'] = 'Unknown action {}'.format(job['action'])
+    elif job['action'] == 'drain' and not common.valid_text(job['reason'], common.MAX_REASON):
+        job['message'] = 'Invalid reason'
+    if job['message'] != 'Running':
+        job['state'] = 'failed'
+        job['ended'] = int(time.time())
+        common.write_job(settings, job)
+        os.remove(common.request_file(settings, job_id))
+        logging.warning('Job %s refused: %s', job_id, job['message'])
+        return
+    # The job file first, then the request is removed: a page following the job always finds it
+    common.write_job(settings, job)
+    os.remove(common.request_file(settings, job_id))
+
+    results = run_job(settings, job)
+    failed = []
+    for host in sorted(results):
+        if not results[host]['ok']:
+            failed.append(host)
+    if len(results) == 1:
+        host = list(results)[0]
+        job['message'] = '{}: {}'.format(host, results[host]['detail'])
+    elif len(failed) == 0:
+        job['message'] = '{} hosts: all done'.format(len(results))
+    else:
+        job['message'] = '{} hosts: {} done, {} failed ({})'.format(
+            len(results), len(results) - len(failed), len(failed), NodeSet.fromlist(failed))
+    job['state'] = 'success'
+    if len(failed) > 0:
+        job['state'] = 'failed'
+    job['results'] = results
+    job['ended'] = int(time.time())
+    common.write_job(settings, job)
+    logging.info('Job %s (%s %s by %s) %s: %s', job_id, job['action'], job['hosts'], job['by'],
+                 job['state'], job['message'])
+
+
+def end_lost_jobs(settings):
+    """At startup: a job still running was being run when the worker stopped, end it."""
+    for filename in sorted(os.listdir(settings['jobs_path'])):
+        job_id = filename[:-len('.yml')]
+        if not filename.endswith('.yml') or not common.valid_job_id(job_id):
+            continue
+        job = common.read_yaml(common.job_file(settings, job_id), None)
+        if job is None or job['state'] != 'running':
+            continue
+        job['state'] = 'failed'
+        job['message'] = 'Worker restarted while the job was running: check the state of the nodes, then ask again'
+        job['ended'] = int(time.time())
+        common.write_job(settings, job)
+        logging.warning('Job %s ended: worker restarted while it was running', job_id)
+
+
+def remove_old_jobs(settings):
+    """Job files are kept common.JOBS_KEPT_DAYS days."""
+    oldest = time.time() - common.JOBS_KEPT_DAYS * 86400
+    for filename in os.listdir(settings['jobs_path']):
+        path = os.path.join(settings['jobs_path'], filename)
+        try:
+            if os.path.getmtime(path) < oldest:
+                logging.info('Removing old job file %s', path)
+                os.remove(path)
+        except OSError as e:
+            logging.debug('Can not remove old job file %s: %s', path, e)
+
+
+# ─── state of the nodes ─────────────────────────────────────────────────────────
+
+def read_status(settings):
+    """Read the state of every node (wrapper status) and write it. When it fails, the previous
+    state is kept, with the error: its data gets old, and the WebUI says why."""
+    state = common.read_state(settings)
+    ok, output = wrapper(settings, ['status'])
+    if ok:
+        try:
+            status = json.loads(output)
+        except ValueError:
+            ok, output = False, 'the wrapper did not answer JSON'
+    if not ok:
+        if state.get('error') != output:
+            logging.error('Can not read the state of the nodes: %s', output)
+        state['error'] = output
+        common.write_yaml(settings['state_file'], state)
+        return
+    if state.get('error') is not None:
+        logging.info('State of the nodes read again')
+    common.write_yaml(settings['state_file'], {
+        'as_of': int(time.time()),
+        'error': None,
+        'nodes': status['nodes'],
+        'cpus': status['cpus'],
+        'jobs': status['jobs'],
+    })
+
+
+def main():
+    parser = argparse.ArgumentParser(description='bluebanquise-slurm worker daemon')
+    parser.add_argument('--settings', default=common.SETTINGS_FILE, help='Settings file')
+    parser.add_argument('--log-level', default=None, help='DEBUG, INFO, WARNING, ERROR')
+    args = parser.parse_args()
+
+    common.setup_logging(args.log_level or 'INFO')
+    settings = common.load_settings(args.settings)
+    common.setup_logging(args.log_level or settings['log_level'])
+    common.drop_privileges(settings['worker_user'])
+
+    logging.info('bluebanquise-slurm-worker starting: state read every %ds', settings['refresh_interval'])
+    end_lost_jobs(settings)
+    next_status = time.monotonic()
+
+    while True:
+        # 1. Requests, the oldest first. Files starting with a dot are being written.
+        did_job = False
+        for filename in sorted(os.listdir(settings['requests_path'])):
+            job_id = filename[:-len('.yml')]
+            if filename.startswith('.') or not filename.endswith('.yml') or not common.valid_job_id(job_id):
+                continue
+            start_request(settings, job_id)
+            did_job = True
+
+        # 2. State of the nodes, every refresh_interval seconds, at once after a job, and again 5
+        #    seconds later: a resumed node is "not responding" until slurmctld pings it.
+        if did_job or time.monotonic() >= next_status:
+            read_status(settings)
+            next_status = time.monotonic() + settings['refresh_interval']
+            if did_job:
+                next_status = time.monotonic() + 5
+            remove_old_jobs(settings)
+
+        time.sleep(1)
+
+
+if __name__ == '__main__':
+    main()

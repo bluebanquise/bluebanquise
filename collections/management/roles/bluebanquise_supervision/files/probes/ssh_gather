@@ -1,0 +1,78 @@
+#!/bin/bash
+# Gather host data for the drift check, in one SSH session. Not a probe: run by the probe daemon
+# when drift_check is enabled for the host.
+# Each section starts with a "### <name>" line, the daemon (drift.py) parses each section.
+
+echo "### lscpu"
+lscpu 2>/dev/null
+
+echo "### os-release"
+cat /etc/os-release 2>/dev/null
+
+echo "### kernel"
+uname -r
+
+echo "### firewall"
+# Prints active or inactive (also inactive when firewalld is not installed)
+systemctl is-active firewalld 2>/dev/null
+
+echo "### selinux"
+# Prints Enforcing, Permissive or Disabled, nothing when SELinux is not available
+getenforce 2>/dev/null
+
+echo "### gpu"
+# One line per NVIDIA GPU, same names as nvidia-smi -L (used in hw_specs.gpu)
+if command -v nvidia-smi >/dev/null 2>&1; then
+    nvidia-smi --query-gpu=name --format=csv,noheader 2>/dev/null
+fi
+
+echo "### ip"
+ip -json addr show 2>/dev/null
+
+echo "### speed"
+# interface|speed in Mb/s (empty or -1 when no link)
+for iface_path in /sys/class/net/*; do
+    iface=$(basename "$iface_path")
+    speed=$(cat "$iface_path/speed" 2>/dev/null)
+    echo "$iface|$speed"
+done
+
+echo "### ib_rate"
+# interface|rate, for IPoIB interfaces only. The netdev dev_id file holds the zero-based port
+# offset (same convention as ibdev2netdev), so dev_id + 1 is the HCA port number.
+for iface_path in /sys/class/net/*; do
+    iface=$(basename "$iface_path")
+    ib_dir="$iface_path/device/infiniband"
+    if [ -d "$ib_dir" ]; then
+        hca=$(ls "$ib_dir" 2>/dev/null | head -n1)
+        dev_id=$(cat "$iface_path/dev_id" 2>/dev/null)
+        port_num=$(( dev_id + 1 ))
+        rate=$(cat "/sys/class/infiniband/$hca/ports/$port_num/rate" 2>/dev/null)
+        echo "$iface|$rate"
+    fi
+done
+
+echo "### pcie"
+# slot|width|speed|max_width|max_speed, for devices with a trained PCIe link. Bridges (PCI class
+# 0x06, root ports) and untrained links (width 0, chipset functions) are skipped: they drown out
+# the real add-in devices.
+for dev in /sys/bus/pci/devices/*/; do
+    slot=$(basename "$dev")
+    if [ -f "${dev}current_link_width" ] && [ -f "${dev}current_link_speed" ]; then
+        width=$(cat "${dev}current_link_width" 2>/dev/null)
+        class=$(cat "${dev}class" 2>/dev/null)
+        class_base="${class:2:2}"
+        if [ "$class_base" = "06" ] || [ "$width" = "0" ]; then
+            continue
+        fi
+        speed=$(cat "${dev}current_link_speed" 2>/dev/null)
+        max_width=$(cat "${dev}max_link_width" 2>/dev/null)
+        max_speed=$(cat "${dev}max_link_speed" 2>/dev/null)
+        echo "${slot}|${width}|${speed}|${max_width}|${max_speed}"
+    fi
+done
+
+echo "### lspci"
+lspci -D -mm 2>/dev/null
+
+echo "### end"

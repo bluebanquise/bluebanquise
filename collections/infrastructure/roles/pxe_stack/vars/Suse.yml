@@ -20,7 +20,7 @@ pxe_stack_default_tftp_service: tftp.socket
 pxe_stack_diskless_packages_to_install:
   - nfs-utils
 pxe_stack_diskless_services_to_start:
-  - nfsserver
+  - nfs-server
   - rpcbind
 pxe_stack_diskless_firewall_services_to_add:
   - nfs

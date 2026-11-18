@@ -1,0 +1,5 @@
+---
+# Apache of the http_server role (same values as its vars/Debian.yml)
+bluebanquise_slurm_apache_conf_path: /etc/apache2/conf-enabled
+bluebanquise_slurm_apache_service: apache2
+bluebanquise_slurm_apache_configtest_command: apache2ctl configtest

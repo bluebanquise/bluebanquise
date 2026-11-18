@@ -1,0 +1,12 @@
+---
+- name: bluebanquise slurm
+  hosts: "fn_management"
+  roles:
+
+    # Serves the WebUI under /webui/slurm/. The slurm role (controller or submitter) must be
+    # applied first: the hpc.yml playbook, earlier in the workflows.
+    - role: bluebanquise.infrastructure.http_server
+      tags: http_server
+
+    - role: bluebanquise.management.bluebanquise_slurm
+      tags: bluebanquise_slurm

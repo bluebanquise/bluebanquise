@@ -7,23 +7,24 @@ import threading
 import time
 import yaml
 import importlib.util
+import json
 from ClusterShell.NodeSet import NodeSet, NodeSetParseError
 import logging
 import sys
 
 # usage: bluebanquise-power c001 power on
 
-print("""\
+BANNER = """\
 
                 (o_
       (o_  (o_  //\\
       (/)_ (/)_ V_/_
 
    BlueBanquise power
-   v1.0.0
+   v1.1.0
    https://github.com/bluebanquise/bluebanquise/
 
-""", flush=True)  # flush: banner must appear before logs (stderr) when output is piped
+"""
 
 # Valid parameters for each action. Each protocol plugin implements one function per action.
 ACTIONS = {
@@ -45,6 +46,10 @@ examples:
   bluebanquise-power c[001-004] boot pxe
   bluebanquise-power --dryrun c[001-004] power reset
   bluebanquise-power --delay 2 --random c[001-100] power on
+  bluebanquise-power --json c[001-004] power status
+
+--json: stdout holds only the result, one JSON document (logs stay on stderr):
+  {"nodes": {"c001": {"ok": true, "detail": "on"}, "c002": {"ok": false, "detail": "..."}}}
 """)
 parser.add_argument("nodes", help="Target node(s), using nodeset format (c001, c[001-004], c001,login1).")
 parser.add_argument("action", choices=sorted(ACTIONS), help="Action to perform.")
@@ -59,9 +64,16 @@ parser.add_argument("--delay", type=float, default=0,
                          "the power surge when powering many nodes at once. Default is 0 (no delay).")
 parser.add_argument("--random", action='store_true', dest='random',
                     help="Process nodes in random order, for example to spread power on across racks/PDUs.")
+parser.add_argument("--json", action='store_true', dest='json',
+                    help="Print the result as JSON on stdout, instead of the banner and the status table. "
+                         "For other programs (the WebUI Operation pack uses it).")
 
 # parameters is a dict: parameters['action'], parameters['debug'], parameters['timeout']...
 parameters = vars(parser.parse_args())
+
+# With --json, stdout holds only the JSON result
+if not parameters['json']:
+    print(BANNER, flush=True)  # flush: banner must appear before logs (stderr) when output is piped
 action = parameters['action']
 parameter = parameters['parameter']
 
@@ -99,7 +111,7 @@ try:
         power_configuration = yaml.safe_load(file)
 except PermissionError:
     logger.error(f'Cannot read {configuration_file_path} (it contains BMC credentials). '
-                 f'Run this tool as root or as a member of the bluebanquise group.')
+                 f'Run this tool as root or as a member of the bluebanquise-power group (bluebanquise_power_users).')
     sys.exit(1)
 except yaml.YAMLError as e:
     logger.error(f'Invalid configuration file {configuration_file_path}: {e}')
@@ -208,29 +220,40 @@ with ThreadPoolExecutor(max_workers=parameters['parallel']) as executor:
     for node in nodes_to_process:
         results[node] = running[node].result()
 
-# Final status table, in nodeset order. Colors only when writing to a terminal, so that
-# redirecting output to a file does not fill it with color codes.
-if sys.stdout.isatty():
-    GREEN, RED, RESET = '\033[92m', '\033[91m', '\033[0m'
-else:
-    GREEN, RED, RESET = '', '', ''
-# Width of the first column: longest node name
-width = len('NODE')
-for node in nodes:
-    if len(node) > width:
-        width = len(node)
-print()
-print('NODE'.ljust(width) + '  RESULT  DETAILS')
 failed_nodes = []
 for node in nodes:
-    return_code, detail = results[node]
-    if return_code == 0:
-        result = GREEN + 'OK'.ljust(6) + RESET
-    else:
-        result = RED + 'ERROR'.ljust(6) + RESET
+    if results[node][0] != 0:
         failed_nodes.append(node)
-    print(node.ljust(width) + '  ' + result + '  ' + str(detail))
-print(flush=True)
+
+if parameters['json']:
+    # --json: the result of every node, in nodeset order, as one JSON document on stdout
+    result = {'nodes': {}}
+    for node in nodes:
+        return_code, detail = results[node]
+        result['nodes'][node] = {'ok': return_code == 0, 'detail': str(detail)}
+    print(json.dumps(result, indent=1), flush=True)
+else:
+    # Final status table, in nodeset order. Colors only when writing to a terminal, so that
+    # redirecting output to a file does not fill it with color codes.
+    if sys.stdout.isatty():
+        GREEN, RED, RESET = '\033[92m', '\033[91m', '\033[0m'
+    else:
+        GREEN, RED, RESET = '', '', ''
+    # Width of the first column: longest node name
+    width = len('NODE')
+    for node in nodes:
+        if len(node) > width:
+            width = len(node)
+    print()
+    print('NODE'.ljust(width) + '  RESULT  DETAILS')
+    for node in nodes:
+        return_code, detail = results[node]
+        if return_code == 0:
+            result = GREEN + 'OK'.ljust(6) + RESET
+        else:
+            result = RED + 'ERROR'.ljust(6) + RESET
+        print(node.ljust(width) + '  ' + result + '  ' + str(detail))
+    print(flush=True)
 
 # Exit code allows scripts to detect a failure: 1 if the action failed on at least one node
 if failed_nodes:

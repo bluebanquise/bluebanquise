@@ -1,0 +1,237 @@
+#!/usr/lib/bluebanquise/venv/bin/python3
+"""
+bluebanquise-operation-worker: runs the power and boot actions asked through the WebUI or the
+REST API, and reads the power state of every host. It has no HTTP port.
+
+Everything is done by bluebanquise-power (bluebanquise_power role), as a separate process: this
+daemon only starts it with --json, and reads the result it prints on stdout. Every second:
+  1. a finished bluebanquise-power command ends its job (success or failed, result per host);
+  2. a new request file (requests/<job id>, written by the API) starts a command:
+       bluebanquise-power <hosts> power on|off|reset    or    bluebanquise-power <hosts> boot pxe|disk|bios
+     its result (stdout) going to jobs/<job id>.json, its logs (stderr) to jobs/<job id>.log.
+     Jobs run in parallel;
+  3. every status_interval seconds, "bluebanquise-power <all hosts> power status", its result
+     going to power-status.json and its logs to power-status.log, then power.yml is written. After a power action, the power
+     state of its hosts is read again 5, 15 and 30 seconds later (a BMC answers at once, the
+     power state of the host changes a few seconds later).
+Each step can be replayed by hand, as the conman user, with the same command line (written in
+the job, and in the journal of this daemon).
+
+A job running when the worker stops is lost with its command (systemd stops them together): at
+startup, every running job without its request file ends failed.
+"""
+
+import argparse
+import logging
+import os
+import subprocess
+import sys
+import time
+
+from ClusterShell.NodeSet import NodeSet
+
+sys.path.insert(0, '/usr/lib/bluebanquise/bluebanquise-operation/lib')
+import common  # noqa: E402
+
+# Seconds after a power action when the power state of its hosts is read again
+RECHECK_DELAYS = [5, 15, 30]
+
+
+def power_command(settings, hosts, action, parameter):
+    """Command line of bluebanquise-power, as a list (no shell)."""
+    command = [settings['power_command'], '--json', '--parallel', str(settings['power_parallel'])]
+    if settings['power_delay'] > 0:
+        command = command + ['--delay', str(settings['power_delay'])]
+    return command + [hosts, action, parameter]
+
+
+def start_command(command, result_path, log_path):
+    """Start a bluebanquise-power command, its stdout (the JSON result) and its stderr (logs) going
+    to files. Never to a pipe: a large result would fill it, and the command would wait for this
+    daemon to read it, while this daemon waits for the command to end."""
+    with open(result_path, 'w') as result, open(log_path, 'w') as log:
+        return subprocess.Popen(command, stdout=result, stderr=log, stdin=subprocess.DEVNULL)
+
+
+# ─── jobs ───────────────────────────────────────────────────────────────────────
+
+def start_job(settings, hosts, job_id):
+    """Start the command of a new job. Returns its process, or None when the job is not valid
+    (then it ends failed)."""
+    job = None
+    if common.valid_job_id(job_id):
+        job = common.read_job(settings, job_id)
+    if job is None:
+        logging.warning('Ignoring request %s: no job file', job_id)
+        return None
+    # The API checked everything, checked again here: this daemon holds the BMC credentials
+    if job['action'] not in common.ACTIONS or job['parameter'] not in common.ACTIONS[job['action']]:
+        common.update_job(settings, job_id, 'failed', 'Unknown action {} {}'.format(job['action'], job['parameter']))
+        return None
+    for host in common.job_hosts(job):
+        if host not in hosts:
+            common.update_job(settings, job_id, 'failed', '{} is not a host of this pack'.format(host))
+            return None
+
+    command = power_command(settings, job['hosts'], job['action'], job['parameter'])
+    job['command'] = ' '.join(command)
+    common.write_job(settings, job)
+    common.update_job(settings, job_id, 'running', 'Running bluebanquise-power')
+    logging.info('Job %s: running %s', job_id, job['command'])
+    return start_command(command, common.job_result_file(settings, job_id), common.job_log_file(settings, job_id))
+
+
+def end_job(settings, job_id, return_code):
+    """bluebanquise-power ended: read its result, end the job."""
+    results = common.read_power_result(common.job_result_file(settings, job_id))
+    if results is None:
+        common.update_job(settings, job_id, 'failed',
+                          'bluebanquise-power failed (exit code {}), see the logs of the job'.format(return_code), {})
+        return
+    failed = []
+    for host in sorted(results):
+        if not results[host]['ok']:
+            failed.append(host)
+    if len(results) == 1:
+        host = list(results)[0]
+        message = '{}: {}'.format(host, results[host]['detail'])
+    elif len(failed) == 0:
+        message = '{} hosts: all ok'.format(len(results))
+    else:
+        message = '{} hosts: {} ok, {} failed'.format(len(results), len(results) - len(failed), len(failed))
+    if return_code == 0 and len(failed) == 0:
+        common.update_job(settings, job_id, 'success', message, results)
+    else:
+        common.update_job(settings, job_id, 'failed', message, results)
+
+
+def end_lost_jobs(settings):
+    """At startup: a job still running without its request file had its command running when
+    the worker stopped. It will never end, end it now."""
+    for filename in sorted(os.listdir(settings['jobs_path'])):
+        job_id = filename[:-len('.yml')]
+        if not filename.endswith('.yml') or not common.valid_job_id(job_id):
+            continue
+        job = common.read_job(settings, job_id)
+        if job is None or job['state'] != 'running':
+            continue
+        if os.path.exists(os.path.join(settings['requests_path'], job_id)):
+            continue
+        common.update_job(settings, job_id, 'failed',
+                          'Worker restarted while the job was running: check the power state of the hosts, then ask again')
+
+
+def remove_old_jobs(settings):
+    """Job files (and their output) are kept common.JOBS_KEPT_DAYS days."""
+    oldest = time.time() - common.JOBS_KEPT_DAYS * 86400
+    for filename in os.listdir(settings['jobs_path']):
+        path = os.path.join(settings['jobs_path'], filename)
+        try:
+            if os.path.getmtime(path) < oldest:
+                logging.info('Removing old job file %s', path)
+                os.remove(path)
+        except OSError as e:
+            # Removed or renamed meanwhile (a temporary file of write_yaml)
+            logging.debug('Can not remove old job file %s: %s', path, e)
+
+
+# ─── power state ────────────────────────────────────────────────────────────────
+
+def save_power_status(settings, return_code):
+    """bluebanquise-power power status ended: write the state of every host of its table. A host
+    missing from the table keeps its previous state, which gets old (grey in the WebUI)."""
+    results = common.read_power_result(settings['status_result_file'])
+    if results is None:
+        logging.error('Power status failed (exit code %d), no state read: see %s',
+                      return_code, settings['status_log_file'])
+        return
+    power = common.read_power(settings)
+    now = int(time.time())
+    for host in results:
+        power[host] = {'ok': results[host]['ok'], 'detail': results[host]['detail'], 'as_of': now}
+    common.write_yaml(settings['power_file'], power)
+    failed = 0
+    for host in results:
+        if not results[host]['ok']:
+            failed = failed + 1
+    logging.info('Power status read: %d host(s), %d BMC error(s)', len(results), failed)
+
+
+def main():
+    parser = argparse.ArgumentParser(description='bluebanquise-operation worker daemon')
+    parser.add_argument('--settings', default=common.SETTINGS_FILE, help='Settings file')
+    parser.add_argument('--log-level', default=None, help='DEBUG, INFO, WARNING, ERROR')
+    args = parser.parse_args()
+
+    common.setup_logging(args.log_level or 'INFO')
+    settings = common.load_settings(args.settings)
+    common.setup_logging(args.log_level or settings['log_level'])
+    common.drop_privileges(settings['user'])
+    hosts = common.load_hosts(settings)
+
+    logging.info('bluebanquise-operation-worker starting: %d host(s) with a BMC, power status every %ds',
+                 len(hosts), settings['status_interval'])
+    end_lost_jobs(settings)
+
+    # Job id -> its bluebanquise-power process. Only this main loop uses them, no lock needed.
+    running = {}
+    status_process = None
+    # Power state to read again after a power action: list of (time, host)
+    rechecks = []
+    next_status = time.monotonic()
+
+    while True:
+        # 1. Finished jobs
+        for job_id in list(running):
+            return_code = running[job_id].poll()
+            if return_code is None:
+                continue
+            del running[job_id]
+            end_job(settings, job_id, return_code)
+            job = common.read_job(settings, job_id)
+            if job is not None and job['action'] == 'power':
+                for delay in RECHECK_DELAYS:
+                    for host in common.job_hosts(job):
+                        rechecks.append((time.monotonic() + delay, host))
+
+        # 2. New requests. Files starting with a dot are being written.
+        for job_id in sorted(os.listdir(settings['requests_path'])):
+            if job_id.startswith('.'):
+                continue
+            os.remove(os.path.join(settings['requests_path'], job_id))
+            process = start_job(settings, hosts, job_id)
+            if process is not None:
+                running[job_id] = process
+
+        # 3. Power state: of every host every status_interval seconds, or of the hosts of the
+        #    last power actions. One status command at a time.
+        if status_process is not None:
+            return_code = status_process.poll()
+            if return_code is not None:
+                status_process = None
+                save_power_status(settings, return_code)
+        if status_process is None and len(hosts) > 0:
+            status_hosts = []
+            if time.monotonic() >= next_status:
+                status_hosts = list(hosts)
+                next_status = time.monotonic() + settings['status_interval']
+                remove_old_jobs(settings)
+            else:
+                later = []
+                for recheck in rechecks:
+                    if recheck[0] <= time.monotonic():
+                        status_hosts.append(recheck[1])
+                    else:
+                        later.append(recheck)
+                rechecks = later
+            if len(status_hosts) > 0:
+                nodes = str(NodeSet.fromlist(status_hosts))
+                command = power_command(settings, nodes, 'power', 'status')
+                logging.debug('Power status: running %s', ' '.join(command))
+                status_process = start_command(command, settings['status_result_file'], settings['status_log_file'])
+
+        time.sleep(1)
+
+
+if __name__ == '__main__':
+    main()

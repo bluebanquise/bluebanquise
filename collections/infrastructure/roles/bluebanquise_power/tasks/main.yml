@@ -6,9 +6,28 @@
   tags:
     - package
 
+# The configuration file holds every BMC password: it is readable by the bluebanquise-power group
+# only, a group for this file and nothing else. Its members can run the tool without root.
+- name: "group <|> Create bluebanquise-power group"
+  ansible.builtin.group:
+    name: bluebanquise-power
+    system: true
+
+- name: "getent <|> Read users"
+  ansible.builtin.getent:
+    database: passwd
+
+- name: "user <|> Add users to bluebanquise-power group"
+  ansible.builtin.user:
+    name: "{{ item }}"
+    groups:
+      - bluebanquise-power
+    append: true
+  loop: "{{ bluebanquise_power_users }}"
+  when: item in ansible_facts.getent_passwd
+
 # Code and directories are owned by root: they are executed by root and other users, so they must
-# not be writable by an unprivileged account. Only the configuration file (BMC credentials) is
-# readable by the bluebanquise group, which allows bluebanquise user to run the tool without root.
+# not be writable by an unprivileged account.
 - name: "file <|> Create directories structure"
   ansible.builtin.file:
     path: "{{ item }}"
@@ -28,7 +47,7 @@
     src: "bluebanquise-power.yml.j2"
     dest: "/etc/bluebanquise/bluebanquise-power/bluebanquise-power.yml"
     owner: root
-    group: bluebanquise
+    group: bluebanquise-power
     mode: 0640
   tags:
     - template

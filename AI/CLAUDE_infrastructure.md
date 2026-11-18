@@ -8,7 +8,73 @@ The infrastructure repo is at `/claude/infrastructure/` (sibling of `/claude/blu
 ## What the infrastructure repo is
 
 It contains tooling to validate BlueBanquise end-to-end on real (KVM) VMs.
-The active work lives in `Validation/steps_v3/` (the older `steps/` and `steps_v2/` are legacy; ignore them).
+The active work lives in `Validation/steps_v4/` + `launch_v4.sh`/`values_v4.sh` (since 2026-11-08,
+merged to master 2026-11-12). `steps_v3/` (described after this section) is superseded but its bug
+history stays useful; `steps/` and `steps_v2/` are legacy, ignore them.
+
+---
+
+## Validation V4 (current)
+
+**Result 2026-11-12: 6/6 distributions FULL PASS** - rhel9 (BIOS), rhel10, debian13, ubuntu24,
+ubuntu26, leap16 (UEFI) - BlueBanquise master + `steps_v4/patches/`, the fixes found by the runs
+(committed in BB-UMMON-4 `c85f1e76` and `5e6047c9`).
+
+**Shape** (replaces V3's mgt1 + PXE-of-the-mgmt pipeline, judged inefficient): per distro, one
+single-distro cluster.
+- 10: mgmt VM `mgmt_<distro>` installed by `virt-install --location <ISO>` with the distro's own
+  unattended file, like a USB key install. No host HTTP server (host firewall blocks VMs): RHEL and
+  Debian `--initrd-inject` (kickstart/preseed), Ubuntu autoinstall on a `CIDATA` seed CD-ROM, Leap
+  Agama profile on an `AGAMA`-labelled CD-ROM (`inst.auto=label://AGAMA/profile.json
+  inst.finish=poweroff`). Live ISOs need `kernel=`/`initrd=` in `--location` (Ubuntu `casper/`, Leap
+  `boot/x86_64/loader/`). Admin user `validation`, key only.
+- 11: OS update + reboot, then BlueBanquise **master cloned on the host, `patches/*.patch` applied**
+  (already-merged ones skipped by `git apply --reverse --check`), copied with `scp -r` (minimal
+  Rocky has no tar), `online_bootstrap.sh --skip_environment` then `configure_environment.sh
+  --bb_collections_local_path` on that tree.
+- 12 mgmt stack, 13 PXE prep (cluster ISO hot-plugged as a read-only virtio disk, serial
+  `validationiso`, then `dd`), 14 PXE install of login1/c001/c002, 15 node stacks, 16 `srun
+  --nodes=2 uname -n` as testuser on login1, 17 cleanup. `STOP_AFTER=<n>` stops after a step.
+- Networks: own NAT uplink `validation_uplink` (virbr3, 192.168.123.0/24, dnsmasq forwarders
+  1.1.1.1/9.9.9.9, static DHCP host per mgmt MAC: 192.168.123.<9|10|13|16|24|26>) - static because
+  the nic role's netplan -> NetworkManager switch changes the DHCP client-id, a new IP hung Ansible;
+  `cluster_network` 10.20.0.0/24, mgmt VM 10.20.0.1 gateways its nodes through the `firewall`
+  role's `firewall_policies` (no harness firewall-cmd any more).
+- Data on gabriel `/data2/validation/{iso,unattended,images}`, run log
+  `/data2/validation/run_<distros>.log`. Failure stops the run, VMs kept, last line prints the resume
+  command. ~1 h per distro.
+
+**Resume rules (learned the hard way):**
+- A fix to a BB patch only reaches the mgmt VM through step 11: resume with `STEP=10
+  CURRENT_DISTRO=<d>` (reruns 11), never higher, after adding/changing `patches/`. For an
+  environment failure (network outage) in step n > 11, `STEP=<n-1>` reruns just that step.
+- A role that broke a file on the mgmt VM is not undone by its fixed version (e.g. a duplicated
+  directive): reset the file to the vendor copy, or restart from `STEP=0`.
+- Stop a run by its exact argv (`ps -eo pid,args | awk '$2=="bash" && $3=="launch_v4.sh"'`, then
+  `kill -- -<pgid>`): never `pkill -f`/`pgrep -f`, they match the caller's own shell.
+- Watching the log: the FAILED line can be glued to the previous output (no newline before it), so
+  match `FAILED` anywhere in the line, not anchored at `^[`.
+
+**gabriel (hypervisor) constraints:**
+- Its LAN link (power line) drops under load and overheats: uplink of every mgmt VM capped at 1900
+  KiB/s (`UPLINK_RATE_KBPS`, `virsh domiftune`), ISO downloads one at a time with `wget
+  --limit-rate=1900k`. Short outages still happen (several per day, no reboot): a step failing on a
+  download during one is an environment failure, resume it. Static LAN IP planned (2026-11-12) to
+  remove DHCP renewal failures.
+- `/data2` is the sTec S1120 (`skd`) card: mounted at boot since a udev rule adds `skd*` by-uuid
+  links (`61-skd-persistent-storage.rules`, verified on a real reboot 2026-11-12).
+- Clock is right (NTP); compare times in one timezone (host log UTC, VMs CET) before claiming drift.
+
+**Leap 16 / Agama debugging:**
+- Keep the installer alive after install with `inst.finish=stop live.password=<pw>` and ssh in as
+  root: post scripts' output is in `/run/agama/scripts/post/<name>.{log,err,out}` (not in the logs
+  tarball copied to the target). Failed post scripts do not fail the install.
+- Inspecting a Leap disk offline (`qemu-nbd --read-only` + mount): a plain mount gives the default
+  subvolume (the root snapshot `@/.snapshots/1/snapshot`), `/home`, `/var`, ... are separate
+  subvolumes reachable only through a second `subvolid=5` mount (`@/home`, `@/var`). Reading the
+  wrong one makes files "missing" that are there - likely why a 2026-11-10 inspection concluded the
+  mgmt post script never ran (not reproduced since).
+- Minimal Leap has no `hostname` command (harness uses `uname -n`).
 
 ---
 

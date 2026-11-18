@@ -1,0 +1,132 @@
+#!/usr/bin/python3 -I
+"""
+bluebanquise-slurm-node: the only Slurm commands the WebUI Slurm pack can run, as the SlurmUser.
+
+Owned by root, run by the bluebanquise-slurm user through one sudo rule:
+  bluebanquise-slurm ALL=(slurm) NOPASSWD: /usr/lib/bluebanquise/bluebanquise-slurm/bluebanquise-slurm-node
+
+Why a wrapper: the SlurmUser can do anything in Slurm (set a whole partition down, cancel every
+job), an unprivileged user can not drain a node, and with PrivateData=jobs an unprivileged user
+sees no job at all. This script allows three things, and checks every argument itself: it is the
+security boundary, whatever its caller sent.
+
+  bluebanquise-slurm-node status
+      state of every node, CPUs and jobs counts, as one JSON document on stdout
+  bluebanquise-slurm-node drain <node> <reason>
+      scontrol update NodeName=<node> State=DRAIN Reason="<reason>"
+  bluebanquise-slurm-node resume <node>
+      scontrol update NodeName=<node> State=RESUME
+
+<node> must be a node of sinfo. <reason> must be one line of text, at most 200 characters, not
+starting with "-". Exit code 0 when done, 1 when refused or failed (why on stderr), 2 for a bad
+command line. Run by hand to debug: sudo -u slurm /usr/lib/bluebanquise/bluebanquise-slurm/bluebanquise-slurm-node status
+"""
+
+import json
+import subprocess
+import sys
+import unicodedata
+
+# Seconds given to each Slurm command: slurmctld not answering must not hang the caller
+TIMEOUT = 30
+
+MAX_REASON = 200
+
+USAGE = 'usage: bluebanquise-slurm-node status | drain <node> <reason> | resume <node>'
+
+
+def fail(message, code=1):
+    sys.stderr.write(message + '\n')
+    sys.exit(code)
+
+
+def run(command):
+    """Run a Slurm command (argument list, no shell), return its stdout. Fails on error."""
+    try:
+        result = subprocess.run(command, capture_output=True, text=True, timeout=TIMEOUT)
+    except subprocess.TimeoutExpired:
+        fail('{}: no answer within {} seconds (is slurmctld running?)'.format(command[0], TIMEOUT))
+    except OSError as e:
+        fail('{}: {}'.format(command[0], e))
+    if result.returncode != 0:
+        fail('{} failed: {}'.format(' '.join(command), result.stderr.strip() or result.stdout.strip()))
+    return result.stdout
+
+
+def status():
+    """sinfo lists a node once per partition: each node is kept once, with all its partitions.
+    The reason is free text that may hold "|": it is the last field, and the line is split at
+    most 5 times."""
+    nodes = {}
+    cpus = {'allocated': 0, 'idle': 0, 'other': 0, 'total': 0}
+    for line in run(['sinfo', '--noheader', '--Node', '--format=%N|%T|%C|%H|%P|%E']).splitlines():
+        fields = line.split('|', 5)
+        if len(fields) != 6:
+            continue
+        name, state, node_cpus, reason_time, partition, reason = fields
+        partition = partition.rstrip('*')
+        if name in nodes:
+            nodes[name]['partitions'].append(partition)
+            continue
+        if reason == 'none':
+            reason = ''
+        if reason_time == 'Unknown':
+            reason_time = ''
+        nodes[name] = {'state': state, 'reason': reason, 'reason_time': reason_time, 'partitions': [partition]}
+        # CPUs of the node: allocated/idle/other/total
+        numbers = node_cpus.split('/')
+        if len(numbers) == 4 and all(number.isdigit() for number in numbers):
+            cpus['allocated'] = cpus['allocated'] + int(numbers[0])
+            cpus['idle'] = cpus['idle'] + int(numbers[1])
+            cpus['other'] = cpus['other'] + int(numbers[2])
+            cpus['total'] = cpus['total'] + int(numbers[3])
+
+    jobs = {'running': 0, 'pending': 0}
+    for line in run(['squeue', '--noheader', '--format=%T']).splitlines():
+        if line.strip() == 'RUNNING':
+            jobs['running'] = jobs['running'] + 1
+        elif line.strip() == 'PENDING':
+            jobs['pending'] = jobs['pending'] + 1
+
+    print(json.dumps({'nodes': nodes, 'cpus': cpus, 'jobs': jobs}, indent=1))
+
+
+def check_node(node):
+    known = run(['sinfo', '--noheader', '--Node', '--format=%N']).split()
+    if node not in known:
+        fail('{} is not a Slurm node'.format(node))
+
+
+def check_reason(reason):
+    if reason.strip() == '' or len(reason) > MAX_REASON:
+        fail('The reason must be 1 to {} characters long'.format(MAX_REASON))
+    if reason.startswith('-'):
+        fail('The reason must not start with "-"')
+    for character in reason:
+        # Control characters (new line, tab, escape...) and line separators
+        if unicodedata.category(character) in ('Cc', 'Zl', 'Zp'):
+            fail('The reason must be one line of text, without control characters')
+
+
+def main():
+    if len(sys.argv) == 2 and sys.argv[1] == 'status':
+        status()
+    elif len(sys.argv) == 4 and sys.argv[1] == 'drain':
+        node, reason = sys.argv[2], sys.argv[3]
+        check_reason(reason)
+        check_node(node)
+        # scontrol removes one " at the start and one at the end of the value: the reason is
+        # given between quotes, so a reason ending with " is kept as written (checked on 24.11)
+        run(['scontrol', 'update', 'NodeName=' + node, 'State=DRAIN', 'Reason="' + reason + '"'])
+        print('{} drained'.format(node))
+    elif len(sys.argv) == 3 and sys.argv[1] == 'resume':
+        node = sys.argv[2]
+        check_node(node)
+        run(['scontrol', 'update', 'NodeName=' + node, 'State=RESUME'])
+        print('{} resumed'.format(node))
+    else:
+        fail(USAGE, 2)
+
+
+if __name__ == '__main__':
+    main()

@@ -1,0 +1,270 @@
+{% extends "webui_base.html" %}
+
+{% block title %}Operation{% endblock %}
+
+{% block content %}
+<h1 class="title">Operation</h1>
+
+<!-- Counts: filled by loadHosts() -->
+<div class="columns is-mobile is-multiline">
+  <div class="column">
+    <div class="box has-text-centered">
+      <p class="heading">Power on</p>
+      <p class="title has-text-success" id="count-on">-</p>
+    </div>
+  </div>
+  <div class="column">
+    <div class="box has-text-centered">
+      <p class="heading">Power off</p>
+      <p class="title" id="count-off">-</p>
+    </div>
+  </div>
+  <div class="column">
+    <div class="box has-text-centered">
+      <p class="heading">BMC error</p>
+      <p class="title has-text-danger" id="count-error">-</p>
+    </div>
+  </div>
+  <div class="column">
+    <div class="box has-text-centered">
+      <p class="heading">Not read yet</p>
+      <p class="title has-text-grey" id="count-unknown">-</p>
+    </div>
+  </div>
+</div>
+
+<!-- Actions on a nodeset: POST api/power and api/boot, one job each -->
+<div class="box">
+  <div class="field">
+    <label class="label" for="action-hosts">Hosts</label>
+    <div class="control">
+      <input class="input" id="action-hosts" type="text" placeholder="c[001-004],login1">
+    </div>
+    <p class="help">A host or a nodeset. Click a host on the map to add it.</p>
+  </div>
+  <div class="buttons mb-0">
+    <span class="mr-2">Power:</span>
+    <button class="button is-success" onclick="powerAction('on')">On</button>
+    <button class="button is-danger" onclick="powerAction('off')">Off</button>
+    <button class="button is-warning" onclick="powerAction('reset')">Reset</button>
+    <span class="ml-5 mr-2">Next boot (BMC):</span>
+    <button class="button" onclick="bootAction('pxe')">PXE</button>
+    <button class="button" onclick="bootAction('disk')">Disk</button>
+    <button class="button" onclick="bootAction('bios')">BIOS</button>
+  </div>
+</div>
+
+<!-- Map: one box per function group, one tile per host. Legend on the right. -->
+<div class="level">
+  <div class="level-left">
+    <div class="level-item">
+      <label class="checkbox"><input type="checkbox" id="click-adds" checked> Click on a host adds it to Hosts (else opens its page)</label>
+    </div>
+  </div>
+  <div class="level-right">
+    <div class="level-item">
+      <span class="tile-host state-ok"></span>&nbsp;on&nbsp;&nbsp;
+      <span class="tile-host has-background-grey-dark"></span>&nbsp;off&nbsp;&nbsp;
+      <span class="tile-host state-error"></span>&nbsp;BMC error&nbsp;&nbsp;
+      <span class="tile-host state-unknown"></span>&nbsp;not read yet, or old
+    </div>
+  </div>
+</div>
+<div id="hosts"></div>
+<p class="has-text-grey is-size-7 mb-5" id="updated"></p>
+
+<!-- Last jobs: filled by loadJobs() -->
+<h2 class="title is-4">Last actions</h2>
+<div class="table-container">
+  <table class="table is-fullwidth is-striped is-narrow">
+    <thead>
+      <tr><th>Started</th><th>By</th><th>Action</th><th>Hosts</th><th>State</th><th>Message</th></tr>
+    </thead>
+    <tbody id="jobs"></tbody>
+  </table>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const REFRESH_SECONDS = 15;
+
+const JOB_TAGS = {
+  running: 'is-info',
+  success: 'is-success',
+  failed: 'is-danger',
+};
+
+
+// ─── hosts ──────────────────────────────────────────────────────────────────────
+
+// CSS classes of the tile of a host: its color
+function tileClasses(host, refresh) {
+  if (host.as_of !== null && isStale(host.as_of, refresh)) {
+    return 'tile-host state-unknown';
+  }
+  if (host.power === 'off') {
+    return 'tile-host has-background-grey-dark';
+  }
+  return 'tile-host state-' + host.state;
+}
+
+// Text shown when the mouse is over a tile
+function tileTitle(host, refresh) {
+  let title = host.host + ': ' + host.text;
+  if (host.as_of !== null) {
+    title = title + ' (read ' + ageText(host.as_of) + ')';
+    if (isStale(host.as_of, refresh)) {
+      title = title + ', old data';
+    }
+  }
+  return title;
+}
+
+// Click on a tile: add the host to the Hosts field, or open its page
+function clickHost(event, hostname) {
+  if (!document.getElementById('click-adds').checked) {
+    return;
+  }
+  event.preventDefault();
+  const field = document.getElementById('action-hosts');
+  const current = field.value.trim();
+  if (current === '') {
+    field.value = hostname;
+  } else if (!current.split(',').includes(hostname)) {
+    field.value = current + ',' + hostname;
+  }
+}
+
+async function loadHosts() {
+  const data = await apiRequest('GET', 'api/hosts');
+
+  document.getElementById('count-on').textContent = data.counts.on;
+  document.getElementById('count-off').textContent = data.counts.off;
+  document.getElementById('count-error').textContent = data.counts.error;
+  document.getElementById('count-unknown').textContent = data.counts.unknown;
+
+  // Group hosts by function group
+  const groups = {};
+  for (const host of data.hosts) {
+    if (!(host.group in groups)) {
+      groups[host.group] = [];
+    }
+    groups[host.group].push(host);
+  }
+
+  const container = document.getElementById('hosts');
+  container.replaceChildren();
+  const groupNames = Object.keys(groups).sort();
+  if (groupNames.length === 0) {
+    container.appendChild(element('p', 'has-text-grey', 'No host with a BMC in the inventory.'));
+  }
+  for (const groupName of groupNames) {
+    const box = element('div', 'box');
+    box.appendChild(element('p', 'has-text-weight-bold mb-2', groupName + ' (' + groups[groupName].length + ')'));
+    for (const host of groups[groupName]) {
+      const tile = element('a', tileClasses(host, data.refresh));
+      tile.href = 'hosts/' + encodeURIComponent(host.host);
+      tile.title = tileTitle(host, data.refresh);
+      tile.addEventListener('click', function (event) {
+        clickHost(event, host.host);
+      });
+      box.appendChild(tile);
+    }
+    container.appendChild(box);
+  }
+
+  document.getElementById('updated').textContent = 'Updated ' + new Date().toLocaleTimeString() +
+    ', power states are read every ' + data.refresh + ' s';
+}
+
+
+// ─── jobs ───────────────────────────────────────────────────────────────────────
+
+async function loadJobs() {
+  const data = await apiRequest('GET', 'api/jobs');
+  const rows = document.getElementById('jobs');
+  rows.replaceChildren();
+  for (const job of data.jobs.slice(0, 20)) {
+    const row = element('tr');
+    const started = element('td');
+    const link = element('a', null, new Date(job.started * 1000).toLocaleString());
+    link.href = 'jobs/' + job.job;
+    started.appendChild(link);
+    row.appendChild(started);
+    row.appendChild(element('td', null, job.by));
+    row.appendChild(element('td', null, job.action + ' ' + job.parameter));
+    row.appendChild(element('td', null, job.hosts));
+    const state = element('td');
+    state.appendChild(element('span', 'tag ' + JOB_TAGS[job.state], job.state));
+    row.appendChild(state);
+    row.appendChild(element('td', null, job.message));
+    rows.appendChild(row);
+  }
+  if (data.jobs.length === 0) {
+    const row = element('tr');
+    row.appendChild(element('td', 'has-text-grey', 'No action in the last days'));
+    rows.appendChild(row);
+  }
+}
+
+
+// ─── actions ────────────────────────────────────────────────────────────────────
+
+// Send an action, then follow its job until it ends (POST answers 202 and the job)
+async function runAction(path, body) {
+  let request;
+  try {
+    request = await apiRequest('POST', path, body);
+  } catch (error) {
+    // Refused (unknown host, host already in a running job...): apiRequest showed why
+    return;
+  }
+  loadJobs();
+  let job = {state: 'running'};
+  for (let second = 0; second < 600 && job.state === 'running'; second++) {
+    await new Promise(function (resolve) {
+      setTimeout(resolve, 1000);
+    });
+    job = await apiRequest('GET', request.url);
+  }
+  if (job.state === 'success') {
+    showNotification('is-success', job.action + ' ' + job.parameter + ': ' + job.message);
+  } else if (job.state === 'failed') {
+    showNotification('is-danger', job.action + ' ' + job.parameter + ' failed: ' + job.message);
+  }
+  loadJobs();
+  // The worker reads the power state of the hosts again after a power action
+  setTimeout(loadHosts, 3000);
+}
+
+function powerAction(action) {
+  const hosts = document.getElementById('action-hosts').value.trim();
+  if (hosts === '') {
+    showNotification('is-warning', 'Write the hosts first');
+    return;
+  }
+  if (!confirm('Power ' + action + ' ' + hosts + '?')) {
+    return;
+  }
+  runAction('api/power', {hosts: hosts, action: action});
+}
+
+function bootAction(device) {
+  const hosts = document.getElementById('action-hosts').value.trim();
+  if (hosts === '') {
+    showNotification('is-warning', 'Write the hosts first');
+    return;
+  }
+  runAction('api/boot', {hosts: hosts, device: device});
+}
+
+
+loadHosts();
+loadJobs();
+setInterval(function () {
+  loadHosts();
+  loadJobs();
+}, REFRESH_SECONDS * 1000);
+</script>
+{% endblock %}

@@ -1,0 +1,125 @@
+#jinja2: lstrip_blocks: True
+#### Blue Banquise file ####
+## {{ ansible_managed }}
+# Supervised hosts, built from bluebanquise_supervision_checks.
+# WARNING: contains BMC credentials (for hosts with the check_bmc probe). Keep it 0640.
+
+hosts:
+{% for host in groups['all'] | sort %}
+  {% set hv = hostvars[host] %}
+  {% set ns = namespace(found=false, ssh_username=bluebanquise_supervision_ssh_username, drift_check=false, probes={}, actions={}) %}
+  {# Groups are applied in the order they are written in bluebanquise_supervision_checks, so the
+     later group wins when two groups of the same host define the same item. #}
+  {% for group_name, group_checks in bluebanquise_supervision_checks.items() %}
+    {% if group_name in hv['group_names'] or group_name == 'all' %}
+      {% set ns.found = true %}
+      {% if group_checks['ssh'] is defined and group_checks['ssh']['username'] is defined %}
+        {% set ns.ssh_username = group_checks['ssh']['username'] %}
+      {% endif %}
+      {% if group_checks['drift_check'] is defined %}
+        {% set ns.drift_check = group_checks['drift_check'] | bool %}
+      {% endif %}
+      {% set ns.probes = ns.probes | combine(group_checks['probes'] | default({}, true)) %}
+      {% set ns.actions = ns.actions | combine(group_checks['actions'] | default({}, true)) %}
+    {% endif %}
+  {% endfor %}
+  {# A host matching only groups without probes (for example a group setting ssh.username only)
+     has nothing to check: it is not supervised, rather than displayed as always OK. #}
+  {% if ns.found and (ns.probes | length > 0 or ns.drift_check) %}
+    {# Function group, used by the WebUI to group hosts on the cluster map #}
+    {% set fn_groups = hv['group_names'] | select('match', '^fn_') | sort %}
+    {% set host_data = {
+        'group': fn_groups[0] | default('none'),
+        'ssh_username': ns.ssh_username,
+        'drift_check': ns.drift_check,
+        'probes': ns.probes,
+        'actions': ns.actions
+    } %}
+    {# BMC address and credentials, only for hosts using the check_bmc probe. Same rules as the
+       bluebanquise_power role: the first hw_board_authentication entry defining a protocol. #}
+    {% if 'check_bmc' in ns.probes and hv['bmc'] is defined and hv['hw_board_authentication'] is defined %}
+      {% set host_bmc_auth = hv['hw_board_authentication'] | selectattr('protocol', 'defined') | first | default({}) %}
+      {% if host_bmc_auth['protocol'] is defined and host_bmc_auth['user'] is defined and host_bmc_auth['password'] is defined %}
+        {% set bmc = {
+            'name': hv['bmc']['name'] | default(none),
+            'ip4': hv['bmc']['ip4'] | default(none),
+            'protocol': host_bmc_auth['protocol'],
+            'system_id': host_bmc_auth['system_id'] | default(none),
+            'user': host_bmc_auth['user'] | string,
+            'password': host_bmc_auth['password'] | string
+        } %}
+        {% set host_data = host_data | combine({'bmc': bmc}) %}
+      {% endif %}
+    {% endif %}
+    {# Expected values for the drift check. Only values defined in the inventory are written: a
+       value missing here is simply not compared. #}
+    {% if ns.drift_check %}
+      {% set ex = namespace(data={}) %}
+      {% if hv['hw_specs'] is defined and hv['hw_specs']['cpu'] is defined %}
+        {# A namespace is needed: a plain set inside a for loop is lost when the loop ends #}
+        {% set cpu = namespace(data={}) %}
+        {% for key in ['architecture', 'sockets', 'cores_per_socket', 'threads_per_core'] %}
+          {% if hv['hw_specs']['cpu'][key] is defined %}
+            {% set cpu.data = cpu.data | combine({key: hv['hw_specs']['cpu'][key]}) %}
+          {% endif %}
+        {% endfor %}
+        {% if cpu.data['architecture'] is not defined and hv['hw_architecture'] is defined %}
+          {% set cpu.data = cpu.data | combine({'architecture': hv['hw_architecture']}) %}
+        {% endif %}
+        {% set ex.data = ex.data | combine({'cpu': cpu.data}) %}
+      {% elif hv['hw_architecture'] is defined %}
+        {% set ex.data = ex.data | combine({'cpu': {'architecture': hv['hw_architecture']}}) %}
+      {% endif %}
+      {% if hv['hw_specs'] is defined and hv['hw_specs']['gpu'] is defined %}
+        {% if hv['hw_specs']['gpu'] == none or hv['hw_specs']['gpu'] == 'none' %}
+          {% set ex.data = ex.data | combine({'gpu': []}) %}
+        {% elif hv['hw_specs']['gpu'] is string %}
+          {% set ex.data = ex.data | combine({'gpu': [hv['hw_specs']['gpu']]}) %}
+        {% else %}
+          {% set ex.data = ex.data | combine({'gpu': hv['hw_specs']['gpu'] | list}) %}
+        {% endif %}
+      {% endif %}
+      {% if hv['hw_specs'] is defined and hv['hw_specs']['pcie'] is defined %}
+        {% set ex.data = ex.data | combine({'pcie': hv['hw_specs']['pcie']}) %}
+      {% endif %}
+      {% if hv['os_operating_system'] is defined %}
+        {% set ex.data = ex.data | combine({'os': {
+            'distribution': hv['os_operating_system']['distribution'] | default('') | string,
+            'version': hv['os_operating_system']['distribution_version'] | default('') | string
+        }}) %}
+      {% endif %}
+      {% if hv['os_kernel_version'] is defined %}
+        {% set ex.data = ex.data | combine({'kernel': hv['os_kernel_version'] | string}) %}
+      {% endif %}
+      {% if hv['os_firewall'] is defined %}
+        {% set ex.data = ex.data | combine({'firewall': hv['os_firewall'] | bool}) %}
+      {% endif %}
+      {% if hv['os_access_control'] is defined %}
+        {% set ex.data = ex.data | combine({'access_control': hv['os_access_control'] | string | lower}) %}
+      {% endif %}
+      {% set ifaces = namespace(list=[]) %}
+      {% for iface in hv['network_interfaces'] | default([], true) %}
+        {# Interfaces with skip: true are not configured by BlueBanquise, they may not exist #}
+        {% if iface['interface'] is defined and not (iface['skip'] | default(false) | bool) %}
+          {% set expected_iface = {'name': iface['interface']} %}
+          {% if iface['ip4'] is defined %}
+            {% set expected_iface = expected_iface | combine({'ip4': iface['ip4']}) %}
+          {% endif %}
+          {# ib_rate: the interface value wins, else the default of its network #}
+          {% if iface['ib_rate'] is defined %}
+            {% set expected_iface = expected_iface | combine({'ib_rate': iface['ib_rate'] | string}) %}
+          {% elif iface['network'] is defined and networks[iface['network']] is defined and networks[iface['network']]['ib_rate'] is defined %}
+            {% set expected_iface = expected_iface | combine({'ib_rate': networks[iface['network']]['ib_rate'] | string}) %}
+          {% endif %}
+          {% set ifaces.list = ifaces.list + [expected_iface] %}
+        {% endif %}
+      {% endfor %}
+      {% if ifaces.list | length > 0 %}
+        {% set ex.data = ex.data | combine({'network_interfaces': ifaces.list}) %}
+      {% endif %}
+      {% set host_data = host_data | combine({'expected': ex.data}) %}
+    {% endif %}
+  {{ host }}:
+{{ host_data | to_nice_yaml(indent=2) | indent(4, true) }}
+  {% endif %}
+{% endfor %}

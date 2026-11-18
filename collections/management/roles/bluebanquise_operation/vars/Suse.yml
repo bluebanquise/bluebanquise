@@ -1,0 +1,5 @@
+---
+# Apache of the http_server role (same values as its vars/Suse.yml)
+bluebanquise_operation_apache_conf_path: /etc/apache2/conf.d
+bluebanquise_operation_apache_service: apache2
+bluebanquise_operation_apache_configtest_command: start_apache2 -t

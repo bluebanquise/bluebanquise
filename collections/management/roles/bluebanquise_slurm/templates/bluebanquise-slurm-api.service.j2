@@ -1,0 +1,26 @@
+#### Blue Banquise file ####
+## {{ ansible_managed }}
+
+[Unit]
+Description=bluebanquise-slurm REST API and WebUI daemon
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User={{ bluebanquise_slurm_api_user }}
+Group={{ bluebanquise_slurm_api_user }}
+ExecStart=/usr/sbin/bluebanquise-slurm-api
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+# Hardening: this daemon runs no command and can only write into the requests folder
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths={{ bluebanquise_slurm_requests_path }}
+
+[Install]
+WantedBy=multi-user.target

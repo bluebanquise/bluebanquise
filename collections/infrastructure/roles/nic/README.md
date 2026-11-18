@@ -186,7 +186,7 @@ To achieve that, few variables are at disposal:
 * `nic_force_nic_restart`: this variable will trigger a task that will manually down and up interfaces. To be used with care.
 * `nic_restart_timeout`: this variable is used with nic_force_nic_restart to specify the time to wait between connection down and up actions. Default value is 2s.
 * `nic_force_reboot`: this variable will trigger a reboot (only one) if any nic configuration changed. To be used with care. Needs `nic_allow_reboot`.
-* `nic_allow_reboot`: allow the role to reboot the host, with `nic_force_reboot`, and when switching Ubuntu/Debian netplan, or older Suse wicked, to NetworkManager. Default is `true`.
+* `nic_allow_reboot`: allow the role to reboot the host, with `nic_force_reboot`, and when switching Ubuntu/Debian netplan or Debian ifupdown, or older Suse wicked, to NetworkManager. Default is `true`.
 
 ## Variables
 

@@ -1,0 +1,201 @@
+{% extends "webui_base.html" %}
+
+{% block title %}Cluster overview{% endblock %}
+
+{% block content %}
+<h1 class="title">Cluster overview</h1>
+
+<!-- One tile per pack (bluebanquise_webui_packs), filled by loadOverview() with the summary of
+     the pack (GET ../<pack>/api/summary) -->
+<div class="columns is-multiline">
+  {% for tile in tiles %}
+  <div class="column is-one-quarter">
+    <div class="box" data-pack="{{ tile.name }}" data-label="{{ tile.label }}">
+      <p class="has-text-weight-bold mb-2"><a href="../{{ tile.name }}/">{{ tile.label }}</a></p>
+      <p><span class="tile-host state-unknown" id="pack-{{ tile.name }}-color"></span> <span id="pack-{{ tile.name }}-state">loading</span></p>
+      <p class="mt-2" id="pack-{{ tile.name }}-text"></p>
+      <p class="is-size-7 has-text-grey mt-2" id="pack-{{ tile.name }}-age"></p>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% if not tiles %}
+<p class="has-text-grey mb-5">No pack to show: list the packs in bluebanquise_webui_packs.</p>
+{% endif %}
+
+<!-- Cluster map: one box per function group, one tile per host of the inventory -->
+<div class="level">
+  <div class="level-left">
+    <div class="level-item">
+      <h2 class="title is-4">Hosts</h2>
+    </div>
+  </div>
+  <div class="level-right">
+    <div class="level-item">
+      <span class="tile-host state-ok"></span>&nbsp;ok&nbsp;&nbsp;
+      <span class="tile-host state-error"></span>&nbsp;error&nbsp;&nbsp;
+      <span class="tile-host state-maintenance"></span>&nbsp;maintenance&nbsp;&nbsp;
+      <span class="tile-host state-unknown"></span>&nbsp;unknown or old data
+    </div>
+  </div>
+</div>
+<p class="has-text-grey mb-3" id="map-missing"></p>
+<div id="hosts"></div>
+<p class="has-text-grey is-size-7" id="updated"></p>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const REFRESH_SECONDS = 30;
+
+
+// Color of a host: the most important state given by the packs that know it.
+//   maintenance  someone works on the host (an error is then expected)
+//   error        something needs an action
+//   unknown      a pack does not know the state, or its data is old
+//   ok           every pack says ok
+// A pack that does not answer is not used: it is listed above the map instead.
+const HOST_STATES = ['maintenance', 'error', 'unknown', 'ok'];
+
+function hostState(states) {
+  for (const state of HOST_STATES) {
+    if (states.includes(state)) {
+      return state;
+    }
+  }
+  return 'unknown';
+}
+
+
+// One pack tile: state, text and age of the summary of the pack
+function renderPackTile(name, result) {
+  const color = document.getElementById('pack-' + name + '-color');
+  const state = document.getElementById('pack-' + name + '-state');
+  const text = document.getElementById('pack-' + name + '-text');
+  const age = document.getElementById('pack-' + name + '-age');
+
+  if (!result.ok) {
+    color.className = 'tile-host state-unknown';
+    state.textContent = 'unavailable';
+    text.textContent = result.error;
+    age.textContent = '';
+    return;
+  }
+  const summary = result.data;
+  if (isStale(summary.as_of, summary.refresh)) {
+    color.className = 'tile-host state-unknown';
+    state.textContent = 'old data (was ' + summary.cluster.state + ')';
+  } else {
+    color.className = 'tile-host state-' + summary.cluster.state;
+    state.textContent = summary.cluster.state;
+  }
+  text.textContent = summary.cluster.text;
+  age.textContent = 'Data from ' + ageText(summary.as_of);
+}
+
+
+// Cluster map: one box per group, one small colored square per host
+function renderMap(hosts, hostStates, hostTexts) {
+  const groups = {};
+  for (const host of hosts) {
+    if (!(host.group in groups)) {
+      groups[host.group] = [];
+    }
+    groups[host.group].push(host.host);
+  }
+
+  const container = document.getElementById('hosts');
+  container.replaceChildren();
+  for (const groupName of Object.keys(groups).sort()) {
+    const box = element('div', 'box');
+    box.appendChild(element('p', 'has-text-weight-bold mb-2', groupName + ' (' + groups[groupName].length + ')'));
+    for (const hostname of groups[groupName]) {
+      let texts = hostTexts[hostname];
+      if (texts.length === 0) {
+        texts = ['no pack reports this host'];
+      }
+      // Host pages need the operator level: viewers get tiles without links
+      let tile = element('span', 'tile-host state-' + hostState(hostStates[hostname]));
+      if (LEVEL !== 'viewer') {
+        tile = element('a', 'tile-host state-' + hostState(hostStates[hostname]));
+        tile.href = 'hosts/' + encodeURIComponent(hostname);
+      }
+      tile.title = hostname + '\n' + texts.join('\n');
+      box.appendChild(tile);
+    }
+    container.appendChild(box);
+  }
+  if (hosts.length === 0) {
+    container.appendChild(element('p', 'has-text-grey', 'No host in the inventory.'));
+  }
+}
+
+
+async function loadOverview() {
+  const hostsData = await apiRequest('GET', 'api/hosts');
+
+  // States and texts given by each pack, per host
+  const hostStates = {};
+  const hostTexts = {};
+  for (const host of hostsData.hosts) {
+    hostStates[host.host] = [];
+    hostTexts[host.host] = [];
+  }
+
+  // Ask every pack at once. Each pack tile is filled as soon as its pack answers: a pack that
+  // hangs does not delay the others. The map waits for all the answers (10 s at most).
+  const boxes = Array.from(document.querySelectorAll('[data-pack]'));
+  const requests = [];
+  for (const box of boxes) {
+    const name = box.dataset.pack;
+    requests.push(packRequest(name, 'api/summary').then(function (result) {
+      renderPackTile(name, result);
+      return result;
+    }));
+  }
+  const results = await Promise.all(requests);
+
+  const missing = [];
+  for (let i = 0; i < boxes.length; i++) {
+    const label = boxes[i].dataset.label;
+    const result = results[i];
+    if (!result.ok) {
+      missing.push(label + ' (unavailable)');
+      continue;
+    }
+    const summary = result.data;
+    for (const hostname of Object.keys(summary.hosts)) {
+      // A host the pack knows but the inventory does not: not on the map
+      if (!(hostname in hostStates)) {
+        continue;
+      }
+      const entry = summary.hosts[hostname];
+      // Age of the host, or of the whole pack when the pack gives no age per host
+      let asOf = summary.as_of;
+      if (entry.as_of !== undefined) {
+        asOf = entry.as_of;
+      }
+      if (isStale(asOf, summary.refresh)) {
+        hostStates[hostname].push('unknown');
+        hostTexts[hostname].push(label + ': old data, ' + ageText(asOf) + ' (was ' + entry.text + ')');
+      } else {
+        hostStates[hostname].push(entry.state);
+        hostTexts[hostname].push(label + ': ' + entry.text);
+      }
+    }
+  }
+
+  if (missing.length > 0) {
+    document.getElementById('map-missing').textContent = 'Not on the map: ' + missing.join(', ') + '.';
+  } else {
+    document.getElementById('map-missing').textContent = '';
+  }
+  renderMap(hostsData.hosts, hostStates, hostTexts);
+  document.getElementById('updated').textContent = 'Updated ' + new Date().toLocaleTimeString();
+}
+
+
+loadOverview();
+setInterval(loadOverview, REFRESH_SECONDS * 1000);
+</script>
+{% endblock %}

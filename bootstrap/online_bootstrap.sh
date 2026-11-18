@@ -94,7 +94,7 @@ echo -n " Installing needed dependencies, could take some time..."
   set -x
   # UBUNTU
   if [ "$NAME" == "Ubuntu" ]; then
-    if [ "$VERSION_ID" == "24.04" ]; then
+    if [ "$VERSION_ID" == "24.04" ] || [ "$VERSION_ID" == "26.04" ]; then
       apt-get update
       DEBIAN_FRONTEND=noninteractive apt-get install python3 python3-pip python3-venv ssh curl git -y
     fi
@@ -148,14 +148,18 @@ echo -n " Installing needed dependencies, could take some time..."
   fi
   # OPENSUSE LEAP
   if [ "$ID" == "opensuse-leap" ]; then
-    zypper -n install python3 python3-pip
-    zypper -n install python311 python311-pip git openssh curl
-    update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 3
-    update-alternatives --install /usr/bin/python python /usr/bin/python3.11 3
-    update-alternatives --install /usr/bin/pip pip /usr/bin/pip3.11 3
-    update-alternatives --install /usr/bin/pip3 pip3 /usr/bin/pip3.11 3
-    # ln -s /usr/bin/python3.9 /usr/bin/python3
-    # ln -s /usr/bin/pip3.9 /usr/bin/pip3
+    if [[ "$VERSION_ID" == 15.* ]]; then
+      # Leap 15 default python3 is too old for Ansible: use python 3.11
+      zypper -n install python3 python3-pip
+      zypper -n install python311 python311-pip git openssh curl
+      update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 3
+      update-alternatives --install /usr/bin/python python /usr/bin/python3.11 3
+      update-alternatives --install /usr/bin/pip pip /usr/bin/pip3.11 3
+      update-alternatives --install /usr/bin/pip3 pip3 /usr/bin/pip3.11 3
+    else
+      # Leap 16 default python3 (3.13) is recent enough, and has no python311
+      zypper -n install python3 python3-pip git openssh curl
+    fi
   fi
   # DEBIAN
   if [ "$VERSION_ID" == "11" ] || [ "$VERSION_ID" == "12" ] || [ "$VERSION_ID" == "13" ]; then
@@ -172,6 +176,10 @@ echo -n " Creating bluebanquise user..."
   set -x
   getent group bluebanquise &>/dev/null || groupadd --gid 377 bluebanquise
   getent passwd bluebanquise &>/dev/null || useradd --gid 377 --uid 377 --create-home --home-dir /var/lib/bluebanquise --shell /bin/bash --system bluebanquise
+  # The home holds the inventory, the Ansible configuration and SSH key: only bluebanquise enters
+  # it. useradd creates it 0750 on Ubuntu (HOME_MODE of login.defs), so the bluebanquise group
+  # could read the inventory there.
+  chmod 700 /var/lib/bluebanquise
   echo 'bluebanquise ALL=(ALL:ALL) NOPASSWD:ALL' | tee /etc/sudoers.d/bluebanquise
   set +x
 ) >> /var/log/bluebanquise/bootstrap 2>&1

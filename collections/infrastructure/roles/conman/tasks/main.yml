@@ -85,8 +85,7 @@
     recurse: true
   notify: service <|> Restart conman
 
-# On RedHat family systems, conmand runs as conman user instead of root.
-# systemd creates /run/conman (RuntimeDirectory), owned by conman, at each service start.
+# conmand runs as conman user instead of root, with a systemd drop-in (RedHat and Debian families).
 - name: file <|> Ensure systemd drop-in directory exists
   ansible.builtin.file:
     path: /etc/systemd/system/conman.service.d
@@ -95,8 +94,10 @@
     owner: root
     group: root
   when:
-    - ansible_facts.os_family == "RedHat"
+    - ansible_facts.os_family in ["RedHat", "Debian"]
 
+# RedHat family: systemd creates /run/conman (RuntimeDirectory), owned by conman, at each service
+# start, for the pid file.
 - name: copy <|> Ensure service run with user conman
   ansible.builtin.copy:
     content: |
@@ -118,6 +119,26 @@
   when:
     - ansible_facts.os_family == "RedHat"
 
+# On Debian and Ubuntu, the package unit runs conmand as root, in the foreground (conmand -F):
+# only the user changes, so console logs are written by conman, and readable by the WebUI
+# Operation pack (bluebanquise_operation role), which runs as conman. On Suse, the package unit
+# already runs conmand as conman.
+- name: copy <|> Ensure service run with user conman
+  ansible.builtin.copy:
+    content: |
+      [Service]
+      User=conman
+      Group=conman
+    dest: /etc/systemd/system/conman.service.d/user.conf
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - systemd <|> Reload systemd configuration
+    - service <|> Restart conman
+  when:
+    - ansible_facts.os_family == "Debian"
+
 # Previous versions of this role created /run/conman using a tmpfiles.d file,
 # now replaced by RuntimeDirectory in the systemd drop-in above.
 - name: file <|> Remove legacy /etc/tmpfiles.d/conman.conf
@@ -138,6 +159,8 @@
   tags:
     - template
 
+# The logrotate file of the package is kept, except when it is only a commented example (Debian,
+# Ubuntu): logs are then rotated weekly, and conmand reopens them on SIGHUP.
 - name: stat <|> Check if /etc/logrotate.d/conman file exists
   ansible.builtin.stat:
     path: /etc/logrotate.d/conman
@@ -150,7 +173,7 @@
     owner: root
     group: root
     mode: 0644
-  when: not conman_logrotate_conman.stat.exists
+  when: not conman_logrotate_conman.stat.exists or conman_logrotate_replace_package_file
   tags:
     - template
 

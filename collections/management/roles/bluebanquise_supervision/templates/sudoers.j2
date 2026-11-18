@@ -1,0 +1,7 @@
+#### Blue Banquise file ####
+## {{ ansible_managed }}
+# Commands bluebanquise-supervision daemons may run as root (actions, like a Slurm drain).
+
+{% for command in bluebanquise_supervision_sudoers_commands %}
+{{ bluebanquise_supervision_user }} ALL=(root) NOPASSWD: {{ command }}
+{% endfor %}
