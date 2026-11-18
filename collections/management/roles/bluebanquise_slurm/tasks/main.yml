@@ -161,6 +161,15 @@
     group: root
     mode: '0755'
 
+# Ubuntu 26.04 uses sudo-rs, which knows fewer Defaults than sudo: the rule depends on it
+- name: "command <|> Check which sudo is installed"
+  ansible.builtin.command: sudo --version
+  register: bluebanquise_slurm_sudo_version
+  changed_when: false
+  check_mode: false
+  tags:
+    - template
+
 - name: "template <|> Render sudo rule of the worker"
   ansible.builtin.template:
     src: sudoers.j2

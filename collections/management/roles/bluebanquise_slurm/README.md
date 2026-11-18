@@ -34,7 +34,8 @@ down, cancel every job). The pack never gets that power:
 * **Two users, one per daemon:**
   * `bluebanquise-slurm` runs `bluebanquise-slurm-worker`. Its only power is one sudo rule
     (`/etc/sudoers.d/bluebanquise-slurm`): run the wrapper as the SlurmUser. The rule opens no PAM
-    session (`!pam_session`): sudo logs one line per call, with the command line.
+    session (`!pam_session`): sudo logs one line per call, with the command line. sudo-rs
+    (Ubuntu 26.04) has no such setting: the rule is then written without it.
   * `bluebanquise-slurm-api` runs `bluebanquise-slurm-api`, the WebUI and REST API. It has no
     sudo rule and runs no Slurm command: it reads the files of the worker (group
     `bluebanquise-slurm`), and writes requests. Its systemd unit lets it write into the requests
