@@ -33,9 +33,8 @@
   ansible.builtin.include_role:
     name: bluebanquise.infrastructure.ha_engine
   vars:
-    ha_declaration: "{{ registry_ha }}"
-    ha_owner: podman
-    ha_restart_handler: Restart service registry
-  when: 
-  - "'service' not in ansible_skip_tags"
-  - podman_start_services | default(bb_start_services) | default(true) | bool
+    ha_engine_declaration: "{{ registry_ha }}"
+    ha_engine_owner: podman
+  when: inventory_hostname in groups['ha_management']
+        and inventory_hostname == groups['ha_management'][0]
+        and not (ha_bootstrap | default(false) | bool)
