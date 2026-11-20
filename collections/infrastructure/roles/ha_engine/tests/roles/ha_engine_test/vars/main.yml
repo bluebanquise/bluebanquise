@@ -1,0 +1,82 @@
+---
+# Three groups of ocf:heartbeat:Dummy resources (no real service):
+#
+#   <prefix>-base   target of every constraint
+#   <prefix>-order  starts after base, runs with base, prefers node 0
+#   <prefix>-anti   starts after base, never runs with <prefix>-order, avoids node 0
+#
+# The "modify" phase changes one attribute of each constraint (and an
+# option of base) so that the engine has to delete and recreate it.
+
+ha_engine_test_p: "{{ ha_engine_test_prefix }}"
+ha_engine_test_n0: "{{ ha_engine_test_nodes[0] }}"
+ha_engine_test_mod: "{{ ha_engine_test_phase == 'modify' }}"
+
+ha_engine_test_declaration:
+  - group: "{{ ha_engine_test_p }}-base"
+    resources:
+      - id: "{{ ha_engine_test_p }}-base-1"
+        type: Dummy
+        arguments: "fake={{ ha_engine_test_mod | bool | ternary('2', '1') }}"
+      - id: "{{ ha_engine_test_p }}-base-2"
+        type: Dummy
+
+  - group: "{{ ha_engine_test_p }}-order"
+    resources:
+      - id: "{{ ha_engine_test_p }}-order-1"
+        type: Dummy
+    order:
+      - start_after: "{{ ha_engine_test_p }}-base"
+        kind: "{{ ha_engine_test_mod | bool | ternary('Optional', 'Mandatory') }}"
+        symmetrical: "{{ ha_engine_test_mod | bool | ternary(false, true) }}"
+    colocations:
+      - slave: "{{ ha_engine_test_p }}-base"
+        score: "{{ ha_engine_test_mod | bool | ternary('500', 'INFINITY') }}"
+    locations:
+      - type: prefers
+        nodes: ["{{ ha_engine_test_n0 }}"]
+        score: "{{ ha_engine_test_mod | bool | ternary(200, 100) }}"
+
+  - group: "{{ ha_engine_test_p }}-anti"
+    resources:
+      - id: "{{ ha_engine_test_p }}-anti-1"
+        type: Dummy
+    order:
+      - start_after: "{{ ha_engine_test_p }}-base"
+        kind: "{{ ha_engine_test_mod | bool | ternary('Mandatory', 'Optional') }}"
+    colocations:
+      - slave: "{{ ha_engine_test_p }}-order"
+        score: -INFINITY
+    locations:
+      - type: avoids
+        nodes: ["{{ ha_engine_test_n0 }}"]
+        score: "{{ ha_engine_test_mod | bool | ternary(100, 50) }}"
+
+# What the CIB must contain after the phase, checked independently of the
+# engine: element, its identifying attributes, and the expected values
+# (an attribute absent from the CIB takes pacemaker's default).
+ha_engine_test_expected:
+  - tag: rsc_order
+    match: {first: "{{ ha_engine_test_p }}-base", then: "{{ ha_engine_test_p }}-order"}
+    want:
+      kind: "{{ ha_engine_test_mod | bool | ternary('Optional', 'Mandatory') }}"
+      symmetrical: "{{ ha_engine_test_mod | bool | ternary('false', 'true') }}"
+  - tag: rsc_colocation
+    match: {rsc: "{{ ha_engine_test_p }}-order", with-rsc: "{{ ha_engine_test_p }}-base"}
+    want: {score: "{{ ha_engine_test_mod | bool | ternary('500', 'INFINITY') }}"}
+  - tag: rsc_location
+    match: {rsc: "{{ ha_engine_test_p }}-order", node: "{{ ha_engine_test_n0 }}"}
+    want: {score: "{{ ha_engine_test_mod | bool | ternary('200', '100') }}"}
+  - tag: rsc_order
+    match: {first: "{{ ha_engine_test_p }}-base", then: "{{ ha_engine_test_p }}-anti"}
+    want:
+      kind: "{{ ha_engine_test_mod | bool | ternary('Mandatory', 'Optional') }}"
+      symmetrical: "true"
+  - tag: rsc_colocation
+    match: {rsc: "{{ ha_engine_test_p }}-anti", with-rsc: "{{ ha_engine_test_p }}-order"}
+    want: {score: "-INFINITY"}
+  - tag: rsc_location
+    match: {rsc: "{{ ha_engine_test_p }}-anti", node: "{{ ha_engine_test_n0 }}"}
+    want: {score: "{{ ha_engine_test_mod | bool | ternary('-100', '-50') }}"}
+
+ha_engine_test_defaults: {kind: Mandatory, symmetrical: "true"}

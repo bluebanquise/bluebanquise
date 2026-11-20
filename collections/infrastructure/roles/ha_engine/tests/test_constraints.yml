@@ -1,0 +1,16 @@
+---
+# Test the ha_engine constraints on a live cluster with Dummy resources.
+#
+#   ansible-playbook <this file> -e ha_engine_test_phase=create
+#   ansible-playbook <this file> -e ha_engine_test_phase=modify
+#   ansible-playbook <this file> -e ha_engine_test_phase=create   # back
+#   ansible-playbook <this file> -e ha_engine_test_phase=cleanup
+#
+# Runs on the first ha_management node (the cluster writer). Override the
+# pacemaker node names with -e '{"ha_engine_test_nodes": ["n1", "n2"]}'.
+- name: Test ha_engine constraints
+  hosts: ha_management[0]
+  gather_facts: false
+  become: true
+  roles:
+    - role: ha_engine_test

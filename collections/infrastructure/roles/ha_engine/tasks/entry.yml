@@ -9,6 +9,8 @@
         ha_engine_after: "{{ ha_entry.after | default([]) }}"
         ha_engine_members: []
         ha_engine_diff: {}
+        ha_engine_constraints: []
+        ha_engine_cons_state: []
 
     # Joiner only: prove the declared join points are already in the group.
     - name: HA | {{ ha_engine_owner }} | Probe group members  # noqa: name[template]
@@ -89,6 +91,119 @@
       changed_when: true
       # predecessor always exists here: the join-point assert guaranteed the
       # anchor, earlier members were created earlier in this sequential loop
+
+    # Constraints, same keys as the pcs role (order, colocations, locations).
+    # Each one is identified in the CIB by its resources (not by its id), and
+    # compared on its declared attributes (want), with pacemaker's default
+    # for an attribute absent from the CIB (defaults). A missing constraint
+    # is created; a differing one is deleted and created again (pcs cannot
+    # edit a constraint); an undeclared one is never removed.
+    - name: HA | {{ ha_engine_owner }} | Build declared constraints (order)  # noqa: name[template]
+      vars:
+        _kind: "{{ item.kind | default('Mandatory') }}"
+        _sym: "{{ ((item.symmetrical | bool) | ternary('true', 'false')) if item.symmetrical is defined else '' }}"
+      ansible.builtin.set_fact:
+        ha_engine_constraints: >-
+          {{ ha_engine_constraints + [ {
+               'label': 'order ' ~ item.start_after ~ ' then ' ~ ha_engine_group ~ ' kind=' ~ _kind
+                        ~ ((' symmetrical=' ~ _sym) if _sym | length > 0 else ''),
+               'xpath': '//rsc_order[@first="' ~ item.start_after ~ '" and @then="' ~ ha_engine_group ~ '"]',
+               'want': {'kind': _kind, 'symmetrical': _sym | default('true', true)},
+               'defaults': {'kind': 'Mandatory', 'symmetrical': 'true'},
+               'cmd': 'pcs constraint order start ' ~ item.start_after ~ ' then start ' ~ ha_engine_group
+                      ~ ' kind=' ~ _kind ~ ((' symmetrical=' ~ _sym) if _sym | length > 0 else '') } ] }}
+      loop: "{{ ha_entry.order | default([]) }}"
+      loop_control:
+        label: "{{ item.start_after }}"
+
+    - name: HA | {{ ha_engine_owner }} | Build declared constraints (colocations)  # noqa: name[template]
+      vars:
+        _src: "{{ item.master | default(ha_engine_group) }}"
+        _tgt: "{{ item.slave | default(ha_engine_group) }}"
+        _score: "{{ item.score | default('INFINITY') | string }}"
+      ansible.builtin.set_fact:
+        ha_engine_constraints: >-
+          {{ ha_engine_constraints + [ {
+               'label': 'colocation ' ~ _src ~ ' with ' ~ _tgt ~ ' score=' ~ _score,
+               'xpath': '//rsc_colocation[@rsc="' ~ _src ~ '" and @with-rsc="' ~ _tgt ~ '"]',
+               'want': {'score': _score},
+               'defaults': {},
+               'cmd': 'pcs constraint colocation add ' ~ _src ~ ' with ' ~ _tgt ~ ' score=' ~ _score } ] }}
+      loop: "{{ ha_entry.colocations | default([]) }}"
+      loop_control:
+        label: "{{ item.master | default(ha_engine_group) }} with {{ item.slave | default(ha_engine_group) }}"
+
+    # One constraint per node; "avoids <node>=<score>" is stored by pacemaker
+    # as score -<score>.
+    - name: HA | {{ ha_engine_owner }} | Build declared constraints (locations)  # noqa: name[template]
+      vars:
+        _score: "{{ item.0.score | default('INFINITY') | string }}"
+        _cib_score: >-
+          {{ _score if item.0.type == 'prefers'
+             else (_score[1:] if _score.startswith('-') else '-' ~ _score) }}
+      ansible.builtin.set_fact:
+        ha_engine_constraints: >-
+          {{ ha_engine_constraints + [ {
+               'label': 'location ' ~ ha_engine_group ~ ' ' ~ item.0.type ~ ' ' ~ item.1 ~ '=' ~ _score,
+               'xpath': '//rsc_location[@rsc="' ~ ha_engine_group ~ '" and @node="' ~ item.1 ~ '"]',
+               'want': {'score': _cib_score},
+               'defaults': {},
+               'cmd': 'pcs constraint location ' ~ ha_engine_group ~ ' ' ~ item.0.type ~ ' '
+                      ~ item.1 ~ '=' ~ _score } ] }}
+      loop: "{{ ha_entry.locations | default([]) | subelements('nodes') }}"
+      loop_control:
+        label: "{{ item.0.type }} {{ item.1 }}"
+
+    - name: HA | {{ ha_engine_owner }} | Probe declared constraints  # noqa: name[template]
+      ansible.builtin.command:
+        argv: [cibadmin, --query, --xpath, "{{ item.xpath }}"]
+      loop: "{{ ha_engine_constraints }}"
+      loop_control:
+        label: "{{ item.label }}"
+      register: ha_engine_cons_probe
+      changed_when: false
+      failed_when: ha_engine_cons_probe.rc not in [0, 6, 105]   # 6/105 => not in the CIB
+
+    - name: HA | {{ ha_engine_owner }} | Compare declared constraints with the CIB  # noqa: name[template]
+      vars:
+        _match: >-
+          {% set ns = namespace(ok=true) %}{% for k, v in item.0.want.items() %}{%
+          set m = item.1.stdout | regex_search(k ~ '="([^"]*)"', '\\1') %}{%
+          set live = (m | first) if m else (item.0.defaults[k] | default('')) %}{%
+          if live | string != v | string %}{% set ns.ok = false %}{% endif %}{% endfor %}{{ ns.ok }}
+        _ids: >-
+          {{ item.1.stdout | regex_findall(' id="([^"]+)"') }}
+      ansible.builtin.set_fact:
+        ha_engine_cons_state: >-
+          {{ ha_engine_cons_state + [ item.0 | combine({
+               'present': item.1.rc == 0,
+               'match': item.1.rc == 0 and _match | bool,
+               'ids': _ids if item.1.rc == 0 else [] }) ] }}
+      loop: "{{ ha_engine_constraints | zip(ha_engine_cons_probe.results) | list }}"
+      loop_control:
+        label: "{{ item.0.label }}"
+
+    - name: HA | {{ ha_engine_owner }} | Delete constraints that differ from the declaration  # noqa: name[template]
+      ansible.builtin.command:
+        cmd: pcs constraint delete {{ item.1 }}
+      loop: "{{ ha_engine_cons_state | selectattr('present') | rejectattr('match') | subelements('ids') }}"
+      loop_control:
+        label: "{{ item.0.label }} (was {{ item.1 }})"
+      changed_when: true
+
+    - name: HA | {{ ha_engine_owner }} | Create missing or differing constraints  # noqa: name[template]
+      ansible.builtin.command:
+        cmd: "{{ item.cmd }}"
+      loop: "{{ ha_engine_cons_state | rejectattr('match') | list }}"
+      loop_control:
+        label: "{{ item.label }}"
+      register: ha_engine_cons_create
+      changed_when: ha_engine_cons_create.rc == 0
+      # "already exists": an equivalent constraint pcs recognizes but the
+      # probe did not (e.g. a resource set), kept as is, like the pcs role.
+      failed_when:
+        - ha_engine_cons_create.rc != 0
+        - "'already exists' not in ha_engine_cons_create.stderr"
 
     - name: HA | {{ ha_engine_owner }} | Diff declared vs live options (from pcs JSON config)  # noqa: name[template]
       vars:

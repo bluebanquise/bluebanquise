@@ -18,6 +18,9 @@ register them in the live cluster:
   missing from the CIB are applied with `pcs resource update`; options
   present in the CIB but not declared are operator-managed and only
   reported, never removed (see [Restart after drift](#restart-after-drift));
+- constraints declared on a group (`order`, `colocations`, `locations`,
+  same keys as the `pcs` role, see [Constraints](#constraints)) are created,
+  and recreated when they differ from the declaration;
 - the run blocks until every declared member reports `Started`.
 
 ## Usage
@@ -47,6 +50,48 @@ units to restart when drifted options are applied:
 | `ha_engine_restart_services` | no | Units the engine may restart after drift, through the generic handlers `Restart service <unit>` (see below), which the role loads itself. Defaults to the units of the `systemd:<unit>` resources of `ha_engine_declaration`. When set, it can list any unit, in any group or outside the declaration (see [Restart after drift](#restart-after-drift)); `[]` = no restart by the engine. |
 | `ha_engine_restart_handler` | no | Handler name, or list of handler names, always notified after drift, in addition to the engine's own selection. Default `[]`. Use it to force a restart pacemaker would not do (e.g. `Restart service grafana-db`), or for a custom handler; a custom handler must restart the service through `pcs resource restart` when pacemaker owns it. |
 
+### Constraints
+
+A group entry accepts the constraint keys of the `pcs` role, so a
+`pcs_resources` entry can be reused as is. `order` also accepts `kind` and
+`symmetrical`.
+
+```yaml
+grafana_db_ha:
+  - group: grafana-db
+    resources: [...]
+    order:
+      - start_after: containers     # pcs constraint order start containers then start grafana-db
+        kind: Optional              # Mandatory (default) | Optional | Serialize
+        symmetrical: false          # default: pacemaker's (true)
+    colocations:
+      - slave: http                 # pcs constraint colocation add <master> with <slave> score=<score>
+        score: -INFINITY            # master/slave default to the entry group; score to INFINITY
+    locations:
+      - type: prefers               # prefers | avoids
+        nodes: [mgt1, mgt2]         # one constraint per node
+        score: 100                  # default INFINITY
+```
+
+| Key | pcs command |
+|---|---|
+| `order` | `pcs constraint order start <start_after> then start <group> kind=<kind> [symmetrical=<bool>]` |
+| `colocations` | `pcs constraint colocation add <master> with <slave> score=<score>` |
+| `locations` | `pcs constraint location <group> <type> <node>=<score>`, for each node |
+
+Each constraint is looked up in the CIB by its resources (`first`/`then`,
+`rsc`/`with-rsc`, `rsc`/`node`), not by its id, so constraints created
+earlier by the `pcs` role are recognized. Then:
+
+- missing: it is created;
+- different (kind, symmetrical or score): it is deleted and created again,
+  since pcs cannot edit a constraint;
+- no longer declared: it is left in place, never removed.
+
+The resources a constraint refers to (`start_after`, `slave`, ...) must
+already exist: run the role that owns them first, pcs fails otherwise.
+Constraints are only accepted on a group entry (`group` not empty).
+
 ### Restart after drift
 
 `pcs resource update` makes pacemaker restart the changed resource and, in
@@ -57,6 +102,10 @@ that entry when it is grouped: those are already restarted by pacemaker,
 and "Wait for declared members to start" waits for them. Units of an
 ungrouped entry (`group: ''`, no ordering), of other groups, or outside the
 declaration are restarted by the engine.
+
+A `Mandatory` order constraint propagates restarts the same way: drift in
+the `start_after` group also makes pacemaker restart the groups that start
+after it.
 
 With the default `ha_engine_restart_services` and several entries in the
 declaration, drift in one entry also restarts the `systemd:` units of the
@@ -137,5 +186,6 @@ restart a unit that Pacemaker owns.
 ## Limitations
 
 - Cluster-scoped configuration (STONITH, cluster properties/defaults,
-  global colocation/location constraints) is out of scope: it stays in
-  inventory for the `bluebanquise.infrastructure.pcs` role.
+  constraints not attached to a declared group, resource sets, rules) is
+  out of scope: it stays in inventory for the
+  `bluebanquise.infrastructure.pcs` role.

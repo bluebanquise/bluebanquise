@@ -1,0 +1,114 @@
+---
+- name: Assert █ Check the test parameters
+  ansible.builtin.assert:
+    that:
+      - ha_engine_test_phase in ['create', 'modify', 'cleanup']
+      - ha_engine_test_phase == 'cleanup' or ha_engine_test_nodes | length >= 2
+    fail_msg: >-
+      ha_engine_test_phase must be create, modify or cleanup, and
+      ha_engine_test_nodes must list at least 2 pacemaker nodes
+      (got: phase={{ ha_engine_test_phase }}, nodes={{ ha_engine_test_nodes | to_json }})
+    quiet: true
+
+# Dependents first; deleting a group deletes its resources and every
+# constraint that refers to it.
+- name: Command █ Delete the test groups
+  ansible.builtin.command:
+    cmd: pcs resource delete {{ item }}
+  loop:
+    - "{{ ha_engine_test_p }}-anti"
+    - "{{ ha_engine_test_p }}-order"
+    - "{{ ha_engine_test_p }}-base"
+  register: ha_engine_test_delete
+  changed_when: ha_engine_test_delete.rc == 0
+  failed_when:
+    - ha_engine_test_delete.rc != 0
+    - "'does not exist' not in ha_engine_test_delete.stderr"
+  when: ha_engine_test_phase == 'cleanup'
+
+- name: Meta █ Stop here for the cleanup phase
+  ansible.builtin.meta: end_host
+  when: ha_engine_test_phase == 'cleanup'
+
+- name: Include_role █ Run ha_engine ({{ ha_engine_test_phase }})
+  ansible.builtin.include_role:
+    name: bluebanquise.infrastructure.ha_engine
+  vars:
+    ha_engine_declaration: "{{ ha_engine_test_declaration }}"
+    ha_engine_owner: ha_engine_test
+
+- name: Command █ Read the constraints of the CIB
+  ansible.builtin.command:
+    cmd: cibadmin --query --scope constraints
+  register: ha_engine_test_cons
+  changed_when: false
+
+- name: Debug █ Constraints of the test groups
+  ansible.builtin.debug:
+    msg: "{{ ha_engine_test_cons.stdout_lines | select('search', ha_engine_test_p) | map('trim') | list }}"
+
+# Independent of the engine: find the element by its identifying attributes,
+# then compare the expected values (pacemaker default when absent).
+- name: Assert █ Check each expected constraint
+  vars:
+    _hits: >-
+      {% set ns = namespace(out=[]) %}{%
+      for l in ha_engine_test_cons.stdout_lines if ('<' ~ item.tag ~ ' ') in l %}{%
+      set ns.ok = true %}{%
+      for k, v in item.match.items() if (' ' ~ k ~ '="' ~ v ~ '"') not in l %}{%
+      set ns.ok = false %}{% endfor %}{%
+      if ns.ok %}{% set ns.out = ns.out + [l] %}{% endif %}{% endfor %}{{ ns.out | to_json }}
+    _line: "{{ _hits | from_json | first | default('') }}"
+    _live: >-
+      {% set ns = namespace(d={}) %}{% for k in item.want %}{%
+      set m = _line | regex_search(' ' ~ k ~ '="([^"]*)"', '\\1') %}{%
+      set ns.d = ns.d | combine({k: (m | first) if m
+                                   else (ha_engine_test_defaults[k] | default('(absent)'))}) %}{%
+      endfor %}{{ ns.d | to_json }}
+  ansible.builtin.assert:
+    that:
+      - _hits | from_json | length == 1
+      - _live | from_json == item.want
+    fail_msg: >-
+      {{ item.tag }} {{ item.match | to_json }}: expected {{ item.want | to_json }},
+      found {{ _hits | from_json | length }} element(s), live {{ _live }}
+    success_msg: "{{ item.tag }} {{ item.match | to_json }} = {{ item.want | to_json }}"
+  loop: "{{ ha_engine_test_expected }}"
+  loop_control:
+    label: "{{ item.tag }} {{ item.match | to_json }}"
+
+# The CIB epoch increments on every configuration change: a second run of
+# the engine with the same declaration must leave it unchanged.
+- name: Block █ Check the engine is idempotent
+  when: ha_engine_test_check_idempotence | bool
+  block:
+    - name: Command █ Read the CIB before the second run
+      ansible.builtin.command:
+        cmd: cibadmin --query
+      register: ha_engine_test_before
+      changed_when: false
+
+    - name: Include_role █ Run ha_engine again with the same declaration
+      ansible.builtin.include_role:
+        name: bluebanquise.infrastructure.ha_engine
+      vars:
+        ha_engine_declaration: "{{ ha_engine_test_declaration }}"
+        ha_engine_owner: ha_engine_test
+
+    - name: Command █ Read the CIB after the second run
+      ansible.builtin.command:
+        cmd: cibadmin --query
+      register: ha_engine_test_after
+      changed_when: false
+
+    - name: Assert █ The second run did not change the configuration
+      vars:
+        _re: '\b(admin_epoch|epoch)="([0-9]+)"'
+        _before: "{{ ha_engine_test_before.stdout | regex_search('<cib [^>]*') | regex_findall(_re) }}"
+        _after: "{{ ha_engine_test_after.stdout | regex_search('<cib [^>]*') | regex_findall(_re) }}"
+      ansible.builtin.assert:
+        that:
+          - _before | length > 0
+          - _before == _after
+        fail_msg: "The second run changed the CIB configuration: {{ _before }} -> {{ _after }}"
+        success_msg: "Idempotent: CIB {{ _after }} unchanged by the second run"

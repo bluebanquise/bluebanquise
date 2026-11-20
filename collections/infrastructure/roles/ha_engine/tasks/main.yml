@@ -28,6 +28,36 @@
       {{ _decl | map('to_json') | join(', ') }}, restart_handler=
       {{ ha_engine_restart_handler | to_json }})
 
+- name: HA | {{ ha_engine_owner }} | Validate constraints  # noqa: name[template]
+  vars:
+    _decl: "{{ ha_engine_declaration }}"
+    _with_cons: >-
+      {{ _decl | selectattr('order', 'defined') | list
+         + _decl | selectattr('colocations', 'defined') | list
+         + _decl | selectattr('locations', 'defined') | list }}
+    _order: "{{ _decl | map(attribute='order', default=[]) | flatten }}"
+    _coloc: "{{ _decl | map(attribute='colocations', default=[]) | flatten }}"
+    _loc: "{{ _decl | map(attribute='locations', default=[]) | flatten }}"
+  ansible.builtin.assert:
+    that:
+      - _with_cons | selectattr('group', 'equalto', '') | list | length == 0
+      - _order | rejectattr('start_after', 'defined') | list | length == 0
+      - _order | map(attribute='kind', default='Mandatory')
+               | difference(['Mandatory', 'Optional', 'Serialize']) | length == 0
+      - _coloc | rejectattr('master', 'defined') | rejectattr('slave', 'defined') | list | length == 0
+      - _loc | map(attribute='type', default='') | difference(['prefers', 'avoids']) | length == 0
+      - _loc | rejectattr('nodes', 'defined') | list | length == 0
+      - _loc | map(attribute='nodes') | select('string') | list | length == 0
+      - _loc | map(attribute='nodes') | map('length') | select('equalto', 0) | list | length == 0
+    fail_msg: >-
+      [{{ ha_engine_owner }}] constraints are declared on a group entry (not
+      group: ''), with the pcs role keys: order [{start_after, kind
+      (Mandatory|Optional|Serialize), symmetrical}], colocations [{master
+      and/or slave, score}], locations [{type (prefers|avoids), nodes (non-empty
+      list), score}] (got: order={{ _order | to_json }},
+      colocations={{ _coloc | to_json }}, locations={{ _loc | to_json }})
+    quiet: true
+
 - name: HA | {{ ha_engine_owner }} | Load the generic restart handlers  # noqa: name[template]
   ansible.builtin.include_tasks:
     file: handlers.yml
