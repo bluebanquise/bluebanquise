@@ -1,0 +1,3 @@
+---
+- name: "Restart service {{ ha_engine_restart_service | default('(ha_engine: no service)') }}"
+  ansible.builtin.include_tasks: restart.yml

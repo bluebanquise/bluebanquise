@@ -1,0 +1,26 @@
+---
+# Load one generic handler "Restart service <unit>" per unit of
+# ha_engine_restart_services. Handlers of an included role only exist once
+# the include has run, hence "always": a run limited by --tags must still
+# define the handlers its tasks notify.
+
+- name: HA | Check the units to restart  # noqa: name[template]
+  ansible.builtin.assert:
+    that:
+      - ha_engine_restart_services is sequence and ha_engine_restart_services is not string
+    fail_msg: >-
+      ha_engine_restart_services must be a list of units
+      (got: {{ ha_engine_restart_services | to_json }})
+    quiet: true
+  tags: always
+
+- name: HA | Load the generic restart handlers
+  ansible.builtin.include_role:
+    name: "{{ ansible_role_name }}"
+    tasks_from: noop
+  vars:
+    ha_engine_restart_service: "{{ ha_engine_restart_services_item }}"
+  loop: "{{ ha_engine_restart_services }}"
+  loop_control:
+    loop_var: ha_engine_restart_services_item
+  tags: always
