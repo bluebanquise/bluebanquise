@@ -31,8 +31,6 @@
 - name: HA | {{ ha_engine_owner }} | Load the generic restart handlers  # noqa: name[template]
   ansible.builtin.include_tasks:
     file: handlers.yml
-    apply:
-      tags: always
   tags: always
 
 - name: HA | {{ ha_engine_owner }} | Register each declared group  # noqa: name[template]
