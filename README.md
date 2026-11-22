@@ -63,10 +63,10 @@ Currently tested and supported distributions (other derivative could work) are:
 | Operating System family | Operating System distribution | Tested versions    | Architectures    | Notes                                                       |
 | ----------------------- | ----------------------------- | ------------------ | ---------------- | ----------------------------------------------------------- |
 | Red Hat                 |                               |                    |                  |                                                             |
-|                         | RHEL (and clones)             | 9, 10              | x86_64, aarch64  | √                                                           |
+|                         | RHEL (and clones)             | 9, 10              | x86_64, aarch64, riscv64 (10) | √. riscv64: Rocky Linux 10, deployment not tested yet. |
 | Debian                  |                               |                    |                  |                                                             |
-|                         | Ubuntu                        | 24.04, 26.04              | x86_64, arm64    | √. Diskless not supported for now.                          |
-|                         | Debian                        | 13                 | x86_64, arm64    | √. Diskless not supported for now.                          |
+|                         | Ubuntu                        | 24.04, 26.04              | x86_64, arm64, riscv64    | √. Diskless not supported for now. riscv64: 26.04 needs RVA23 processors, deployment not tested yet. |
+|                         | Debian                        | 13                 | x86_64, arm64, riscv64    | √. Diskless not supported for now. riscv64: deployment not tested yet. |
 | Suse                    |                               |                    |                  |                                                             |
 |                         | Leap                          | 16               | x86_64, arm64    | √. Diskless not supported for now.                          |
 

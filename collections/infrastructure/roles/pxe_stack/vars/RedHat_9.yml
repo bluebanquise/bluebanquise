@@ -6,6 +6,7 @@ pxe_stack_htdocs_path: /var/www/html
 pxe_stack_packages_to_install:
   - bluebanquise-ipxe-x86_64
   - bluebanquise-ipxe-arm64
+  - bluebanquise-ipxe-riscv64
   - httpd
   - python3-policycoreutils
   - policycoreutils

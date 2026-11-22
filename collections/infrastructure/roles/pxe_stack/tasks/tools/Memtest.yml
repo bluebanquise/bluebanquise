@@ -1,8 +1,13 @@
 ---
 
+# One noarch package per target architecture, files in pxe/tools/memtest86plus/<arch>/
+# (x86_64: memtest.bin and memtest.efi, arm64: memtest.efi). No memtest86+ for riscv64.
+# On Debian and Ubuntu, alien converted the x86_64 package name to x86-64.
 - name: "package <|> Install memtest86plus"
   ansible.builtin.package:
-    name: "memtest86plus"
+    name:
+      - "{{ 'memtest86plus-x86-64' if ansible_facts['os_family'] == 'Debian' else 'memtest86plus-x86_64' }}"
+      - memtest86plus-arm64
     state: present
   tags:
     - package

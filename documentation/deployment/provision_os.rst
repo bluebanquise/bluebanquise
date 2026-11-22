@@ -170,8 +170,8 @@ Provide operating system images
 To install hosts through the network, the management host needs the installation media of each
 distribution (and architecture) you plan to deploy. They live under
 ``/var/www/html/pxe/netboots/<distribution>/<version>/<architecture>/`` (``/srv/www/htdocs/pxe/...``
-on OpenSuse), following the ``os_operating_system`` and ``hw_architecture`` values of your
-inventory.
+on OpenSuse), following the ``os_operating_system`` values of your inventory. The architecture
+folder (``x86_64``, ``arm64`` or ``riscv64``) is the one detected by iPXE when the host boots.
 
 The ``bluebanquise-netboots-installer`` tool, installed by the ``pxe_stack`` role, does all the work
 for you: it downloads the ISO, checks it, and extracts it at the right place.
@@ -181,6 +181,10 @@ for you: it downloads the ISO, checks it, and extracts it at the right place.
   sudo bluebanquise-netboots-installer list
   sudo bluebanquise-netboots-installer install rhel_10 x86_64
   sudo bluebanquise-netboots-installer install rhel_10 arm64
+  sudo bluebanquise-netboots-installer install debian_13 riscv64
+
+riscv64 images are available for Debian 13, Ubuntu 24.04, Ubuntu 26.04 (RVA23 processors only) and
+RHEL 10 (Rocky Linux 10). RHEL 9 and OpenSuse Leap 16 have no riscv64 version.
 
 On an air-gapped cluster, download the ISO from another host, copy it on the management host, and
 give it to the tool:

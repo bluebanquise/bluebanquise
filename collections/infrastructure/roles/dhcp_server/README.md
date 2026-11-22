@@ -78,10 +78,15 @@ When `pxe4` (or `services_ip`) is defined for a network, the role sends to booti
 * Legacy BIOS PXE: `x86_64/dhcpretry_undionly.kpxe` (TFTP)
 * x86_64 UEFI PXE: `x86_64/dhcpretry_snponly_ipxe.efi` (TFTP)
 * arm64 UEFI PXE: `arm64/dhcpretry_snponly_ipxe.efi` (TFTP)
-* x86_64 UEFI HTTP boot: `http://<pxe4 ip>/pxe/x86_64/dhcpretry_snponly_ipxe.efi`
-* arm64 UEFI HTTP boot: `http://<pxe4 ip>/pxe/arm64/dhcpretry_snponly_ipxe.efi`
+* riscv64 UEFI PXE: `riscv64/dhcpretry_snponly_ipxe.efi` (TFTP)
+* x86_64 UEFI HTTP boot: `http://<pxe4 ip>/pxe/bin/x86_64/dhcpretry_snponly_ipxe.efi`
+* arm64 UEFI HTTP boot: `http://<pxe4 ip>/pxe/bin/arm64/dhcpretry_snponly_ipxe.efi`
+* riscv64 UEFI HTTP boot: `http://<pxe4 ip>/pxe/bin/riscv64/dhcpretry_snponly_ipxe.efi`
 
-UEFI HTTP boot clients are identified by `HTTPClient` in their vendor class (option 60) and their architecture (option 93, `0x0010` for x86_64 and `0x0013` for arm64). Their URL uses the PXE server of their own network.
+PXE clients are identified by their architecture (option 93): `0x0000` for legacy BIOS, `0x0007` or `0x0009` for x86_64 UEFI, `0x000b` for arm64 UEFI and `0x001b` for riscv64 UEFI.
+UEFI HTTP boot clients are identified by `HTTPClient` in their vendor class (option 60) and their architecture (option 93, `0x0010` for x86_64, `0x0013` for arm64 and `0x001c` for riscv64). Their URL uses the PXE server of their own network.
+
+The roms are provided by the `bluebanquise-ipxe-x86_64`, `bluebanquise-ipxe-arm64` and `bluebanquise-ipxe-riscv64` packages, installed by the `pxe_stack` role.
 
 File names above use default settings. They are set for all hosts using:
 
