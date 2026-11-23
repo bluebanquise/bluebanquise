@@ -14,7 +14,7 @@ These settings are one of the major components of the BlueBanquise project.
   * clonezilla (x86_64 only)
   * alpine live (x86_64 and arm64)
   * On a host of another architecture, the tool entry tells it is not available and goes back to the host boot sequence (a queued tool is skipped).
-* Boot x86_64 (legacy BIOS and EFI), arm64 (EFI) and riscv64 (EFI) hosts from the same PXE server: the iPXE roms of the three architectures are installed (`bluebanquise-ipxe-<arch>` packages), and `convergence.ipxe` detects the host architecture (`${arch}`: `x86_64`, `arm64` or `riscv64`), used to find netboots, grub2 images and tools.
+* Boot x86_64 (legacy BIOS and EFI), arm64 (EFI) and riscv64 (EFI) hosts from the same PXE server: the iPXE roms are installed (`bluebanquise-ipxe-<arch>` packages; riscv64 roms are only built for RHEL 10, Ubuntu 26.04 and Debian 13, so only a management server running one of these can boot riscv64 hosts), and `convergence.ipxe` detects the host architecture (`${arch}`: `x86_64`, `arm64` or `riscv64`), used to find netboots, grub2 images and tools.
 ## Global instructions
 
 These settings will deploy all the needed files, binaries, and scripts to deploy

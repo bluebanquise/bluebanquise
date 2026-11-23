@@ -86,7 +86,7 @@ When `pxe4` (or `services_ip`) is defined for a network, the role sends to booti
 PXE clients are identified by their architecture (option 93): `0x0000` for legacy BIOS, `0x0007` or `0x0009` for x86_64 UEFI, `0x000b` for arm64 UEFI and `0x001b` for riscv64 UEFI.
 UEFI HTTP boot clients are identified by `HTTPClient` in their vendor class (option 60) and their architecture (option 93, `0x0010` for x86_64, `0x0013` for arm64 and `0x001c` for riscv64). Their URL uses the PXE server of their own network.
 
-The roms are provided by the `bluebanquise-ipxe-x86_64`, `bluebanquise-ipxe-arm64` and `bluebanquise-ipxe-riscv64` packages, installed by the `pxe_stack` role.
+The roms are provided by the `bluebanquise-ipxe-x86_64`, `bluebanquise-ipxe-arm64` and `bluebanquise-ipxe-riscv64` packages, installed by the `pxe_stack` role. `bluebanquise-ipxe-riscv64` is only available on RHEL 10, Ubuntu 26.04 and Debian 13.
 
 File names above use default settings. They are set for all hosts using:
 
