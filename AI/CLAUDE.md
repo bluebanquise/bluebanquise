@@ -6,6 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 BlueBanquise is an Ansible collection (`bluebanquise.infrastructure`, version 3.4.0) for deploying and managing clusters of nodes — HPC clusters, render farms, university infrastructure, etc. The collection lives under `collections/infrastructure/`.
 
+A second collection, `bluebanquise.management` (`collections/management/`, version 0.1.0, added 2026-11), holds the tools used to run a deployed cluster: each role is a **pack** (a few daemons, a JSON REST API, a small WebUI served by the `http_server` Apache under `/webui/<pack>/`). First pack: `bluebanquise_supervision`. Both collections install from `collections/` in one `ansible-galaxy collection install collections/` (a folder without `galaxy.yml`, like `unsupported_infrastructure/`, is skipped); the online path in `configure_environment.sh` installs each one by its git subdirectory.
+
 ## Repository Layout
 
 ```
@@ -15,6 +17,8 @@ collections/infrastructure/      # The Ansible collection (bluebanquise.infrastr
   plugins/
     filter/                      # Custom Jinja2 filters (nodeset, hosts_by_network, etc.)
     vars/core.py                 # Deprecated vars plugin
+collections/management/          # Second collection (bluebanquise.management): WebUI packs
+  roles/bluebanquise_supervision # Health probes, drift, events, maintenance + WebUI/API/CLI/exporter
 resources/
   data_model.md                  # Canonical reference for the inventory data model
   examples/simple_cluster/       # Reference inventory for a minimal cluster
@@ -83,7 +87,7 @@ README.md              # Role-specific documentation and variable reference
 | `defaults/main.yml` | Has `---`? All documented variables present? |
 | `tasks/*.yml` and `tasks/**/*.yml` | FQCNs, booleans, separator `<|>`, no `j2_*` references, `---` on line 1 (sub-task files in subdirectories are equally required to start with `---`) |
 | `tasks/firewall.yml` | `immediate: true`, `permanent: true` |
-| `handlers/main.yml` | `daemon_reload: true`, separator `<|>`, no duplicate handler names |
+| `handlers/main.yml` | `daemon_reload: true`, separator `<|>`, no duplicate handler names, and no handler name or `listen` topic shared with another role when it uses role variables: handlers are play-wide, a notify runs only the last role's handler of that name, even before that role's `include_vars` ran (WebUI packs, 2026-11-17: "bluebanquise_supervision_apache_configtest_command is not defined"). Identical variable-free handlers (`systemd <|> Reload systemd configuration`) may be shared |
 | `templates/*.j2` | `{{ ansible_managed }}` spacing, no dead `{# ... #}` blocks with deprecated vars |
 | `README.md` | Grammar, variable names match `defaults/`, Markdown links (not RST), YAML examples that pass values to non-Ansible config files (slurm.conf, etc.) must quote strings like `"YES"`/`"NO"` to prevent YAML boolean coercion. Never use `—` character in text, replace by `-` when found |
 
@@ -109,6 +113,13 @@ state: "{{ (role_start_services | default(bb_start_services) | default(true) | b
 - **Galaxy `meta/main.yml` `platforms`** — only `local_configuration` has one so far. Ubuntu and Debian versions must be **codenames** (`noble`, `resolute`, `trixie`...), not numbers — ansible-lint's bundled schema enforces this per-platform and will fail the whole file (not just warn) on a mismatch. EL (`8`/`9`/`10`) and opensuse (`15.5`, `all`) are the opposite: numeric/decimal, not codenames. Check `ansible-lint`'s own `schemas/meta.json` (`$defs/<Platform>Model`) if unsure which a given platform expects.
 - **`os_firewall` default inconsistency across roles — found 2026-08-07, fixed 2026-08-12.** The `firewall` role itself defaults `os_firewall` to **true** when unset (`os_firewall | default(true) | bool`, `tasks/main.yml`, gates whether firewalld gets enabled/started at all). Every *other* role's own firewalld self-registration task (each has a `firewalld <|> Add services to firewall's zone`-shaped task keyed off `<role>_firewall_zone | default(bb_services_firewall_zone, true) | default('public')`) used to gate on `os_firewall | default(false) | bool` — the **opposite** default. Net effect: if an inventory never sets `os_firewall` explicitly, the `firewall` role happily enabled/configured firewalld (since it defaulted true), but none of the *other* roles registered their own ports/services into it (since they defaulted false) — a host ended up with an active, mostly-empty firewall silently blocking its own services, with no error anywhere. Caught live in the `infrastructure` repo's validation run (2026-08-07): `dhcp`/`dns`/`http`/`tftp`/pxe_stack's port 7770 all got silently blocked on a per-distro mgmt VM until `os_firewall=true` was set explicitly. Fixed by standardizing on `default(true)` everywhere (Oxedions' call, "the security safest way" — closes the silent-block trap instead of just avoiding it) — turned out to be a bigger sweep than the 4 roles first named: 23 call sites across 19 files/14 roles (`dhcp_server`, `dns_server`, `http_server`, `pxe_stack` ×2, `pcs`, `podman`, `nfs`, `rsyslog` ×2, `slurm` ×4, `grafana` ×2, `sshd`, `prometheus` ×3, `time`, `http_proxy`), all flipped from `default(false)` to `default(true)`. `pxe_stack`'s unrelated `equipment['os']['os_firewall'] | default(pxe_stack_os_firewall)` (the kickstart template's own `firewall --enabled` line) was deliberately left alone — different variable purpose, not a firewalld self-registration gate. **Lint-verified 2026-08-12**: `yamllint`/`ansible-lint` (production profile) both installed in this sandbox pass after all, just not on `PATH` (`~/.local/bin`) — 0 failures/0 warnings across all 15 touched roles. Not yet live-verified against a real host.
 - **`firewall` role has no support for firewalld policy objects — implemented and lint-verified 2026-08-12, not yet live verified.** The role only manages zone-level config (`firewall_zones`: services/ports/rich-rules/masquerade/icmp, all via `ansible.posix.firewalld` in `tasks/firewalld.yml`). It has no way to declare a firewalld **policy** (`--new-policy`, `--add-ingress-zone`, `--add-egress-zone`, `--set-target`, `--add-masquerade`) — the mechanism firewalld actually requires for one zone's traffic to forward *into a different zone* at all (masquerade + `forward: yes` on a zone only govern same-zone traffic; cross-zone forwarding is unconditionally denied without an explicit policy, confirmed live 2026-08-09). A second, easy-to-miss layer of the same gap: even with a policy permitting the forward, NAT for that traffic still doesn't happen unless masquerade is *also* declared **on the policy object itself** — the zone's own `masquerade: yes` only rewrites same-zone traffic, not what crosses via a policy. Confirmed live 2026-08-11: forwarded packets left the WAN interface still carrying their original private source address (seen directly via `tcpdump`), silently dropped upstream with no error anywhere — looked identical to a routing problem, wasn't one. Surfaced validating a management node acting as its own internet gateway (`infrastructure` repo, `Validation/steps_v3`, see its own `CLAUDE_infrastructure.md` for the full incident) — worked around there as a harness-only `firewall-cmd` script step deliberately kept out of this role (Oxedions, 2026-08-09), since that particular gateway-to-the-real-internet shape is a validation-harness artifact, not a typical deployment. **Confirmed 2026-08-11 that this isn't just an mgt1 artifact**: `mgmt_rhel9` gatewaying its own `login1`/`c001`/`c002` (a genuinely realistic BlueBanquise pattern, not a harness quirk) hit the identical block — same-zone masquerade alone does not work, a cross-zone policy is unconditionally required by firewalld regardless of which two zones are involved. Also confirmed **why the role can't just add this**: `ansible.posix.firewalld` (the module the whole role is built on) has **zero support for firewalld policy objects at all** — checked its `main`-branch source directly (no `policy`/`ingress_zones`/`egress_zones` parameter exists anywhere in its `argument_spec`) and the upstream feature request (`ansible-collections/ansible.posix#284`) has been open, unimplemented, since 2021. So this can't be a small addition using the same declarative module style as the rest of `firewalld.yml` — it needed new tasks built on raw `ansible.builtin.command`/`firewall-cmd` calls with hand-written idempotency, a new `firewall_policies`-shaped inventory variable, and README/testing to match. **Implemented 2026-08-12**: `tasks/firewalld.yml` gained a single `policy <|> Manage firewalld policies` block, gated by one top-level `when: firewall_policies | default([]) | length > 0` (checked once, not per-task, per Oxedions' explicit ask) — mirrors `firewall_zones`' existing shape (`name`/`ingress_zones`/`egress_zones`/`target`/`masquerade`/`services_enabled`+`disabled`/`ports_enabled`+`disabled`/`rich_rules_enabled`+`disabled`). Idempotency is hand-rolled: every mutating `--add-*`/`--remove-*`/`--set-target`/`--new-policy` command is preceded by its own `--query-*`/`--get-target`/`--get-policies` check (`changed_when: false`, `check_mode: false` on the checks), matching the shape this note already anticipated. All commands stay `--permanent`-only; changes go live via the same `service <|> Restart firewall services` handler the rest of the role already notifies — no separate `--reload` task needed, since nothing here has an `immediate`-style runtime-existence dependency the way zone creation does. Every `ansible.builtin.command` task uses the `argv:` list form, not an interpolated string — caught in review before landing: a rich rule value contains internal spaces (and sometimes embedded quotes, see the existing `rich_rules_disabled` README example), and the string form's shlex-style re-split would have silently mangled it into multiple bogus arguments; `argv:` sidesteps that entirely, consistent with this codebase's standing "argv list only, never shell string interpolation" rule (see "Gotchas seen in this codebase's Python tools" above — same principle, now confirmed to matter for Ansible `command` tasks too, not just Python `subprocess`). `firewall_policies: []` default added; README documents the exact gateway shape (`ingress_zones`/`egress_zones`/`target: ACCEPT`/policy-level `masquerade`) validated live against mgt1/`mgmt_rhel9` in the infrastructure repo. **Lint-verified 2026-08-12**: `ansible-lint` (production profile) and `yamllint` both clean, 0 failures/0 warnings. **Not yet done**: no live `firewall-cmd` round trip against a real host — the query-then-mutate idempotency logic and the exact `--query-*` flag set were verified against firewalld's own documented man page, not exercised live yet.
+- **OpenSuse Leap 16 portability (found live by validation v4, 2026-11-12, fixed in BB-UMMON-4 `5e6047c9`)** - Leap 16 is not "Leap 15 plus one", check each Suse var/template against it:
+  - Service and package names changed: NFS server is `nfs-server` (`nfsserver` is gone; Leap 15.6 ships both, so `nfs-server` is the portable name); no `python311` (system `python3` is 3.13, enough for Ansible).
+  - BlueBanquise's own osl15/osl16 packages split `slurm-slurmctld`/`slurm-slurmd` out of `slurm`, like RHEL: a Suse vars file listing only `slurm` installs no daemon unit.
+  - Vendor config lives in `/usr/etc` (`sudoers`, `ssh`, `logrotate.d`); `/etc/<file>` may not exist. `visudo` on a missing `/etc/sudoers` copies the vendor file then edits, which is safe (keeps both `@includedir`s).
+  - Distribution files ship *commented examples* of active directives (`listen.conf`: `#Listen 80` example on line 16, `Listen 80` on line 19). A `lineinfile` that "restores" a directive by uncommenting `^#Directive$` hits the example and duplicates it: comment out with a role-specific marker (`#Listen 80  # Disabled by BlueBanquise http_server role`) and restore only that marker.
+  - Agama creates the first user with a **group of the same name** (uid/gid 1000): post scripts renumbering that user must `groupmod` the existing group, not `groupadd` a new one (`groupadd` fails "already exists", then `usermod -g` fails, nothing changes). Failed Agama post scripts are only logged, the install still "succeeds"; their output is in `/run/agama/scripts/post/<name>.{log,err,out}` of the live installer, not in the copied logs tarball.
+  - Minimal installs have no `hostname` command (use `uname -n` in scripts/tests).
 
 #### Python tools
 
@@ -846,6 +857,231 @@ we add/change reference inventory"). First applied to `network.yml`/`network_int
 (`ib_rate`) and `hw_group.yml` (`hw_specs.pcie`) when the PCIe/InfiniBand rate gatherers were
 added — see "PCIe and InfiniBand rate tracking" above. Add the skeleton-file task up front when
 planning this kind of change, not after review surfaces it missing.
+
+## Supervision tool: bluebanquise_supervision (added 2026-11)
+
+Lives in the `bluebanquise.management` collection (`collections/management/roles/`, moved there
+2026-11-14 from `infrastructure`), FQCN `bluebanquise.management.bluebanquise_supervision`.
+
+Standalone replacement for the supervision/events/maintenance part of `cluster_management` (to be
+deprecated: users prefer small modular tools over one big tool). **No shared code with
+`cluster_management`**, nothing migrated (it was never released). Full user doc in the role README.
+
+- **Parts**: `bluebanquise-supervision-probe` (loop + on-demand + actions), `-api` (Flask/waitress
+  REST + WebUI, Bulma only + plain JS), `-exporter` (stdlib `http.server`, hand-written metrics),
+  CLI `bluebanquise-supervision`. Shared code in `files/lib/common.py` (files, lock, events, latch,
+  maintenance, `host_summary()` = the ONE place deciding a host state) and `files/lib/drift.py`,
+  imported with `sys.path.insert` + plain `import`. Shebang = bluebanquise-venv interpreter.
+- **User**: everything runs as `bluebanquise-supervision` (never root, the `bluebanquise` user is
+  root-like). CLI and daemons started as root drop privileges themselves (`common.drop_privileges`,
+  same pattern as pxe_stack), CLI reads the admin name from `SUDO_USER` first. Remote probes SSH as
+  `bluebanquise` (or per-group `ssh.username`) with the user's own key, `StrictHostKeyChecking=no` +
+  `UserKnownHostsFile=/dev/null` on purpose (reinstalls change host keys).
+- **Data**: `/var/lib/bluebanquise-supervision/cluster/hosts/<host>/{probes,gathered,maintenance,events}.yml`.
+  No status file: latched = an `Error` event after the last `Acknowledge` (`common.is_latched`).
+  Atomic writes (tmp in same dir + `os.replace`), per-host `flock` for read-modify-write. YAML uses
+  libyaml `CSafeLoader/CSafeDumper` when available: pure-Python PyYAML made a 1000-event file
+  take minutes (each append rewrites the file).
+- **On-demand probe** = file `requests/<host>` holding a request id; only the probe daemon runs
+  probes (single SSH executor, never two probes of one host at once); it stores the id in
+  `probes.yml` (`request_id`), which is how CLI `probe` and the WebUI know their result arrived.
+- **Config reload**: none in code (Oxedions' choice for simplicity) - handlers restart all 3
+  services on any config/code change.
+- **Inventory**: `bluebanquise_supervision_checks: {group: {ssh: {username}, drift_check, probes: {},
+  actions: {on_fail}}}`, merged per host in `templates/hosts.yml.j2` using `hostvars[h].group_names`
+  (not `host in groups[g]`, quadratic). A host with no probe and no drift check is not supervised
+  (it was shown always-green before that fix). `skip: true` interfaces are not expected.
+- **Actions**: `/bin/sh -c` with `SUPERVISION_HOST`/`SUPERVISION_PROBES` env vars, never text
+  substitution (probe output comes from possibly compromised hosts). Fired only on a new latch.
+  The probe service has no `NoNewPrivileges`/`ProtectSystem` because actions may need sudo
+  (`bluebanquise_supervision_sudoers_commands`); api/exporter are hardened.
+- **API CSRF guard**: POST/DELETE must be `application/json` (a cross-site form can not send it
+  without a CORS preflight the API never allows). WebUI inserts host data with `textContent` only.
+- **Users, levels, audit (2026-11-14, `files/lib/webui_auth.py`, DUPLICATED in every pack)**:
+  users from `/etc/bluebanquise/webui/users.yml` (inventory `bluebanquise_webui_users`:
+  name/password_hash/role, every pack role templates the same `templates/webui_users.yml.j2`,
+  also duplicated) then `users.d/*.yml` (service accounts; a users.d user can NOT replace a
+  users.yml one, logged). Checked at EVERY request, on purpose: the file is shared, pack A's role
+  may rewrite it without restarting pack B (no restart handler on it). Parsed again only when
+  a file's (mtime_ns, size) changes (`users_cache`, one tuple assignment for thread safety):
+  without it, one bad entry re-logged its error on every request (static files, 1 s probe poll). Levels viewer < operator
+  < admin; realm `BlueBanquise`. Access is a per-pack table `ROUTE_LEVELS` {route function name:
+  minimum level} checked by `webui_auth.check_request()` in the pack's single `before_request`:
+  401 (user/password) -> 415 (write not JSON) -> 403 (level); a route missing from the table, or
+  with a level not in LEVELS (typo), is refused to EVERYONE (fail closed) - chosen over the design's decorator, which fails open when
+  forgotten or written above `@app.route`. `request.endpoint is None` (404/405) passes through
+  after authentication. `g.user = {'name', 'role'}` for routes and pages. Group
+  `bluebanquise-webui` (root:bluebanquise-webui 0750 dir, 0640 file) holds every pack daemon
+  user; systemd `User=` gives supplementary groups (verified in `/proc/<pid>/status`), and
+  `common.drop_privileges` now uses `os.initgroups` instead of `setgroups([])` so a daemon started
+  by hand as root (debugging) can still read the users file. `audit(action, hosts, result, message)`
+  prints (never logs: log level must not hide it) `AUDIT user="" pack="" action="" hosts=""
+  result="ok|failed|refused" job="" message=""`, every value `json.dumps`-quoted, line cut at
+  8000 chars. `refused` = written by `check_request` itself for writes refused with 403/415
+  (action = method + path). Unknown user names are checked against `UNKNOWN_USER_HASH` (measured
+  before: 6 ms unknown vs 82 ms known, user name enumeration). scrypt costs ~80-110 ms per
+  request on the lab: no cache of successful checks yet (security trade-off, deferred).
+- **Log line forging, found live 2026-11-14**: the audit line itself was escaped, but
+  `common.append_event` logged the user's note raw at INFO; journald split its `\n` into a second
+  entry starting `AUDIT user="oxedions" ... power.off`. journald ALSO starts a new record at a NUL
+  byte and past `LineMax` (48K bytes): both verified live on Debian 13 (code review found them,
+  a `%00` in a URL path reached the 403 warning raw). Fixed at the cause:
+  `common.OneLineFormatter` escapes `\n`/`\r` and every C0/C1 control character (`\xNN`) and
+  cuts lines at 8000 chars, so one log call = one journal line for every daemon (the probe
+  daemon also logs host-originated text: drift findings, action output). Plus the API
+  boundary: reasons/notes must be a JSON string (`null` was stored as "None"), at most 1000
+  chars, without Unicode categories Cc/Zl/Zp (`str.isprintable()` was too strict: it refused
+  the narrow no-break space French typing inserts), and a JSON body that is not an object gets
+  400 (was a 500). Rule for every pack: this formatter, this text rule. Read audits with `journalctl -u <unit> -o cat | grep '^AUDIT'`.
+- **Drift gotchas handled in drift.py** (all were permanent false drifts in `cluster_management`):
+  os-release ID `rhel` vs inventory `redhat` (`OS_RELEASE_IDS` map); `distribution_version` "9"
+  vs VERSION_ID "9.4" (prefix match); `os_access_control` is a SELinux *mode*
+  (enforcing/permissive/disabled), compared with lowercased `getenforce`; GPUs compared by
+  `nvidia-smi` names (what `hw_specs.gpu` documents), not `lspci` VGA lines (BMC framebuffers).
+- **Probe script bugs fixed when copied from cluster_management** (still present there):
+  `dmesg` without sudo -> empty output under `kernel.dmesg_restrict=1` -> silent OK (5 scripts,
+  now `sudo -n dmesg` and a read failure is CRITICAL); `ssh_check_disk_smart` always CRITICAL
+  (only matched the SAS line, then looked for PASSED where SAS says OK); `ssh_check_ib_errors`
+  always OK (`perfquery -x` has no error counters, and `Name:....0` has no space for awk `$2`).
+- **Log pattern false positives found on real VMs (2026-11-05), fixed in the new probes**:
+  `ssh_check_pcie_aer_errors` matched `aer` -> every boot line `AER: enabled with IRQ` / `_OSC: OS
+  now controls [... AER ...]` latched every host; `ssh_check_mce_errors` matched `mce` and
+  `ssh_check_ram_ecc_errors` matched `mce:`/`Machine check`/`Corrected error` -> boot line
+  `mce: CPU supports N MCE banks` on bare metal (VMs do not print it, so lab VMs passed with the
+  old patterns too). Now: AER `PCIe Bus Error|AER: (Multiple )?(Corrected|Correctable|Uncorrected|
+  Uncorrectable)`, MCE `[Hardware Error]|Machine check events logged`, ECC `EDAC .. N CE/UE|
+  [Hardware Error].*memory|Memory failure`. Error line samples are from kernel source formats,
+  not captured from failing hardware.
+- **Published `bluebanquise-venv` for deb13 is still 1.2.1 (no `requests`)**: `check_bmc` Redfish
+  fails on a real install (also in cluster_management). check_bmc now prints a clear CRITICAL.
+  1.2.2 must be published.
+- **Served by Apache under `/webui/supervision/`** (2026-11-14): the API binds `127.0.0.1` only
+  (fixed in `vars/main.yml`, no more `api_bind` default), waitress `serve(..., url_prefix=...)`
+  sets `SCRIPT_NAME`, routes stay `/api/...`. Gotcha verified live: waitress also serves paths
+  WITHOUT the prefix (it strips the prefix when present, refuses nothing), so
+  `127.0.0.1:8091/api/hosts` answers too - harmless (auth still required, localhost only). The
+  role needs `http_server` applied first (asserts the Apache conf folder exists), has its own
+  per-OS `vars/{Debian,RedHat,Suse}.yml` (conf path, service, configtest command: same values
+  as `http_server`'s), enables `proxy`/`proxy_http` with `community.general.apache2_module` on
+  non-RedHat, drops `bluebanquise-webui-supervision.conf`, handlers run configtest THEN `reloaded`
+  (a bad file never stops the Apache that also serves PXE). CI playbook
+  `resources/workflow/playbooks/bluebanquise_supervision.yml` applies `http_server` first, the
+  5 OS workflows run it with `--tags http_server,bluebanquise_supervision`.
+- **WebUI pages** (2026-11-14): Jinja templates rendered by Flask (`files/webui/templates/`),
+  static files in `files/webui/static/`. Every page extends `webui_base.html` (left menu from
+  `bluebanquise_webui_packs`, theme button, `#notifications`); `<base href="{{ request.script_root }}/">`,
+  only relative URLs, other packs linked as `../<name>/`. Values for JS go in `data-` attributes
+  of `<body>` (`SCRIPT_ROOT`, `HOST`), never inside `<script>`. Each page holds its own script
+  (fields with ids, a `load` function filling them one by one, one explicit function per action).
+  `webui_base.html`, `bluebanquise-webui.js` (`apiRequest`, `showNotification`, `element`,
+  theme), `bluebanquise-webui.css` (layout, state colors, tiles) are DUPLICATED files shared with
+  future packs (copy list in their header). `resources/workflow/check_duplicated_files.py` (CI,
+  static_analysis.yml) checks every file with the header: lists itself, every listed copy exists
+  and is byte-identical; `bulma.min.css` compared by name. Copy paths in headers are repository
+  paths starting with `collections/`; the list ends at the first line that is not such a path.
+  New pack: copy the files, then add the new path to the header of EVERY copy (all stay identical). `apiRequest(method, path)` fetches
+  `window.location.origin + SCRIPT_ROOT + '/' + path`, never a relative URL (a page opened as
+  `http://user:pass@host/` can not fetch relative URLs, Chrome TypeError), shows API errors
+  (`{"error"}`, or `HTTP error 503` when Apache answers an HTML page) and success `message`s.
+  Shared variables like `bluebanquise_webui_packs` are NOT set in role defaults (ansible-lint
+  `var-naming[no-role-prefix]`): `| default(...)` inline in the template, as `bb_*` variables.
+  Layout gotcha verified in screenshots: Bulma's page `.column` is a flex item, it would not
+  shrink below its content (`min-width: auto`) and pushed the host page past the right edge;
+  `.webui-page { min-width: 0 }` + `table-container` around wide tables.
+- **Contracts in Supervision (2026-11-15, step 2)**: `GET /api/summary` (viewer, federator
+  contract 1: `contract`, `pack`, `version`, `as_of`, `refresh`, `cluster`, `hosts` with per-host
+  `as_of`), `GET /api/hosts/<host>/summary` (operator). Probe = job: `common.request_probe()`
+  writes `jobs/<uuid>.yml` then `requests/<uuid>` (content: host name, dot name then rename); the
+  probe daemon's `probe_job()` ends it `success`/`failed` (probe pass only, not the latch),
+  `end_lost_jobs()` at startup, `remove_old_jobs()` each cycle (7 days). Job ids are validated as
+  canonical uuids before any path is built. CLI `probe` uses the same job and exits 1 on `failed`.
+  `apiRequest` shows `message` only for write methods (GET job polls would notify every second).
+  Lab gotchas: lab inventory has `loop_interval: 60` (a test expecting 1800 is wrong); check_bmc
+  fails on the lab while the BMC emulators are not started (every verdict is `failed: check_bmc`);
+  `pkill -f <pattern>` / `pgrep -f` over ssh match the ssh command line itself.
+- **Federator (2026-11-15, step 3, `bluebanquise_federator`)**: pages filled by the browser
+  only, never server-side calls. Cross-pack calls go through `packRequest(pack, path)` of the
+  shared JS (silent, never throws, 10 s timeout; `answeredByPack` tells a pack's JSON 404 "host
+  not known" from Apache's HTML 404 "pack not installed"). Fill each tile in the `.then()` of its
+  own request, never after `Promise.all`: one hung pack would freeze every tile (bug caught by
+  SIGSTOP of the fake pack). The fake pack `resources/workflow/webui_fake_pack.py` runs on the lab
+  as the transient unit `test-fake-pack` (`systemd-run --uid=bluebanquise`) with
+  `/etc/apache2/conf-enabled/zz-test-fake-pack.conf`; remove both when the lab is torn down.
+  Lab tests: `~/cdp_federator.py <user> <password>` (admin 56, viewer 23), `~/matrix_3.sh` (42).
+- **Operation (2026-11-16, step 4, `bluebanquise_operation`)**: runs as `conman` (conman role
+  user, joins groups `bluebanquise-power` for bluebanquise-power's config and
+  `bluebanquise-webui`). **Never put a pack user in group `bluebanquise`** (maintainer,
+  2026-11-16): useradd made `/var/lib/bluebanquise` 0750 on Ubuntu 24.04 (HOME_MODE; 0700 on
+  EL 9/10, Debian 13, Leap 15/16, checked in containers), so the group read the inventory. One
+  group per secret file instead (`bluebanquise-webui`, `bluebanquise-power`); the maintainer wants
+  packs and daemons segmented with as many users and groups as needed. The bootstrap now does
+  `chmod 700 /var/lib/bluebanquise`. Never talks to a BMC: the worker runs
+  `bluebanquise-power --json` (`subprocess.Popen`, no shell, stdout to `jobs/<id>.json`, stderr to
+  `jobs/<id>.log`, never a pipe: a large result would block the command while the worker waits for
+  it) and reads `{"nodes": {host: {ok, detail}}}` (`common.read_power_result()`). The job keeps its
+  `command` for replay. Job = `jobs/<uuid>.yml` + empty `requests/<uuid>`, as Supervision. API refuses a job
+  whose hosts are in a running job (409, under a lock). Power status every 60 s, plus 5/15/30 s
+  after a power action (BMCs, and sushy-tools, apply power changes seconds after answering).
+  Contract: off is `ok` (text `off`), BMC error is `error`. **ClusterShell `NodeSet()` expands
+  every range in memory**: `c[1-100000000]` OOM-killed the API (1.6 GB); `nodeset_size()` counts
+  from the text first, and `@`/space/`*` are refused by a character regex. Console log polling
+  as design 3.3 (offset+inode, reset on rotation). conman role: Debian/Ubuntu units run
+  `conmand -F` as root, the drop-in only adds `User=`/`Group=` (the RedHat drop-in changes
+  ExecStart and would break `-F`); Suse's own unit already has `User=conman`; Debian's
+  `/etc/logrotate.d/conman` is all comments and `expect` is only Suggested. Lab: ipmi_sim with
+  `chassis_control "<script>"` (power and boot get/set) and `sol "tcp:127.0.0.1:9101"` to a fake
+  server started on power on; the fake server must close inherited fds or it keeps UDP 623 after
+  ipmi_sim stops. Tests: `~/check_4.py` (92, sudo), `~/matrix_4.sh` (82),
+  `~/cdp_operation.py <user> <pw>` (operator 56, viewer 3).
+- **Slurm (2026-11-16, step 5, `bluebanquise_slurm`)**: two users per the segmentation rule:
+  worker `bluebanquise-slurm` (only power: sudo rule to run the root-owned wrapper
+  `bluebanquise-slurm-node` as `slurm`; unit without NoNewPrivileges, ProtectSystem=strict with
+  the data folder and /run writable), API `bluebanquise-slurm-api` (groups bluebanquise-webui +
+  bluebanquise-slurm, unit writes only `requests/`, folder 2770 api:bluebanquise-slurm). One
+  writer per file: API writes `requests/<id>.yml`, worker writes the job file THEN removes the
+  request (else a polling page gets a 404). The design's "lazy cache in the API" became a worker
+  loop (sudo is impossible under NoNewPrivileges). Slurm gotchas verified on 24.11: `sinfo -N`
+  lists a node once per partition (dedupe, CPUs summed per node); scontrol strips one `"` at
+  each end of `Reason=` (wrapper passes `Reason="<reason>"`); Slurm keeps the reason after a
+  resume (shown only for nodes out of production); a resumed node is `idle*` until slurmctld pings
+  it (state read again 5 s after a job); `allocated+` = several states. Lab: slurmctld on sv-mgmt
+  with the slurm role (`slurm_packages_source: distribution`, munge key in `~/lab/files`,
+  clustershell in the Ansible venv), slurmd by hand on sv-c1/sv-c2 (`slurm` uid set to 777 like
+  the role, `/var/spool/slurmd/slurmd`). Tests: `~/check_5.py` (73, sudo), `~/matrix_5.sh` (73),
+  `~/cdp_slurm.py <user> <pw>` (operator 36, viewer 2). After a gabriel reboot: start the BMC emulators
+  (ipmi_sim, sushy-tools) BEFORE testing Operation, then `systemctl restart conman` (conman's
+  console retry delay grows while the BMC is down: no console line for minutes).
+- **WebUI conventions**: Bulma 1.0.4 only (served locally from `files/webui/static/`, clusters are
+  often offline) + plain JS. Dark mode is
+  Bulma's own `data-theme` on `<html>`: no attribute = follow the system, the moon/sun button
+  forces the other theme; an inline `<head>` script of `webui_base.html` applies the saved theme
+  before drawing (no flash). Per-viewer preferences (`theme`, `view` map/list) in `localStorage`, always wrapped in
+  try/catch. Map tile hover text and list status column come from the same `hostMessage()`.
+- **Browser testing pattern (real clicks, no Playwright)**: headless Chromium with
+  `--remote-debugging-port`, driven from Python by the DevTools protocol over `websocket-client`
+  (`Page.navigate`, `Runtime.evaluate("...click()")`, `Page.captureScreenshot`), then read the
+  PNGs. Use a fresh `--user-data-dir` per run so localStorage starts empty (a kept profile
+  starts in the theme saved by the previous run: a "theme toggle" check then fails every other
+  run - seen 2026-11-14, harness not code). Log in through the real basic auth prompt, not
+  `user:pass@` URLs: `Fetch.enable {handleAuthRequests: true}`, answer `Fetch.authRequired` with
+  `Fetch.continueWithAuth` and continue every `Fetch.requestPaused`; count the prompts (one per
+  realm and session is the expected browser behaviour). A throwaway second API
+  instance (`--settings` pointing to a demo hosts file + demo data dir, other port) with a few
+  hundred synthetic hosts shows how the map/list behave at cluster scale. Plain `--screenshot`
+  only shows the initial state; `--dump-dom` is enough to check that host data is escaped.
+- **Hypervisor lab (gabriel, 2026-11-05)**: Debian 13 / Rocky 9 / Alma 9 cloud images reboot-loop
+  under SeaBIOS there (no kernel output); Debian 13 boots with `--boot uefi`, RHEL 9 family cloud
+  images do not boot either way (also off skd0, so not the skd driver). Ubuntu 24.04 boots in BIOS.
+  BMC emulation inside the mgmt VM: OpenIPMI `ipmi_sim` (SEL verified; could not get a sensor
+  reading, persistence in `/var/ipmi_sim/<name>`), `sushy-tools` fake driver over TLS (health
+  path verified by editing its `system.json` template; it spells `HealthRollUp`, DMTF says
+  `HealthRollup`; no LogServices). Never stop emulators with `pgrep -f | kill` either: same
+  self-match as `pkill -f` when the pattern is in the calling command line.
+- **Sandbox smoketest pattern**: throwaway `sshd` on 127.0.0.11:2222, `/etc/hosts` aliases for
+  supervised hosts, `Host *\n Port 2222` in the service user's `~/.ssh/config`, smoke settings and
+  hosts files next to the real ones in `/etc/bluebanquise/bluebanquise-supervision/` (the scratchpad
+  is not readable by the service user), daemons started by hand with `--settings`. Stop them by
+  PID, **never `pkill -f`** (it matches and kills the calling shell).
 
 ## CI / Testing
 

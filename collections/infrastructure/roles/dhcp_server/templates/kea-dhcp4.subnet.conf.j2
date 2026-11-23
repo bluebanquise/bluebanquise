@@ -93,7 +93,7 @@
 {% endif %}
 {% if ns.pxe | length > 0 %}
   "next-server": "{{ ns.pxe | first }}",
-  "require-client-classes": ["arch_x86_64_http_boot_{{ item }}", "arch_arm64_http_boot_{{ item }}"],
+  "require-client-classes": ["arch_x86_64_http_boot_{{ item }}", "arch_arm64_http_boot_{{ item }}", "arch_riscv64_http_boot_{{ item }}"],
 {% endif %}
 {% if network['dhcp_unknown_range'] is defined and network['dhcp_unknown_range'] %}
   "pools": [ { "pool": "{{ network['dhcp_unknown_range'] }}" } ],

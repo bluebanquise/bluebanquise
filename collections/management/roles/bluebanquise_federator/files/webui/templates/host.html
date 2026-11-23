@@ -1,0 +1,119 @@
+{% extends "webui_base.html" %}
+
+{% block title %}{{ host }}{% endblock %}
+
+{% block content %}
+<h1 class="title">{{ host }}</h1>
+
+<!-- One tile per pack, filled by loadHost() with the host summary of the pack
+     (GET ../<pack>/api/hosts/<host>/summary). A click opens the page of the host in that pack. -->
+<div class="columns is-multiline">
+  {% for tile in tiles %}
+  <div class="column is-one-quarter">
+    <div class="box" data-pack="{{ tile.name }}" data-label="{{ tile.label }}">
+      <p class="has-text-weight-bold mb-2"><a id="pack-{{ tile.name }}-link" href="../{{ tile.name }}/">{{ tile.label }}</a></p>
+      <p><span class="tile-host state-unknown" id="pack-{{ tile.name }}-color"></span> <span id="pack-{{ tile.name }}-state">loading</span></p>
+      <p class="mt-2" id="pack-{{ tile.name }}-text"></p>
+      <p class="is-size-7 has-text-grey mt-2" id="pack-{{ tile.name }}-age"></p>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Inventory facts, filled by loadHost() from GET api/hosts/<host> -->
+<h2 class="title is-4">Inventory</h2>
+<table class="table is-narrow">
+  <tbody>
+    <tr><th>Function group</th><td id="host-group"></td></tr>
+    <tr><th>Groups</th><td id="host-groups"></td></tr>
+  </tbody>
+</table>
+<h3 class="title is-5">Network interfaces</h3>
+<div class="table-container">
+  <table class="table is-narrow">
+    <thead>
+      <tr><th>Interface</th><th>IP</th><th>Network</th></tr>
+    </thead>
+    <tbody id="host-interfaces"></tbody>
+  </table>
+</div>
+<p class="has-text-grey is-size-7" id="updated"></p>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const REFRESH_SECONDS = 30;
+
+
+// One pack tile: state, text and age given by the pack for this host
+function renderPackTile(name, result) {
+  const link = document.getElementById('pack-' + name + '-link');
+  const color = document.getElementById('pack-' + name + '-color');
+  const state = document.getElementById('pack-' + name + '-state');
+  const text = document.getElementById('pack-' + name + '-text');
+  const age = document.getElementById('pack-' + name + '-age');
+
+  link.href = '../' + name + '/';
+  age.textContent = '';
+  color.className = 'tile-host state-unknown';
+  if (!result.ok && result.status === 404 && result.answeredByPack) {
+    // The pack works, but has nothing to say about this host (a 404 from Apache instead means
+    // that the pack is not installed)
+    state.textContent = 'not managed by this pack';
+    text.textContent = '';
+    return;
+  }
+  if (!result.ok) {
+    state.textContent = 'unavailable';
+    text.textContent = result.error;
+    return;
+  }
+
+  const summary = result.data;
+  link.href = '../' + name + '/' + summary.url;
+  if (isStale(summary.as_of, summary.refresh)) {
+    state.textContent = 'old data (was ' + summary.state + ')';
+  } else {
+    color.className = 'tile-host state-' + summary.state;
+    state.textContent = summary.state;
+  }
+  text.textContent = summary.text;
+  age.textContent = 'Data from ' + ageText(summary.as_of);
+}
+
+
+async function loadHost() {
+  // Ask every pack at once, each tile is filled as soon as its pack answers: a pack that hangs
+  // does not delay the others
+  for (const box of document.querySelectorAll('[data-pack]')) {
+    const name = box.dataset.pack;
+    packRequest(name, 'api/hosts/' + encodeURIComponent(HOST) + '/summary').then(function (result) {
+      renderPackTile(name, result);
+    });
+  }
+
+  const host = await apiRequest('GET', 'api/hosts/' + encodeURIComponent(HOST));
+  document.getElementById('host-group').textContent = host.group;
+  document.getElementById('host-groups').textContent = host.groups.join(', ');
+  const interfaces = document.getElementById('host-interfaces');
+  interfaces.replaceChildren();
+  for (const iface of host.network_interfaces) {
+    const row = element('tr');
+    row.appendChild(element('td', null, iface.interface));
+    row.appendChild(element('td', null, iface.ip4));
+    row.appendChild(element('td', null, iface.network));
+    interfaces.appendChild(row);
+  }
+  if (host.network_interfaces.length === 0) {
+    const row = element('tr');
+    row.appendChild(element('td', 'has-text-grey', 'none'));
+    interfaces.appendChild(row);
+  }
+  document.getElementById('updated').textContent = 'Updated ' + new Date().toLocaleTimeString();
+}
+
+
+loadHost();
+setInterval(loadHost, REFRESH_SECONDS * 1000);
+</script>
+{% endblock %}

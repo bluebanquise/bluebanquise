@@ -1,0 +1,201 @@
+#!/usr/lib/bluebanquise/venv/bin/python3
+"""
+bluebanquise-federator: WebUI daemon of the cluster overview, the entry point of the BlueBanquise
+WebUI packs.
+
+The federator holds no data and no secret, and never calls the other packs: its pages are filled
+by the browser, which calls the API of each pack with the credentials of the user. This daemon
+only serves the pages, and the hosts of the inventory (written by the role in hosts.yml).
+
+Served by waitress (production WSGI server). Every request needs HTTP basic authentication, and
+the level given to each route in ROUTE_LEVELS (webui_auth.py, users of bluebanquise_webui_users).
+
+REST API (JSON):
+  GET /api/hosts          hosts of the inventory, with their function group (for the cluster map)
+  GET /api/hosts/<host>   inventory facts of a host: groups, network interfaces
+
+WebUI (Jinja pages, Bulma, plain JavaScript):
+  GET /               cluster overview: one tile per pack, and the cluster map
+  GET /hosts/<host>   host page: one tile per pack
+  GET /packs          packs page: is each pack reachable, its version, the age of its data
+  GET /static/...     CSS and JavaScript files
+
+The daemon listens on 127.0.0.1 only. Apache serves it under /webui/cluster/ (url_prefix of the
+settings): waitress removes this prefix, so the routes above stay as written.
+"""
+
+import argparse
+import logging
+import re
+import sys
+
+import yaml
+from flask import Flask, g, jsonify, render_template, send_from_directory
+from waitress import serve
+
+sys.path.insert(0, '/usr/lib/bluebanquise/bluebanquise-federator/lib')
+import webui_auth  # noqa: E402
+
+SETTINGS_FILE = '/etc/bluebanquise/bluebanquise-federator/bluebanquise-federator.yml'
+
+app = Flask(__name__, static_folder=None)
+
+# Loaded once at startup in main(), the role restarts the service when they change.
+# Users are not loaded here: webui_auth.py reads them at every request.
+settings = None
+hosts = None
+
+# Who can do what: minimum level (viewer, operator, admin) of each route below, by the name of
+# its function. A route missing here is refused to everyone.
+ROUTE_LEVELS = {
+    # REST API
+    'get_hosts': 'viewer',
+    'get_host': 'operator',
+    # WebUI
+    'index_page': 'viewer',
+    'packs_page': 'viewer',
+    'host_page': 'operator',
+    'static_file': 'viewer',
+}
+
+
+# ─── logging ────────────────────────────────────────────────────────────────────
+
+# Control characters, written as \xNN in logs (new line and carriage return as \n and \r)
+CONTROL_CHARACTERS = re.compile(r'[\x00-\x1f\x7f-\x9f]')
+
+# A log line longer than this is cut: journald splits longer lines (48K bytes by default)
+MAX_LOG_LINE = 8000
+
+
+def escape_control_character(match):
+    return '\\x{:02x}'.format(ord(match.group()))
+
+
+class OneLineFormatter(logging.Formatter):
+    """One journal line per log call: text coming from a user (a user name, a URL) can never
+    start a line of its own, so it can never forge a line (an AUDIT line for example). Same as
+    common.OneLineFormatter of bluebanquise-supervision."""
+
+    def format(self, record):
+        line = super().format(record)
+        line = line.replace('\n', '\\n').replace('\r', '\\r')
+        line = CONTROL_CHARACTERS.sub(escape_control_character, line)
+        if len(line) > MAX_LOG_LINE:
+            line = line[:MAX_LOG_LINE] + '... (cut)'
+        return line
+
+
+def setup_logging(log_level):
+    level = getattr(logging, str(log_level).upper(), logging.INFO)
+    root = logging.getLogger()
+    root.setLevel(level)
+    if not root.handlers:
+        handler = logging.StreamHandler(sys.stdout)
+        handler.setFormatter(OneLineFormatter('%(asctime)s [%(levelname)s] %(message)s'))
+        root.addHandler(handler)
+
+
+def read_yaml(path):
+    with open(path, 'r') as f:
+        return yaml.safe_load(f)
+
+
+def error(message, code):
+    return jsonify({'error': message}), code
+
+
+@app.before_request
+def check_user():
+    """User, password and level of every request (webui_auth.py)."""
+    return webui_auth.check_request(ROUTE_LEVELS)
+
+
+# ─── REST API ───────────────────────────────────────────────────────────────────
+
+@app.route('/api/hosts', methods=['GET'])
+def get_hosts():
+    answer = []
+    for hostname in sorted(hosts):
+        answer.append({'host': hostname, 'group': hosts[hostname]['group']})
+    return jsonify({'hosts': answer})
+
+
+@app.route('/api/hosts/<hostname>', methods=['GET'])
+def get_host(hostname):
+    if hostname not in hosts:
+        return error('{} is not in the inventory'.format(hostname), 404)
+    answer = {'host': hostname}
+    answer.update(hosts[hostname])
+    return jsonify(answer)
+
+
+# ─── WebUI ──────────────────────────────────────────────────────────────────────
+
+def page(template, **values):
+    """Render a page of webui/templates/, with the values webui_base.html needs."""
+    return render_template(
+        template,
+        pack='cluster',
+        version=settings['version'],
+        packs=settings['webui_packs'],
+        pack_menu=[{'label': 'Packs', 'url': 'packs'}],
+        user=g.user['name'],
+        level=g.user['role'],
+        **values,
+    )
+
+
+def other_packs():
+    """Packs shown in tiles: every pack of the menu, except the federator itself."""
+    answer = []
+    for entry in settings['webui_packs']:
+        if entry['name'] != 'cluster':
+            answer.append(entry)
+    return answer
+
+
+@app.route('/', methods=['GET'])
+def index_page():
+    return page('index.html', tiles=other_packs())
+
+
+@app.route('/packs', methods=['GET'])
+def packs_page():
+    return page('packs.html', tiles=other_packs())
+
+
+@app.route('/hosts/<hostname>', methods=['GET'])
+def host_page(hostname):
+    if hostname not in hosts:
+        return error('{} is not in the inventory'.format(hostname), 404)
+    return page('host.html', host=hostname, tiles=other_packs())
+
+
+@app.route('/static/<path:filename>', methods=['GET'])
+def static_file(filename):
+    return send_from_directory(settings['webui_path'] + '/static', filename)
+
+
+def main():
+    global settings, hosts
+    parser = argparse.ArgumentParser(description='bluebanquise-federator WebUI daemon')
+    parser.add_argument('--settings', default=SETTINGS_FILE, help='Settings file')
+    parser.add_argument('--log-level', default=None, help='DEBUG, INFO, WARNING, ERROR')
+    args = parser.parse_args()
+
+    setup_logging(args.log_level or 'INFO')
+    settings = read_yaml(args.settings)
+    setup_logging(args.log_level or settings['log_level'])
+    hosts = (read_yaml(settings['hosts_file']) or {}).get('hosts') or {}
+    app.template_folder = settings['webui_path'] + '/templates'
+
+    logging.info('bluebanquise-federator starting: %d host(s), %d pack(s) in the menu',
+                 len(hosts), len(settings['webui_packs']))
+    webui_auth.start('cluster')
+    logging.info('Listening on %s:%d, under %s', settings['api_bind'], settings['api_port'], settings['url_prefix'])
+    serve(app, host=settings['api_bind'], port=settings['api_port'], url_prefix=settings['url_prefix'])
+
+
+if __name__ == '__main__':
+    main()

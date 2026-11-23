@@ -1,4 +1,13 @@
 ---
+# Ubuntu, and Debian cloud images, use netplan. Debian installed from its installer uses ifupdown
+# (/etc/network/interfaces), without netplan.
+- name: stat <|> Check if netplan is used
+  ansible.builtin.stat:
+    path: /etc/netplan
+  register: nic_netplan_dir
+  tags:
+    - identify
+
 - name: file <|> Ensure old netplan configuration is erased
   ansible.builtin.file:
     path: "{{ item }}"
@@ -7,6 +16,7 @@
     - "/etc/netplan/00-installer-config.yaml"
     - "/etc/netplan/50-cloud-init.yaml"
     - "/etc/netplan/99-netcfg-vmware.yaml"
+  when: nic_netplan_dir.stat.exists
   tags:
     - identify
   notify: reboot <|> Reboot system
@@ -18,6 +28,7 @@
     owner: root
     group: root
     mode: 0600
+  when: nic_netplan_dir.stat.exists
   tags:
     - identify
   notify: reboot <|> Reboot system
@@ -33,16 +44,27 @@
     name: systemd-networkd.socket
     masked: true
 
-# Debian installer configures interfaces in /etc/network/interfaces (ifupdown), which NetworkManager
-# ignores by default ([ifupdown] managed=false): let NetworkManager manage them
-- name: ini_file <|> Let NetworkManager manage interfaces declared in /etc/network/interfaces
-  community.general.ini_file:
-    path: /etc/NetworkManager/NetworkManager.conf
-    section: ifupdown
-    option: managed
-    value: 'true'
-    no_extra_spaces: true
+# Debian installer configures interfaces in /etc/network/interfaces (ifupdown). NetworkManager ignores
+# them, or only shows them read only, so it could not configure them: hand them over to NetworkManager,
+# which then creates its own connections (DHCP until configured by nmcli). Reboot stops ifupdown's DHCP client.
+- name: stat <|> Check if ifupdown is used
+  ansible.builtin.stat:
+    path: /etc/network/interfaces
+  register: nic_ifupdown_file
+
+- name: copy <|> Hand interfaces over from ifupdown to NetworkManager
+  ansible.builtin.copy:
+    content: |
+      # Network interfaces are managed by NetworkManager (BlueBanquise nic role)
+      source /etc/network/interfaces.d/*
+
+      auto lo
+      iface lo inet loopback
+    dest: /etc/network/interfaces
     owner: root
     group: root
     mode: '0644'
-  notify: service <|> Restart nic services
+  when: nic_ifupdown_file.stat.exists
+  notify:
+    - service <|> Restart nic services
+    - reboot <|> Reboot system

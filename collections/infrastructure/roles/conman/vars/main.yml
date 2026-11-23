@@ -1,5 +1,5 @@
 ---
-conman_role_version: 1.8.0
+conman_role_version: 1.9.0
 
 # conman >= 0.3 installs its scripts in /usr/share
 conman_execpath: "/usr/share/conman/exec"
@@ -7,3 +7,6 @@ conman_execpath: "/usr/share/conman/exec"
 conman_packages_to_install:
   - conman
   - ipmitool
+
+# True when the logrotate file of the package is only a commented example (set in OS vars files)
+conman_logrotate_replace_package_file: false

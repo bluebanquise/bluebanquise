@@ -1,0 +1,5 @@
+---
+# Apache of the http_server role (same values as its vars/RedHat.yml)
+bluebanquise_federator_apache_conf_path: /etc/httpd/conf.d
+bluebanquise_federator_apache_service: httpd
+bluebanquise_federator_apache_configtest_command: apachectl configtest

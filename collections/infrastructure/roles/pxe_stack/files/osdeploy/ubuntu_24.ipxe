@@ -4,6 +4,9 @@ echo |
 echo | Entering osdeploy/ubuntu_24.ipxe file.
 echo |
 
+# Ubuntu names x86_64 amd64 (ISO name used by bluebanquise-netboots-installer)
+iseq ${eq-architecture} x86_64 && set ubuntu-arch amd64 || set ubuntu-arch ${eq-architecture}
+
 echo | Now starting os deployment process.
 echo | Ubuntu 24 Family ipxe configuration.
 echo |
@@ -14,12 +17,12 @@ echo | > Additional kernel parameters: ${eq-kernel-parameters} ${dedicated-kerne
 echo | > Deployment server: ${next-server}
 echo | > Target images root: ${images-root}
 echo | > Target images root iso: ${images-root-iso}
-echo | > Target iso: ${images-root}/ubuntu-24.04-live-server-amd64.iso
+echo | > Target iso: ${images-root}/ubuntu-24.04-live-server-${ubuntu-arch}.iso
 echo | > Target cloud-init folder: ${cloud-init-path}
 echo |
 echo | Loading linux ...
 
-kernel ${images-root}/${images-root-iso}/casper/vmlinuz initrd=initrd root=/dev/ram0 ramdisk_size=1500000 ip=dhcp url=${images-root}/ubuntu-24.04-live-server-amd64.iso autoinstall ds=nocloud-net;s=${cloud-init-path} cloud-config-url=${cloud-init-path}/user-data ${eq-console} ${eq-kernel-parameters} ${dedicated-kernel-parameters} ipxe_next_server=${next-server} node_hostname=${hostname}
+kernel ${images-root}/${images-root-iso}/casper/vmlinuz initrd=initrd root=/dev/ram0 ramdisk_size=1500000 ip=dhcp url=${images-root}/ubuntu-24.04-live-server-${ubuntu-arch}.iso autoinstall ds=nocloud-net;s=${cloud-init-path} cloud-config-url=${cloud-init-path}/user-data ${eq-console} ${eq-kernel-parameters} ${dedicated-kernel-parameters} ipxe_next_server=${next-server} node_hostname=${hostname}
 
 echo | Loading initial ramdisk ...
 

@@ -1,0 +1,8 @@
+#### Blue Banquise file ####
+## {{ ansible_managed }}
+# bluebanquise-supervision WebUI and REST API, served by Apache under {{ bluebanquise_supervision_url_prefix }}/
+# The daemon listens on 127.0.0.1:{{ bluebanquise_supervision_api_port }} and checks users itself.
+
+RedirectMatch "^{{ bluebanquise_supervision_url_prefix }}$" "{{ bluebanquise_supervision_url_prefix }}/"
+ProxyPass "{{ bluebanquise_supervision_url_prefix }}/" "http://127.0.0.1:{{ bluebanquise_supervision_api_port }}{{ bluebanquise_supervision_url_prefix }}/"
+ProxyPassReverse "{{ bluebanquise_supervision_url_prefix }}/" "http://127.0.0.1:{{ bluebanquise_supervision_api_port }}{{ bluebanquise_supervision_url_prefix }}/"

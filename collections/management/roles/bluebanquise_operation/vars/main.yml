@@ -1,0 +1,28 @@
+---
+bluebanquise_operation_role_version: 1.0.0
+
+bluebanquise_operation_packages_to_install:
+  - bluebanquise-venv
+
+# Fixed paths and names, shared by the role and the daemons. The daemons read only one hardcoded
+# path, the settings file, which gives all the others.
+# The daemons run as conman, the user of the conman role: it already holds the BMC credentials
+# (conman.conf), and is the only one able to read console logs (written 0600 by conmand).
+bluebanquise_operation_user: conman
+bluebanquise_operation_home: /var/lib/bluebanquise-operation
+bluebanquise_operation_jobs_path: /var/lib/bluebanquise-operation/jobs
+bluebanquise_operation_requests_path: /var/lib/bluebanquise-operation/requests
+bluebanquise_operation_conf_path: /etc/bluebanquise/bluebanquise-operation
+bluebanquise_operation_lib_path: /usr/lib/bluebanquise/bluebanquise-operation
+# Written by conmand (conman role): GLOBAL log="/var/log/conman/%N.log"
+bluebanquise_operation_console_path: /var/log/conman
+# Installed by the bluebanquise_power role
+bluebanquise_operation_power_command: /usr/bin/bluebanquise-power
+
+# The daemons listen on localhost only, Apache serves them under this prefix
+bluebanquise_operation_api_bind: 127.0.0.1
+bluebanquise_operation_url_prefix: /webui/operation
+
+bluebanquise_operation_services:
+  - bluebanquise-operation-worker
+  - bluebanquise-operation-api

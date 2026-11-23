@@ -1,0 +1,327 @@
+{% extends "webui_base.html" %}
+
+{% block title %}Slurm{% endblock %}
+
+{% block content %}
+<h1 class="title">Slurm</h1>
+
+<!-- Shown when the worker could not read Slurm: filled by loadHosts() -->
+<div class="notification is-danger is-hidden" id="slurm-error"></div>
+
+<!-- Counts: filled by loadHosts() -->
+<div class="columns is-mobile is-multiline">
+  <div class="column">
+    <div class="box has-text-centered">
+      <p class="heading">In production</p>
+      <p class="title has-text-success" id="count-ok">-</p>
+    </div>
+  </div>
+  <div class="column">
+    <div class="box has-text-centered">
+      <p class="heading">Drained or draining</p>
+      <p class="title has-text-link" id="count-maintenance">-</p>
+    </div>
+  </div>
+  <div class="column">
+    <div class="box has-text-centered">
+      <p class="heading">Down</p>
+      <p class="title has-text-danger" id="count-error">-</p>
+    </div>
+  </div>
+  <div class="column">
+    <div class="box has-text-centered">
+      <p class="heading">CPUs allocated</p>
+      <p class="title" id="cpus">-</p>
+    </div>
+  </div>
+  <div class="column">
+    <div class="box has-text-centered">
+      <p class="heading">Jobs running / pending</p>
+      <p class="title" id="jobs-count">-</p>
+    </div>
+  </div>
+</div>
+
+<!-- Actions on a nodeset: POST api/drain and api/resume, one job each -->
+<div class="box">
+  <div class="columns">
+    <div class="column">
+      <div class="field">
+        <label class="label" for="action-hosts">Nodes</label>
+        <div class="control">
+          <input class="input" id="action-hosts" type="text" placeholder="c[001-004]">
+        </div>
+        <p class="help">A node or a nodeset. Click a node on the map to add it.</p>
+      </div>
+    </div>
+    <div class="column">
+      <div class="field">
+        <label class="label" for="action-reason">Reason (for drain)</label>
+        <div class="control">
+          <input class="input" id="action-reason" type="text" placeholder="disk replacement">
+        </div>
+        <p class="help">Slurm records it as "[your name] reason".</p>
+      </div>
+    </div>
+  </div>
+  <div class="buttons mb-0">
+    <button class="button is-link" onclick="drainAction()">Drain</button>
+    <button class="button is-success" onclick="resumeAction()">Resume</button>
+  </div>
+</div>
+
+<!-- Map: one box per function group, one tile per node. Legend on the right. -->
+<div class="level">
+  <div class="level-left">
+    <div class="level-item">
+      <label class="checkbox"><input type="checkbox" id="click-adds" checked> Click on a node adds it to Nodes (else opens its page)</label>
+    </div>
+  </div>
+  <div class="level-right">
+    <div class="level-item">
+      <span class="tile-host state-ok"></span>&nbsp;in production&nbsp;&nbsp;
+      <span class="tile-host state-maintenance"></span>&nbsp;drained, draining&nbsp;&nbsp;
+      <span class="tile-host state-error"></span>&nbsp;down, not responding&nbsp;&nbsp;
+      <span class="tile-host state-unknown"></span>&nbsp;unknown, or old
+    </div>
+  </div>
+</div>
+<div id="hosts"></div>
+<p class="has-text-grey is-size-7 mb-5" id="updated"></p>
+
+<!-- Nodes out of production: filled by loadHosts() -->
+<h2 class="title is-4">Nodes out of production</h2>
+<div class="table-container">
+  <table class="table is-fullwidth is-striped is-narrow">
+    <thead>
+      <tr><th>Node</th><th>State</th><th>Reason</th><th>Since</th></tr>
+    </thead>
+    <tbody id="out"></tbody>
+  </table>
+</div>
+
+<!-- Last jobs: filled by loadJobs() -->
+<h2 class="title is-4">Last actions</h2>
+<div class="table-container">
+  <table class="table is-fullwidth is-striped is-narrow">
+    <thead>
+      <tr><th>Started</th><th>By</th><th>Action</th><th>Nodes</th><th>State</th><th>Message</th></tr>
+    </thead>
+    <tbody id="jobs"></tbody>
+  </table>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const REFRESH_SECONDS = 15;
+
+const JOB_TAGS = {
+  running: 'is-info',
+  success: 'is-success',
+  failed: 'is-danger',
+};
+
+
+// ─── nodes ──────────────────────────────────────────────────────────────────────
+
+// Click on a tile: add the node to the Nodes field, or open its page
+function clickHost(event, hostname) {
+  if (!document.getElementById('click-adds').checked) {
+    return;
+  }
+  event.preventDefault();
+  const field = document.getElementById('action-hosts');
+  const current = field.value.trim();
+  if (current === '') {
+    field.value = hostname;
+  } else if (!current.split(',').includes(hostname)) {
+    field.value = current + ',' + hostname;
+  }
+}
+
+async function loadHosts() {
+  const data = await apiRequest('GET', 'api/hosts');
+
+  const slurmError = document.getElementById('slurm-error');
+  slurmError.classList.toggle('is-hidden', data.error === null);
+  slurmError.textContent = 'Slurm could not be read, the states below are old: ' + data.error;
+
+  document.getElementById('count-ok').textContent = data.counts.ok;
+  document.getElementById('count-maintenance').textContent = data.counts.maintenance;
+  document.getElementById('count-error').textContent = data.counts.error;
+  document.getElementById('cpus').textContent = '-';
+  if (data.cpus.total !== undefined) {
+    document.getElementById('cpus').textContent = data.cpus.allocated + ' / ' + data.cpus.total;
+  }
+  document.getElementById('jobs-count').textContent = '-';
+  if (data.jobs.running !== undefined) {
+    document.getElementById('jobs-count').textContent = data.jobs.running + ' / ' + data.jobs.pending;
+  }
+  const old = data.as_of !== null && isStale(data.as_of, data.refresh);
+
+  // Map: nodes grouped by function group
+  const groups = {};
+  for (const host of data.hosts) {
+    if (!(host.group in groups)) {
+      groups[host.group] = [];
+    }
+    groups[host.group].push(host);
+  }
+  const container = document.getElementById('hosts');
+  container.replaceChildren();
+  const groupNames = Object.keys(groups).sort();
+  if (groupNames.length === 0) {
+    container.appendChild(element('p', 'has-text-grey', 'No Slurm node read yet.'));
+  }
+  for (const groupName of groupNames) {
+    const box = element('div', 'box');
+    box.appendChild(element('p', 'has-text-weight-bold mb-2', groupName + ' (' + groups[groupName].length + ')'));
+    for (const host of groups[groupName]) {
+      let classes = 'tile-host state-' + host.state;
+      if (old) {
+        classes = 'tile-host state-unknown';
+      }
+      const tile = element('a', classes);
+      tile.href = 'hosts/' + encodeURIComponent(host.host);
+      tile.title = host.host + ': ' + host.text;
+      tile.addEventListener('click', function (event) {
+        clickHost(event, host.host);
+      });
+      box.appendChild(tile);
+    }
+    container.appendChild(box);
+  }
+
+  // Nodes out of production
+  const rows = document.getElementById('out');
+  rows.replaceChildren();
+  for (const host of data.hosts) {
+    if (host.state === 'ok') {
+      continue;
+    }
+    const row = element('tr');
+    const name = element('td');
+    const link = element('a', null, host.host);
+    link.href = 'hosts/' + encodeURIComponent(host.host);
+    name.appendChild(link);
+    row.appendChild(name);
+    row.appendChild(element('td', null, host.slurm_state));
+    row.appendChild(element('td', null, host.reason));
+    row.appendChild(element('td', null, host.reason_time));
+    rows.appendChild(row);
+  }
+  if (rows.children.length === 0) {
+    const row = element('tr');
+    row.appendChild(element('td', 'has-text-grey', 'Every node is in production'));
+    rows.appendChild(row);
+  }
+
+  let updated = 'Updated ' + new Date().toLocaleTimeString() + ', Slurm is read every ' + data.refresh + ' s';
+  if (data.as_of !== null) {
+    updated = updated + ', last read ' + ageText(data.as_of);
+  }
+  document.getElementById('updated').textContent = updated;
+}
+
+
+// ─── jobs ───────────────────────────────────────────────────────────────────────
+
+async function loadJobs() {
+  const data = await apiRequest('GET', 'api/jobs');
+  const rows = document.getElementById('jobs');
+  rows.replaceChildren();
+  for (const job of data.jobs.slice(0, 20)) {
+    const row = element('tr');
+    const started = element('td');
+    const link = element('a', null, new Date(job.started * 1000).toLocaleString());
+    link.href = 'jobs/' + job.job;
+    started.appendChild(link);
+    row.appendChild(started);
+    row.appendChild(element('td', null, job.by));
+    let action = job.action;
+    if (job.reason) {
+      action = action + ': ' + job.reason;
+    }
+    row.appendChild(element('td', null, action));
+    row.appendChild(element('td', null, job.hosts));
+    const state = element('td');
+    state.appendChild(element('span', 'tag ' + JOB_TAGS[job.state], job.state));
+    row.appendChild(state);
+    row.appendChild(element('td', null, job.message));
+    rows.appendChild(row);
+  }
+  if (data.jobs.length === 0) {
+    const row = element('tr');
+    row.appendChild(element('td', 'has-text-grey', 'No action in the last days'));
+    rows.appendChild(row);
+  }
+}
+
+
+// ─── actions ────────────────────────────────────────────────────────────────────
+
+// Send an action, then follow its job until it ends (POST answers 202 and the job)
+async function runAction(path, body) {
+  let request;
+  try {
+    request = await apiRequest('POST', path, body);
+  } catch (error) {
+    // Refused (unknown node, no reason, node already in a running job...): apiRequest showed why
+    return;
+  }
+  loadJobs();
+  let job = {state: 'running'};
+  for (let second = 0; second < 600 && job.state === 'running'; second++) {
+    await new Promise(function (resolve) {
+      setTimeout(resolve, 1000);
+    });
+    job = await apiRequest('GET', request.url);
+  }
+  if (job.state === 'success') {
+    showNotification('is-success', job.action + ': ' + job.message);
+  } else if (job.state === 'failed') {
+    showNotification('is-danger', job.action + ' failed: ' + job.message);
+  }
+  loadJobs();
+  loadHosts();
+}
+
+function drainAction() {
+  const hosts = document.getElementById('action-hosts').value.trim();
+  if (hosts === '') {
+    showNotification('is-warning', 'Write the nodes first');
+    return;
+  }
+  const reason = document.getElementById('action-reason').value.trim();
+  if (reason === '') {
+    showNotification('is-warning', 'Write the reason of the drain first');
+    return;
+  }
+  if (!confirm('Drain ' + hosts + '? Running jobs end normally, no new job starts there.')) {
+    return;
+  }
+  runAction('api/drain', {hosts: hosts, reason: reason});
+}
+
+function resumeAction() {
+  const hosts = document.getElementById('action-hosts').value.trim();
+  if (hosts === '') {
+    showNotification('is-warning', 'Write the nodes first');
+    return;
+  }
+  if (!confirm('Resume ' + hosts + '? New jobs will start there.')) {
+    return;
+  }
+  runAction('api/resume', {hosts: hosts});
+}
+
+
+loadHosts();
+loadJobs();
+setInterval(function () {
+  loadHosts();
+  loadJobs();
+}, REFRESH_SECONDS * 1000);
+</script>
+{% endblock %}

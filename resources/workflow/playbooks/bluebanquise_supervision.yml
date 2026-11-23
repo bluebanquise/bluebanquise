@@ -1,0 +1,11 @@
+---
+- name: bluebanquise supervision
+  hosts: "fn_management"
+  roles:
+
+    # Serves the WebUI under /webui/supervision/
+    - role: bluebanquise.infrastructure.http_server
+      tags: http_server
+
+    - role: bluebanquise.management.bluebanquise_supervision
+      tags: bluebanquise_supervision

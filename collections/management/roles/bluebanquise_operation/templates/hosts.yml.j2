@@ -1,0 +1,22 @@
+#jinja2: lstrip_blocks: True
+#### Blue Banquise file ####
+## {{ ansible_managed }}
+# Hosts managed by bluebanquise-operation: the hosts of the bluebanquise-power configuration (same
+# group, same rule: a bmc entry, and credentials in hw_board_authentication). Credentials stay in
+# the bluebanquise-power configuration, only read by bluebanquise-power.
+
+hosts:
+{% for host in groups[(bluebanquise_power_restrict_to_group | default(bb_restrict_to_group, true) | default('all', true))] | sort %}
+  {% set hv = hostvars[host] %}
+  {% if hv['bmc'] is defined and hv['hw_board_authentication'] is defined %}
+    {% set host_bmc_auth = hv['hw_board_authentication'] | selectattr('protocol', 'defined') | first | default({}) %}
+    {% if host_bmc_auth['protocol'] is defined and host_bmc_auth['user'] is defined and host_bmc_auth['password'] is defined %}
+      {# Function group, used to group hosts on the map (same as the other packs) #}
+      {% set fn_groups = hv['group_names'] | select('match', '^fn_') | sort %}
+  {{ host | to_json }}:
+    group: {{ fn_groups[0] | default('none') | to_json }}
+    bmc: {{ hv['bmc']['name'] | default(hv['bmc']['ip4'] | default('')) | string | to_json }}
+    protocol: {{ host_bmc_auth['protocol'] | string | to_json }}
+    {% endif %}
+  {% endif %}
+{% endfor %}

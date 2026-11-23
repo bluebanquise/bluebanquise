@@ -1,4 +1,6 @@
 ---
+# bluebanquise-ipxe-riscv64 is built by the riscv64 package builds only: listed on the
+# distributions having one (RHEL 10, Ubuntu 26.04, Debian 13).
 pxe_stack_apache_user: www-data
 pxe_stack_apache_group: www-data
 pxe_stack_apache_conf_path: /etc/apache2/conf-enabled
@@ -6,6 +8,7 @@ pxe_stack_htdocs_path: /var/www/html
 pxe_stack_packages_to_install:
   - bluebanquise-ipxe-x86-64
   - bluebanquise-ipxe-arm64
+  - bluebanquise-ipxe-riscv64
   - apache2
   - python3
   - bluebanquise-venv

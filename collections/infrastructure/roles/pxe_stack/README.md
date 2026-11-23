@@ -10,9 +10,11 @@ These settings are one of the major components of the BlueBanquise project.
 * Deploy diskfull servers
 * Provision diskless servers
 * Start tools via PXE
-  * memtest (x86_64 only)
+  * memtest (x86_64 and arm64)
   * clonezilla (x86_64 only)
-  * alpine live
+  * alpine live (x86_64 and arm64)
+  * On a host of another architecture, the tool entry tells it is not available and goes back to the host boot sequence (a queued tool is skipped).
+* Boot x86_64 (legacy BIOS and EFI), arm64 (EFI) and riscv64 (EFI) hosts from the same PXE server: the iPXE roms are installed (`bluebanquise-ipxe-<arch>` packages; riscv64 roms are only built for RHEL 10, Ubuntu 26.04 and Debian 13, so only a management server running one of these can boot riscv64 hosts), and `convergence.ipxe` detects the host architecture (`${arch}`: `x86_64`, `arm64` or `riscv64`), used to find netboots, grub2 images and tools.
 ## Global instructions
 
 These settings will deploy all the needed files, binaries, and scripts to deploy
@@ -22,7 +24,7 @@ These settings take place just after the dhcp in the PXE deployment, and will
 configure all the iPXE chain needed after dhcp provided hosts with next-server
 ip address and filename to use.
 
-Note: if using another dhcp server role than the BlueBanquise one, ensure dhcp server target filename is (assuming x86_64) `x86/standard_snponly_ipxe.efi`, or if using a custom iPXE, that it chains to `http://yournextserverip/pxe/convergence.ipxe`.
+Note: if using another dhcp server role than the BlueBanquise one, ensure dhcp server target filename is `<arch>/standard_snponly_ipxe.efi` (`<arch>`: `x86_64`, `arm64` or `riscv64`), or if using a custom iPXE, that it chains to `http://yournextserverip/pxe/convergence.ipxe`.
 
 ### Role files location
 
@@ -46,7 +48,7 @@ Administrator is also in charge or providing needed OS images for diskfull deplo
 
 In order to deploy diskfull servers, these settings need administrator to provide OS images manually. Procedure depends of each OS.
 
-All these steps have to be done on the PXE server. You can mix OS distributions and architectures (deploy an Ubuntu 22.04 arm64 from an x86_64 RHEL 9 server).
+All these steps have to be done on the PXE server. You can mix OS distributions and architectures (deploy an Ubuntu 24.04 arm64 or a Debian 13 riscv64 from an x86_64 RHEL 9 server).
 Just be carefull of path, as on Suse servers, path is `/srv/www/htdocs` and not `/var/www/html`, adapt to your needs or deploy these settings first so it creates pxe folders for you.
 
 #### bluebanquise-netboots-installer
@@ -58,7 +60,11 @@ bluebanquise-netboots-installer list
 bluebanquise-netboots-installer install ubuntu_24.04 x86_64
 bluebanquise-netboots-installer install debian_13 x86_64 --netboot /path/to/local.iso   # airgapped, use a local ISO instead of downloading
 bluebanquise-netboots-installer uninstall ubuntu_24.04 x86_64
+bluebanquise-netboots-installer install debian_13 riscv64
 ```
+
+Architectures are `x86_64`, `arm64` and `riscv64`. riscv64 entries exist for `debian_13`, `ubuntu_24.04`, `ubuntu_26.04` (RVA23 processors only, as required by Ubuntu 26.04) and `rhel_10` (Rocky Linux 10): RHEL 9 and OpenSuse Leap 16 have no riscv64 version.
+As the catalog is never overwritten, clusters installed before riscv64 support need to add the riscv64 entries to their `/etc/bluebanquise/bootset/netboots_installer.yml` (copy them from the role `files/netboots_installer.yml`).
 
 Before downloading or copying an ISO, the tool checks that at least 20 GB of disk space is available on the target and aborts cleanly with a clear error otherwise, rather than filling the disk mid-transfer.
 
@@ -469,7 +475,7 @@ os_operating_system:
 The node boots the installer with `root=live:<iso>/LiveOS/squashfs.img inst.install_url=<iso>/install
 inst.auto=<profile>` (see `osdeploy/opensuse_16.ipxe`), installs, and reboots. The profile sets:
 
-* the product (`Leap_16.0`), language, keyboard and time zone,
+* the product (`openSUSE_Leap`), language, keyboard and time zone,
 * the root password and ssh keys (`pxe_stack_enable_root: true`), or the sudo user (first user of the installer, its
   uid, gid and home are then set by a post installation script) with its ssh keys and sudoers rule,
 * packages (`openssh-server`, `sudo`, `curl`, plus `os_autoinstall_packages`) and `os_autoinstall_custom_repositories`,

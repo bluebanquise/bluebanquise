@@ -1,0 +1,18 @@
+---
+- name: bluebanquise operation
+  hosts: "fn_management"
+  roles:
+
+    # Serves the WebUI under /webui/operation/
+    - role: bluebanquise.infrastructure.http_server
+      tags: http_server
+
+    # Operation runs as the conman user, and runs bluebanquise-power
+    - role: bluebanquise.infrastructure.conman
+      tags: conman
+
+    - role: bluebanquise.infrastructure.bluebanquise_power
+      tags: bluebanquise_power
+
+    - role: bluebanquise.management.bluebanquise_operation
+      tags: bluebanquise_operation

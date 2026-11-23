@@ -1,0 +1,18 @@
+---
+# WebUI and REST API daemon. It listens on 127.0.0.1 only: Apache (http_server role) serves it
+# under /webui/slurm/.
+bluebanquise_slurm_api_port: 8095
+
+# Seconds between two reads of the state of the nodes (pages never call Slurm). The state is
+# also read right after a drain or a resume.
+bluebanquise_slurm_refresh_interval: 30
+
+# Packs of the left menu, and WebUI users: shared by all WebUI packs, see the
+# bluebanquise_federator and bluebanquise_supervision roles.
+# bluebanquise_webui_packs:
+#   - name: cluster
+#     label: Cluster overview
+#   - name: slurm
+#     label: Slurm
+
+bluebanquise_slurm_log_level: INFO

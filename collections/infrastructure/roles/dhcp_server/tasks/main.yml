@@ -112,6 +112,8 @@
     - template
 
 # Main file is rendered last and includes all other files: its validation checks the whole configuration.
+# The file to validate is read by cat and piped to kea: on Ubuntu, AppArmor confines kea-dhcp4 without
+# dac_override, so it cannot read Ansible's temporary file when Ansible connects as a non-root user.
 - name: "template <|> Render kea-dhcp4.conf"
   ansible.builtin.template:
     src: "kea-dhcp4.conf.j2"
@@ -119,7 +121,7 @@
     owner: root
     group: root
     mode: 0644
-    validate: "/usr/sbin/kea-dhcp4 -t %s"
+    validate: "/bin/sh -c 'cat %s | /usr/sbin/kea-dhcp4 -t /dev/stdin'"
   notify: service <|> Restart dhcp server
   tags:
     - template

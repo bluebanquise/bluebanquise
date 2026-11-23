@@ -8,13 +8,13 @@
 ---
 Devs infos:
 
-:yellow_heart: The main branch is now considered unstable as a new major version is under development. Please use a release tag for production.
+:yellow_green: The main branch is now considered unstable as a new major version is under development. Please use a release tag for production.
 
-:yellow_heart: Current core version: 3.4.0, under development.
+:yellow_green: Current core version: 3.4.0.
 
 :green_heart: ansible-core 2.21 is now supported.
 
-:yellow_heart: documentation v3 is currently written, doing my best.
+:yellow_heart: documentation is nearly done, doing my best.
 
 ---
 
@@ -63,12 +63,12 @@ Currently tested and supported distributions (other derivative could work) are:
 | Operating System family | Operating System distribution | Tested versions    | Architectures    | Notes                                                       |
 | ----------------------- | ----------------------------- | ------------------ | ---------------- | ----------------------------------------------------------- |
 | Red Hat                 |                               |                    |                  |                                                             |
-|                         | RHEL (and clones)             | 9, 10              | x86_64, aarch64  | √                                                           |
+|                         | RHEL (and clones)             | 9, 10              | x86_64, aarch64, riscv64 (10) | √. riscv64: Rocky Linux 10, deployment not tested yet. |
 | Debian                  |                               |                    |                  |                                                             |
-|                         | Ubuntu                        | 24.04              | x86_64, arm64    | √. Diskless not supported for now.                          |
-|                         | Debian                        | 13                 | x86_64, arm64    | √. Diskless not supported for now.                          |
+|                         | Ubuntu                        | 24.04, 26.04              | x86_64, arm64, riscv64    | √. Diskless not supported for now. riscv64: 26.04 needs RVA23 processors, deployment not tested yet. |
+|                         | Debian                        | 13                 | x86_64, arm64, riscv64    | √. Diskless not supported for now. riscv64: deployment not tested yet. |
 | Suse                    |                               |                    |                  |                                                             |
-|                         | Leap                          | 15.7               | x86_64, arm64    | √. Diskless not supported for now.                          |
+|                         | Leap                          | 16               | x86_64, arm64    | √. Diskless not supported for now.                          |
 
 ansible-core >= 2.16 is mandatory for BlueBanquise to run properly (it might work with earlier versions, but not tested).
 
@@ -77,6 +77,7 @@ Please note that:
 * EL 7 and 8 are now considered best effort only.
 * Ubuntu 18.04, 20.04 and 22.04 are now considered best effort only.
 * Debian 11 and 12 are now considered best effort only.
+* OpenSuse Leap 15 is now considered best effort only.
 * RHEL 8 and OpenSuse Leap 15 need an ansible-core==2.16, 2.17+ is not compatible.
 
 ## AI

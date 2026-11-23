@@ -21,6 +21,10 @@ Here is the detailed configuration available for each service of the stack.
    :maxdepth: 1
    :caption: Services:
 
+   services/bluebanquise_federator
+   services/bluebanquise_operation
+   services/bluebanquise_slurm
+   services/bluebanquise_supervision
    services/conman
    services/dhcp_server
    services/dns_server
