@@ -1,0 +1,28 @@
+---
+# WebUI and REST API daemon. It listens on 127.0.0.1 only: Apache (http_server role) serves it
+# under /webui/operation/.
+bluebanquise_operation_api_port: 8092
+
+# Seconds between two reads of the power state of every host (bluebanquise-power power status).
+# The power state of hosts is also read again right after a power action on them.
+bluebanquise_operation_status_interval: 60
+
+# Options of every bluebanquise-power command: number of hosts handled at the same time, and
+# minimum delay in seconds between two hosts powered on or reset (0: no delay), against the
+# power surge when powering on many hosts at once.
+bluebanquise_operation_power_parallel: 16
+bluebanquise_operation_power_delay: 0
+
+# Packs of the left menu, and WebUI users: shared by all WebUI packs, see the
+# bluebanquise_federator and bluebanquise_supervision roles.
+# bluebanquise_webui_packs:
+#   - name: cluster
+#     label: Cluster overview
+#   - name: operation
+#     label: Operation
+# bluebanquise_webui_users:
+#   - name: jdoe
+#     password_hash: "scrypt:32768:8:1$..."
+#     role: operator
+
+bluebanquise_operation_log_level: INFO

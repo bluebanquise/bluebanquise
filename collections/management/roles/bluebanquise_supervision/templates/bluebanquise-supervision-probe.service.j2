@@ -1,0 +1,23 @@
+#### Blue Banquise file ####
+## {{ ansible_managed }}
+
+[Unit]
+Description=bluebanquise-supervision probe daemon
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User={{ bluebanquise_supervision_user }}
+Group={{ bluebanquise_supervision_user }}
+ExecStart=/usr/sbin/bluebanquise-supervision-probe
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+# No NoNewPrivileges/ProtectSystem here, on purpose: on_fail actions may need sudo (see
+# bluebanquise_supervision_sudoers_commands), and sudo needs both.
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

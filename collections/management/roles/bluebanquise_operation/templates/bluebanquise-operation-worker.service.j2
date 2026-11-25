@@ -1,0 +1,28 @@
+#### Blue Banquise file ####
+## {{ ansible_managed }}
+
+[Unit]
+Description=bluebanquise-operation worker daemon (power and boot actions, power state)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User={{ bluebanquise_operation_user }}
+Group={{ bluebanquise_operation_user }}
+ExecStart=/usr/sbin/bluebanquise-operation-worker
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+# Hardening: this daemon, and the bluebanquise-power commands it runs, can only write into the
+# operation data folder. A restart stops the running bluebanquise-power commands too: their
+# jobs end failed.
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths={{ bluebanquise_operation_home }}
+
+[Install]
+WantedBy=multi-user.target

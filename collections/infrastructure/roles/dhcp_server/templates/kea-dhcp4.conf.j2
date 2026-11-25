@@ -53,8 +53,9 @@
     "match-client-id": {{ dhcp_server_match_client_id | bool | lower }},
 
     # Organize hosts booting by classes, using client architecture (option 93) and vendor class (option 60).
-    # PXE clients receive a TFTP file name. UEFI HTTP boot clients (x86_64: 0x0010, arm64: 0x0013)
-    # receive a HTTP URL, from per-network classes, as the URL uses the PXE server ip of the client network.
+    # PXE clients receive a TFTP file name. UEFI HTTP boot clients (x86_64: 0x0010, arm64: 0x0013,
+    # riscv64: 0x001c) receive a HTTP URL, from per-network classes, as the URL uses the PXE server ip
+    # of the client network.
     # Per-network classes are only evaluated for the network requiring them (only-if-required).
     "client-classes": [
       {
@@ -73,25 +74,41 @@
         "option-data": [ { "name": "boot-file-name", "data": "arm64/{{ ipxe_embed }}_{{ ipxe_driver }}ipxe.efi" } ]
       },
       {
+        "name": "arch_riscv64_efi",
+        "test": "option[93].hex == 0x001b and not (substring(option[60].hex, 0, 10) == 'HTTPClient')",
+        "option-data": [ { "name": "boot-file-name", "data": "riscv64/{{ ipxe_embed }}_{{ ipxe_driver }}ipxe.efi" } ]
+      },
+      {
         "name": "arch_x86_64_http_boot",
         "test": "substring(option[60].hex, 0, 10) == 'HTTPClient' and option[93].hex == 0x0010"
       },
       {
         "name": "arch_arm64_http_boot",
         "test": "substring(option[60].hex, 0, 10) == 'HTTPClient' and option[93].hex == 0x0013"
+      },
+      {
+        "name": "arch_riscv64_http_boot",
+        "test": "substring(option[60].hex, 0, 10) == 'HTTPClient' and option[93].hex == 0x001c"
       }
+{# The bluebanquise-ipxe-<arch> packages install HTTP roms in <htdocs>/pxe/bin/<arch>/ #}
 {% for entry in ns.http_boot_networks %}
       ,{
         "name": "arch_x86_64_http_boot_{{ entry.network }}",
         "test": "member('arch_x86_64_http_boot')",
         "only-if-required": true,
-        "option-data": [ { "name": "boot-file-name", "data": "http://{{ entry.pxe_ip }}/pxe/x86_64/{{ ipxe_embed }}_{{ ipxe_driver }}ipxe.efi" } ]
+        "option-data": [ { "name": "boot-file-name", "data": "http://{{ entry.pxe_ip }}/pxe/bin/x86_64/{{ ipxe_embed }}_{{ ipxe_driver }}ipxe.efi" } ]
       },
       {
         "name": "arch_arm64_http_boot_{{ entry.network }}",
         "test": "member('arch_arm64_http_boot')",
         "only-if-required": true,
-        "option-data": [ { "name": "boot-file-name", "data": "http://{{ entry.pxe_ip }}/pxe/arm64/{{ ipxe_embed }}_{{ ipxe_driver }}ipxe.efi" } ]
+        "option-data": [ { "name": "boot-file-name", "data": "http://{{ entry.pxe_ip }}/pxe/bin/arm64/{{ ipxe_embed }}_{{ ipxe_driver }}ipxe.efi" } ]
+      },
+      {
+        "name": "arch_riscv64_http_boot_{{ entry.network }}",
+        "test": "member('arch_riscv64_http_boot')",
+        "only-if-required": true,
+        "option-data": [ { "name": "boot-file-name", "data": "http://{{ entry.pxe_ip }}/pxe/bin/riscv64/{{ ipxe_embed }}_{{ ipxe_driver }}ipxe.efi" } ]
       }
 {% endfor %}
     ],

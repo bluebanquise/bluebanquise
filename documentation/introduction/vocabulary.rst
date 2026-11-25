@@ -19,7 +19,7 @@ something else.
 
 |
 
-Hosts are defined in ``~/bluebanquise/inventory/cluster/hosts/``.
+Hosts are defined in the ``cluster/`` folder of the inventory (for example ``/var/lib/bluebanquise/inventories/my_cluster/cluster/nodes.yml``).
 
 Please do a difference between an **Ansible managed host**, and a **host**.
 All equipment that can have an ip address on the network are considered "host",
@@ -27,7 +27,7 @@ but only those with an ssh + python capability and on which we will use Ansible
 to deploy a configuration are considered "Ansible managed host".
 They are declared the same way in the stack inventory.
 
-Note also that sometime the term **host** is used as a replacement word for **host**.
+Note also that the term **node** is sometimes used in place of **host**.
 
 Group
 -----
@@ -213,9 +213,9 @@ depending of their position.
 When a variable is defined in a yml file, the position of the file in the
 ansible inventory is key.
 
-For example, a variable defined in ``/var/lib/bluebanquise/inventory/group_vars/all/``
+For example, a variable defined in ``/var/lib/bluebanquise/inventories/my_cluster/group_vars/all/``
 will have the less precedence, and a variable defined in
-``/var/lib/bluebanquise/inventory/cluster`` will have a higher precedence, and so win if
+``/var/lib/bluebanquise/inventories/my_cluster/cluster`` will have a higher precedence, and so win if
 variable is used.
 
 The full list of available variables precedence is provided in Ansible
@@ -234,10 +234,10 @@ redefine the whole logic of the stack without editing the stack code). Etc.
 
 Inventory can be seen as a giant pizza, in 3D then flatten.
 
-* *Paste* is the variable in /var/lib/bluebanquise/inventory/group_vars/all
-* Then *large ingredients* comes from /var/lib/bluebanquise/inventory/group_vars/hw_mygroup_with_os_myos
-* Then *small ingredients* above are the /var/lib/bluebanquise/inventory/cluster/hosts/
-* And *pepper and tomatoes* (last layer) is the extra-vars at call.
+* *Dough* is the variables in group_vars/all
+* Then *large ingredients* come from group_vars/<group> (for example group_vars/hw_mygroup or group_vars/os_myos)
+* Then *small ingredients* above are the host variables, in cluster/ and host_vars/
+* And *pepper and tomatoes* (last layer) are the extra-vars given to ansible-playbook.
 
 .. image:: ../images/pizza_example.svg
 
@@ -280,17 +280,17 @@ In **BlueBanquise**, hosts are, in normal time, part of at least 3 key Ansible l
 
 * 1 **function group**, that defines the purpose of the host. These groups are always prefixed by ``fn_``. For example: ``fn_worker``.
 * 1 **hardware group**, that defines the hardware used for the host. These groups are always prefixed by ``hw_``. For example: ``hw_supermicro_X10DRT``.
-* 1 **os group**, that defines the os used for the host. These groups are always prefixed by ``os_``. For example: ``os_ubuntu_22.04``.
+* 1 **os group**, that defines the os used for the host. These groups are always prefixed by ``os_``. For example: ``os_ubuntu_24``.
 
 The conjunction of the **hw_** and **os_** groups creates an **equipment profile**.
 
 For example:
 
-* host ``A`` is part of the following groups: ``['fn_management', 'hw_X2', 'os_debian_12']``
-* host ``B`` is part of the following groups: ``['fn_worker', 'hw_X1', 'os_debian_12']``
-* host ``C`` is part of the following groups: ``['fn_worker', 'hw_X1', 'os_debian_12']``
+* host ``A`` is part of the following groups: ``['fn_management', 'hw_X2', 'os_debian_13']``
+* host ``B`` is part of the following groups: ``['fn_worker', 'hw_X1', 'os_debian_13']``
+* host ``C`` is part of the following groups: ``['fn_worker', 'hw_X1', 'os_debian_13']``
 
-This configuration has 2 equipment profiles: ``hw_X2_with_os_debian_12`` and ``hw_X1_with_os_debian_12``.
+This configuration has 2 equipment profiles: ``hw_X2_with_os_debian_13`` and ``hw_X1_with_os_debian_13``.
 
 .. image:: ../images/vocabulary/groups_ep.svg
    :align: center

@@ -1,0 +1,26 @@
+#### Blue Banquise file ####
+## {{ ansible_managed }}
+
+[Unit]
+Description=bluebanquise-operation REST API and WebUI daemon
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User={{ bluebanquise_operation_user }}
+Group={{ bluebanquise_operation_user }}
+ExecStart=/usr/sbin/bluebanquise-operation-api
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+# Hardening: this daemon can only write into the operation data folder (jobs, requests)
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths={{ bluebanquise_operation_home }}
+
+[Install]
+WantedBy=multi-user.target

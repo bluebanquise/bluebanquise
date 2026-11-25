@@ -32,17 +32,18 @@ slurm_packages_to_install:
       - slurm-smd
       - slurm-smd-dev
       - slurm-smd-client
+  # Package names checked on Debian 12 (slurm 22.05): slurm-wlm-* daemon packages do not exist
   distribution:
     controller:
       - munge
       - libmunge2
       - slurm-wlm
-      - slurm-wlm-dev
-      - slurm-wlm-slurmctld
+      - libslurm-dev
+      - slurmctld
       - slurm-client
     accounting:
       - python3-mysqldb
-      - slurm-wlm-slurmdbd
+      - slurmdbd
     accounting_mysql:
       - mariadb-common
       - mariadb-server
@@ -50,14 +51,14 @@ slurm_packages_to_install:
       - munge
       - libmunge2
       - slurm-wlm
-      - slurm-wlm-dev
-      - slurm-wlm-slurmd
+      - libslurm-dev
+      - slurmd
       - slurm-client
-      - slurm-wlm-libpmi0
-      - slurm-wlm-libpmi2-0
+      - libpmi0
+      - libpmi2-0
     submitter:
       - munge
       - libmunge2
       - slurm-wlm
-      - slurm-wlm-dev
+      - libslurm-dev
       - slurm-client

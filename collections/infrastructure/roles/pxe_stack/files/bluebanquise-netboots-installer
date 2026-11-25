@@ -48,7 +48,7 @@ from argparse import ArgumentParser
 import yaml
 
 
-VERSION = '1.0.0'
+VERSION = '1.1.0'
 PXE_PARAMETERS_FILE = '/etc/bluebanquise/bootset/pxe_parameters.yml'
 NETBOOTS_CONFIG_FILE = '/etc/bluebanquise/bootset/netboots_installer.yml'
 MIN_FREE_SPACE_GB = 20
@@ -92,14 +92,17 @@ if os.getuid() != 0:
     sys.exit(1)
 
 # Parse arguments
+# CPU architectures of the netboots catalog, as detected by convergence.ipxe (${arch})
+ARCHITECTURES = ['x86_64', 'arm64', 'riscv64']
+
 parser = ArgumentParser(
     description='BlueBanquise netboots installer - install, uninstall, or list OS netboots for PXE stack')
 parser.add_argument('action', choices=['install', 'uninstall', 'list'],
                     help='Action to perform: install, uninstall, or list')
 parser.add_argument('netboot_id', nargs='?',
                     help='OS netboot identifier, e.g. ubuntu_24.04, debian_13, rhel_9 (required for install/uninstall)')
-parser.add_argument('arch', nargs='?', choices=['x86_64', 'arm64'],
-                    help='CPU architecture: x86_64 or arm64 (required for install/uninstall)')
+parser.add_argument('arch', nargs='?', choices=ARCHITECTURES,
+                    help='CPU architecture: x86_64, arm64 or riscv64 (required for install/uninstall)')
 parser.add_argument('--netboot', dest='netboot_local',
                     help='Path to local ISO file instead of downloading (for airgapped environments)',
                     metavar='ISO_PATH')
@@ -181,7 +184,7 @@ if passed_arguments.action == 'list':
         os_name = entry['os']
         version = str(entry['version'])
         description = entry.get('description', '')
-        for arch_name in ['x86_64', 'arm64']:
+        for arch_name in ARCHITECTURES:
             if arch_name not in entry:
                 continue
             arch_path = os.path.join(netboots_base, os_name, version, arch_name)
@@ -208,7 +211,7 @@ elif passed_arguments.action == 'install':
 
     if arch not in entry:
         logging.error(bcolors.FAIL + 'Architecture ' + arch + ' not defined for ' + netboot_id + bcolors.ENDC)
-        available_arches = [a for a in ['x86_64', 'arm64'] if a in entry]
+        available_arches = [a for a in ARCHITECTURES if a in entry]
         logging.error('Available architectures for ' + netboot_id + ': ' + ', '.join(available_arches))
         sys.exit(1)
 
@@ -298,12 +301,16 @@ elif passed_arguments.action == 'install':
         sys.exit(1)
     logging.info(bcolors.OKGREEN + '[OK] Install script completed successfully.' + bcolors.ENDC)
 
-    # Create or update major-version symlink (last-installed wins, relative symlink)
-    logging.info('Creating major-version symlink: ' + symlink_path + ' -> ' + version)
+    # Create or update major-version symlink (last-installed wins, relative symlink).
+    # Not when a real directory already has the major version name: rhel_9 is installed in redhat/9/.
     if os.path.islink(symlink_path):
         os.remove(symlink_path)
-    os.symlink(version, symlink_path)
-    logging.info(bcolors.OKGREEN + '[OK] Symlink: ' + symlink_path + ' -> ' + version + bcolors.ENDC)
+    if os.path.exists(symlink_path):
+        logging.info('No major-version symlink: ' + symlink_path + ' is a directory.')
+    else:
+        logging.info('Creating major-version symlink: ' + symlink_path + ' -> ' + version)
+        os.symlink(version, symlink_path)
+        logging.info(bcolors.OKGREEN + '[OK] Symlink: ' + symlink_path + ' -> ' + version + bcolors.ENDC)
 
     print('')
     logging.info(bcolors.OKGREEN + '[OK] Netboot ' + netboot_id + ' (' + arch + ') installed successfully.' + bcolors.ENDC)
@@ -360,7 +367,7 @@ elif passed_arguments.action == 'uninstall':
             new_version = remaining_versions[0]
             new_major = new_version.split('.')[0]
             new_symlink = os.path.join(os_dir, new_major)
-            if not os.path.islink(new_symlink):
+            if not os.path.lexists(new_symlink):
                 os.symlink(new_version, new_symlink)
                 logging.info(bcolors.OKGREEN + '[OK] Updated symlink: ' + new_symlink + ' -> ' + new_version + bcolors.ENDC)
 

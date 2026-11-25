@@ -1,0 +1,32 @@
+---
+bluebanquise_slurm_role_version: 1.0.0
+
+bluebanquise_slurm_packages_to_install:
+  - bluebanquise-venv
+  - sudo
+
+# Fixed paths and names, shared by the role and the daemons. The daemons read only one hardcoded
+# path, the settings file, which gives all the others.
+# Two users, one per daemon:
+#  - bluebanquise-slurm (worker): its only power is one sudo rule, running the node wrapper as the
+#    SlurmUser. Its group, bluebanquise-slurm, reads the data of the pack.
+#  - bluebanquise-slurm-api (WebUI and REST API): no sudo, no Slurm command. It reads the data of
+#    the worker (group bluebanquise-slurm) and writes requests.
+bluebanquise_slurm_worker_user: bluebanquise-slurm
+bluebanquise_slurm_api_user: bluebanquise-slurm-api
+bluebanquise_slurm_home: /var/lib/bluebanquise-slurm
+bluebanquise_slurm_jobs_path: /var/lib/bluebanquise-slurm/jobs
+bluebanquise_slurm_requests_path: /var/lib/bluebanquise-slurm/requests
+bluebanquise_slurm_conf_path: /etc/bluebanquise/bluebanquise-slurm
+bluebanquise_slurm_lib_path: /usr/lib/bluebanquise/bluebanquise-slurm
+bluebanquise_slurm_node_command: /usr/lib/bluebanquise/bluebanquise-slurm/bluebanquise-slurm-node
+# SlurmUser of slurm.conf (slurm role)
+bluebanquise_slurm_slurm_user: slurm
+
+# The API daemon listens on localhost only, Apache serves it under this prefix
+bluebanquise_slurm_api_bind: 127.0.0.1
+bluebanquise_slurm_url_prefix: /webui/slurm
+
+bluebanquise_slurm_services:
+  - bluebanquise-slurm-worker
+  - bluebanquise-slurm-api

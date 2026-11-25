@@ -92,15 +92,16 @@ Ansible group name.
 
 ### Deploy
 
-Apply the role on the management host(s). The `bluebanquise` group must exist on these hosts
-(it is created with the `bluebanquise` user during BlueBanquise bootstrap). The role installs the `ipmitool` and `bluebanquise-venv`
+Apply the role on the management host(s). The role installs the `ipmitool` and `bluebanquise-venv`
 packages (the tool runs from the BlueBanquise Python virtual environment, located in
 `/usr/lib/bluebanquise/venv/`), and generates:
 
 * `/etc/bluebanquise/bluebanquise-power/bluebanquise-power.yml`: the hosts configuration, including
-  BMC credentials. This file is owned by root and only readable by the `bluebanquise` group, so
-  only root and members of this group (like the `bluebanquise` user) can use the tool. No root
-  privileges are needed: IPMI over LAN and Redfish only use the network.
+  BMC credentials. This file is owned by root and only readable by the `bluebanquise-power` group,
+  created by the role for this file only, so only root and members of this group can use the tool.
+  The users of `bluebanquise_power_users` (by default the `bluebanquise` user) join it, when they
+  exist; they get the group at their next login. No root privileges are needed: IPMI over LAN and
+  Redfish only use the network.
 * `/usr/bin/bluebanquise-power` and `/usr/bin/bbp`: the tool, a Python script running with the
   virtual environment interpreter.
 * `/usr/lib/bluebanquise/bluebanquise-power/plugins/`: the protocol plugins.
@@ -110,7 +111,7 @@ Re-run the role each time BMC related inventory data changes, to regenerate the 
 ### Usage
 
 ```
-bluebanquise-power [--dryrun] [--debug] [--timeout SECONDS] [--parallel N] [--delay SECONDS] [--random]
+bluebanquise-power [--dryrun] [--debug] [--timeout SECONDS] [--parallel N] [--delay SECONDS] [--random] [--json]
                    <nodeset> <action> <parameter>
 ```
 
@@ -154,6 +155,14 @@ Options:
   current: `--delay 2` makes sure at most one host starts powering on every 2 seconds.
 * `--random`: process hosts in random order. Hosts are usually numbered by rack, so consecutive
   hosts often share the same PDU: combined with `--delay`, this spreads power on across racks.
+* `--json`: for other programs. stdout holds only the result, one JSON document, instead of the
+  banner and the status table (logs and BMC debug reports stay on stderr, exit codes are the
+  same). The WebUI Operation pack (`bluebanquise.management.bluebanquise_operation` role) uses it:
+  a change of this format must be made in that pack too.
+
+```
+{"nodes": {"c001": {"ok": true, "detail": "on"}, "c002": {"ok": false, "detail": "could not get node power status"}}}
+```
 
 BMC passwords are never passed on a command line: ipmitool receives the password through its
 `IPMI_PASSWORD` environment variable (`ipmitool -E`), so it cannot be seen by other users with
@@ -226,3 +235,4 @@ of a missing Python module) is reported as a warning, and only hosts using this 
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `bluebanquise_power_restrict_to_group` | `bb_restrict_to_group`, else `all` | Only consider hosts of this Ansible group when generating the configuration. |
+| `bluebanquise_power_users` | `[bluebanquise]` | Users added to the `bluebanquise-power` group, which reads the configuration file (every BMC password): they can run the tool without root. Users not existing on the host are skipped. |

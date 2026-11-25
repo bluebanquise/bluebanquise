@@ -1,0 +1,12 @@
+#### Blue Banquise file ####
+## {{ ansible_managed }}
+# bluebanquise-slurm worker: run the node wrapper as the SlurmUser, nothing else. The wrapper is
+# owned by root, and checks every argument (node of sinfo, reason).
+{% if 'sudo-rs' not in bluebanquise_slurm_sudo_version.stdout %}
+# No PAM session for this user: sudo still logs every call with its command line, without the
+# two "session opened/closed" lines of pam_unix (the worker reads Slurm every 30 seconds).
+Defaults:{{ bluebanquise_slurm_worker_user }} !pam_session
+{% else %}
+# sudo-rs (Ubuntu 26.04) has no pam_session setting (visudo refuses it)
+{% endif %}
+{{ bluebanquise_slurm_worker_user }} ALL=({{ bluebanquise_slurm_slurm_user }}) NOPASSWD: {{ bluebanquise_slurm_node_command }}

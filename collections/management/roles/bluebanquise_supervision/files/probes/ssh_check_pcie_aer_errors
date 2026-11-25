@@ -1,0 +1,27 @@
+#!/bin/bash
+# Check for PCIe AER (Advanced Error Reporting) events in dmesg.
+# Usage: ssh_check_pcie_aer_errors
+# Link width/speed against the inventory is checked by the drift check (hw_specs.pcie), not here.
+
+echo "Checking for PCIe AER events..."
+
+# The kernel log needs root on most distributions (kernel.dmesg_restrict), so sudo is used. Not
+# being able to read it is an error, never taken as "no error found".
+if ! KERNEL_LOG=$(sudo -n dmesg -T 2>&1); then
+    echo "CRITICAL: cannot read kernel log (sudo dmesg failed): $KERNEL_LOG"
+    exit 2
+fi
+
+# Only real error reports: "AER: enabled with IRQ" or "_OSC: OS now controls [... AER ...]" are
+# printed at every boot. Kernel 6.x prints "AER: Correctable error message received from ...",
+# older kernels "AER: Corrected error received", and both print "PCIe Bus Error: severity=...".
+AER=$(echo "$KERNEL_LOG" | grep -Ei "PCIe Bus Error|AER: (Multiple )?(Corrected|Correctable|Uncorrected|Uncorrectable)")
+
+if [[ -n "$AER" ]]; then
+    echo "CRITICAL: PCIe AER events detected"
+    echo "$AER"
+    exit 2
+else
+    echo "OK: No PCIe AER events detected"
+    exit 0
+fi

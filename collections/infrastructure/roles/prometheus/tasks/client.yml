@@ -89,10 +89,10 @@
 
 - name: service <|> Manage exporters services
   ansible.builtin.service:
-    name: "{{ item.service }}"
+    name: "{{ item.service | default(item.manage_service) }}"
     enabled: "{{ (prometheus_enable_services | default(bb_enable_services) | default(true) | bool) | ternary(true, false) }}"
     state: "{{ (prometheus_start_services | default(bb_start_services) | default(true) | bool) | ternary('started', omit) }}"
   loop: "{{ prometheus_exporters_groups }}"
-  when: item.service is defined and item.service is not none
+  when: (item.service is defined and item.service is not none) or (item.manage_service is defined and item.manage_service is not none)
   tags:
     - service

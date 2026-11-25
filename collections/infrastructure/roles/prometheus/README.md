@@ -4,7 +4,7 @@
 - [Prometheus](#prometheus)
   * [1. Description](#1-description)
   * [2. General instructions](#2-general-instructions)
-    + [Server or/and client](#server-or-and-client)
+    + [Server or/and client](#server-orand-client)
     + [Default ports](#default-ports)
   * [3. Basic Server configuration](#3-basic-server-configuration)
     + [Prometheus configuration](#prometheus-configuration)
@@ -366,6 +366,7 @@ The following actions can occur:
 * If package is defined, the corresponding package will be installed (should be exporter binary)
 * If service is defined, a systemd service file will be generated and service will be started.
 * If service is defined, a corresponding /etc/{{service}} folder will be created if not exist
+* If manage_service, nothing will be created, but service state will be managed.
 * If port is defined, the port will be opened in the firewall if firewall is up
 
 You can fine tune the service configuration using dedicated parameters

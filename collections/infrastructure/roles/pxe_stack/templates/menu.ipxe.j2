@@ -56,6 +56,15 @@ goto ${selected}
 
 ############ MAIN MENU ITEMS ############
 
+:cancel
+# Menu escaped (Esc key): an administrator is at the console, give an iPXE shell (no stage report,
+# the host boot sequence is unchanged), then back to the menu without timeout.
+echo Menu cancelled. Type 'exit' to get back to the menu.
+shell
+set menu-timeout 0
+set submenu-timeout 0
+goto start
+
 :shell
 imgfetch http://${next-server}:{{ pxe_stack_daemon_port }}/stage_report?hostname=${hostname}&stage=shell&status=running || true
 imgfree stage_report || true
@@ -114,6 +123,9 @@ imgfree stage_report || true
 chain http://${next-server}/pxe/diskless/${node-image}/boot.ipxe || shell
 
 :clonezilla
+# Clonezilla live is an amd64 image
+set unavailable-tool clonezilla
+iseq ${arch} x86_64 || goto tool-unavailable
 imgfetch http://${next-server}:{{ pxe_stack_daemon_port }}/stage_report?hostname=${hostname}&stage=clonezilla&status=running || true
 imgfree stage_report || true
 chain http://${next-server}/pxe/tools/clonezilla/clone.ipxe
@@ -129,9 +141,24 @@ imgfree stage_report || true
 chain http://${next-server}/pxe/tools/clonezilla/autodeploy.ipxe
 
 :alpine
+# Alpine provides no riscv64 netboot
+set unavailable-tool alpine
+iseq ${arch} riscv64 && goto tool-unavailable || goto alpine-available
+
+:alpine-available
 imgfetch http://${next-server}:{{ pxe_stack_daemon_port }}/stage_report?hostname=${hostname}&stage=alpine&status=running || true
 imgfree stage_report || true
 chain http://${next-server}/pxe/tools/alpine/boot.ipxe
+
+:tool-unavailable
+# Tool not available for the host architecture: report the stage, so a queued tool
+# (bluebanquise-bootset -b memtest,...) is consumed, then reload the host file to get the next
+# queued entry, or the menu with the host default entry.
+imgfetch http://${next-server}:{{ pxe_stack_daemon_port }}/stage_report?hostname=${hostname}&stage=${unavailable-tool}&status=unavailable || true
+imgfree stage_report || true
+echo ${unavailable-tool} is not available for ${arch}, going back to the host boot sequence.
+sleep 5
+chain http://${next-server}/pxe/nodes/${hostname}.ipxe || shell
 
 :disk
 imgfetch http://${next-server}:{{ pxe_stack_daemon_port }}/stage_report?hostname=${hostname}&stage=disk&status=running || true
@@ -151,6 +178,11 @@ chain http://${next-server}/pxe/bin/${arch}/grub2_efi_autofind.img || shell
 exit 1
 
 :memtest
+# Memtest86+ exists for x86_64 (legacy BIOS and EFI) and arm64 (EFI only), not for riscv64
+set unavailable-tool memtest
+iseq ${arch} riscv64 && goto tool-unavailable || goto memtest-available
+
+:memtest-available
 imgfetch http://${next-server}:{{ pxe_stack_daemon_port }}/stage_report?hostname=${hostname}&stage=memtest&status=running || true
 imgfree stage_report || true
 iseq ${platform} efi && goto memtest-efi || goto memtest-legacy
@@ -158,12 +190,12 @@ iseq ${platform} efi && goto memtest-efi || goto memtest-legacy
 :memtest-legacy
 echo Booting memtest in legacy bios way
 sleep 2
-boot http://${next-server}/pxe/tools/memtest86plus/memtest.bin ${eq-console} maxpasses={{pxe_stack_memtest_maxpasses}} || shell
+boot http://${next-server}/pxe/tools/memtest86plus/${arch}/memtest.bin ${eq-console} maxpasses={{pxe_stack_memtest_maxpasses}} || shell
 
 :memtest-efi
 echo Booting memtest in EFI way
 sleep 2
-chain http://${next-server}/pxe/tools/memtest86plus/memtest.efi ${eq-console} maxpasses={{pxe_stack_memtest_maxpasses}} || shell
+chain http://${next-server}/pxe/tools/memtest86plus/${arch}/memtest.efi ${eq-console} maxpasses={{pxe_stack_memtest_maxpasses}} || shell
 
 :next
 imgfetch http://${next-server}:{{ pxe_stack_daemon_port }}/stage_report?hostname=${hostname}&stage=next&status=running || true

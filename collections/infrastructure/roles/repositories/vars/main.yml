@@ -1,5 +1,5 @@
 ---
-repositories_role_version: 1.4.0
+repositories_role_version: 1.4.1
 
 _repositories_network_name: >-
   {{ repositories_network | default(

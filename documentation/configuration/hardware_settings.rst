@@ -63,7 +63,7 @@ Note that gpu key is a list of GPU, while cpu key is a dict that defines specifi
 In normal time: ``cores = threads_per_core*cores_per_socket*sockets``.
 
 If needed, you can define the board CPU architecture using the dedicated ``hw_architecture`` key.
-Possible values are either ``x86_64`` or ``arm64``.
+Possible values are ``x86_64``, ``arm64`` or ``riscv64``.
 
 .. code-block:: yaml
 

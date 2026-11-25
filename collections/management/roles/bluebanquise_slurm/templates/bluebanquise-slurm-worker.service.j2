@@ -1,0 +1,26 @@
+#### Blue Banquise file ####
+## {{ ansible_managed }}
+
+[Unit]
+Description=bluebanquise-slurm worker daemon (state of the nodes, drain and resume)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User={{ bluebanquise_slurm_worker_user }}
+Group={{ bluebanquise_slurm_worker_user }}
+ExecStart=/usr/sbin/bluebanquise-slurm-worker
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+# No NoNewPrivileges here, on purpose: the worker runs the node wrapper with sudo, which needs it.
+# The whole file system is read only, except /run (sudo) and the data folder of the pack.
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths={{ bluebanquise_slurm_home }} /run
+
+[Install]
+WantedBy=multi-user.target

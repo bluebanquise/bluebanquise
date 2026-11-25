@@ -33,11 +33,42 @@
   when:
     - bb_repositories is defined and bb_repositories is not none and bb_repositories is iterable and bb_repositories is not string and bb_repositories is not mapping
 
-- name: lineinfile <|> Disable delta RPMs
+# Recent libzypp (OpenSuse Leap 16.1) reads its settings from /usr/etc/zypp/zypp.conf (vendor)
+# and from drop-in files in /etc/zypp/zypp.conf.d/, which override the vendor file and any
+# /etc/zypp/zypp.conf left in place. Older libzypp only reads /etc/zypp/zypp.conf.
+- name: stat <|> Check for zypp.conf drop-in folder
+  ansible.builtin.stat:
+    path: /etc/zypp/zypp.conf.d
+  register: repositories_zypp_conf_d
+
+- name: copy <|> Disable delta RPMs (zypp.conf drop-in)
+  ansible.builtin.copy:
+    dest: /etc/zypp/zypp.conf.d/bluebanquise-deltarpm.conf
+    content: |
+      #### Blue Banquise file ####
+      [main]
+      download.use_deltarpm = false
+    owner: root
+    group: root
+    mode: "0644"
+  when:
+    - repositories_zypp_conf_d.stat.isdir is defined and repositories_zypp_conf_d.stat.isdir
+    - repositories_disable_delta_rpm | bool
+
+- name: file <|> Remove delta RPMs drop-in when not disabled
+  ansible.builtin.file:
+    path: /etc/zypp/zypp.conf.d/bluebanquise-deltarpm.conf
+    state: absent
+  when:
+    - repositories_zypp_conf_d.stat.isdir is defined and repositories_zypp_conf_d.stat.isdir
+    - not (repositories_disable_delta_rpm | bool)
+
+- name: lineinfile <|> Disable delta RPMs (zypp.conf)
   ansible.builtin.lineinfile:
     path: /etc/zypp/zypp.conf
     insertafter: '# download.use_deltarpm = true'
     regexp: '^download.use_deltarpm ='
     line: 'download.use_deltarpm = false'
   when:
+    - not (repositories_zypp_conf_d.stat.isdir is defined and repositories_zypp_conf_d.stat.isdir)
     - repositories_disable_delta_rpm | bool
