@@ -2,7 +2,11 @@
 
 Format: <date> - <author (username or mail or both)> - [role] <change description>
 
-# To 3.4
+* To 3.4.2
+
+* 2026-11-02 - santos-lucas - [prometheus] add manage_service option. 
+
+# To 3.4.1
 
 * 2026-11-22 - oxedions, Ummon - [rsyslog] 1.7.1: clients only forward messages of their own host (fromhost-ip 127.0.0.1). On a host with both the server and the client profiles (the log server being also a client, as in the CI), received messages were forwarded to itself again and again: logs grew by more than 100 MB per second and filled the disk (CI addons jobs failed with No space left on device).
 * 2026-11-22 - oxedions, Ummon - [pxe_stack] bluebanquise-ipxe-riscv64 is only installed on RHEL 10, Ubuntu 26.04 and Debian 13: the package is built by the riscv64 package builds, which only exist for these distributions, and the role failed on RHEL 9, Ubuntu 24.04 and OpenSuse Leap 16 (No provider of bluebanquise-ipxe-riscv64).
