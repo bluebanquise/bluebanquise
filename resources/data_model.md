@@ -253,9 +253,11 @@ os_system_language:
 These groups are for advanced clusters, using multiple icebergs mechanism. If not using icebergs, please ignore this part.
 
 In case of multi-icebergs configuration, each host must also be a member of an
-iceberg group (default prefix is `iceberg`).
+iceberg group (default prefix is `iceberg`, for example `iceberg2`).
 
-Also, management networks must be prefixed by `netX-` with `X` being the iceberg number.
+Each iceberg has its own management network(s), still prefixed by `net-` (for example `net-ice2`), as roles
+detect management networks using this prefix. Roles registering hosts are restricted to the iceberg hosts by
+setting `bb_restrict_to_group` (for example `bb_restrict_to_group: iceberg2` in `group_vars/iceberg2/`).
 
 ## Section 4: Global variables
 
@@ -270,7 +272,7 @@ A role's dedicated variable, when set, always takes precedence over the related 
 | `bb_enable_services` | all roles managing a service | Enable services at boot (`true` if unset). |
 | `bb_start_services` | all roles managing a service | Start and restart services (`true` if unset). |
 | `bb_services_firewall_zone` | all roles opening ports in the firewall | Firewalld zone services are added to (`public` if unset). |
-| `bb_restrict_to_group` | bluebanquise_power, conman, dhcp_server, dns_server, hosts_file, pxe_stack, ssh_client | Restrict the hosts these roles take into account to an Ansible group (`all` if unset). |
+| `bb_restrict_to_group` | bluebanquise_power, conman, dhcp_server, dns_server, hosts_file, powerman, pxe_stack, ssh_client | Restrict the hosts these roles take into account to an Ansible group (`all` if unset). |
 | `bb_enable_flat_optimizations` | hosts_file | Use the optimized (flat) generation logic on very large clusters (`false` if unset). |
 | `bb_iceberg_level` | time | Iceberg level of the host, when using the icebergs mechanism. |
 

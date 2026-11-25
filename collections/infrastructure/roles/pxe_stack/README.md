@@ -10,9 +10,11 @@ These settings are one of the major components of the BlueBanquise project.
 * Deploy diskfull servers
 * Provision diskless servers
 * Start tools via PXE
-  * memtest (x86_64 only)
+  * memtest (x86_64 and arm64)
   * clonezilla (x86_64 only)
-  * alpine live
+  * alpine live (x86_64 and arm64)
+  * On a host of another architecture, the tool entry tells it is not available and goes back to the host boot sequence (a queued tool is skipped).
+* Boot x86_64 (legacy BIOS and EFI), arm64 (EFI) and riscv64 (EFI) hosts from the same PXE server: the iPXE roms are installed (`bluebanquise-ipxe-<arch>` packages; riscv64 roms are only built for RHEL 10, Ubuntu 26.04 and Debian 13, so only a management server running one of these can boot riscv64 hosts), and `convergence.ipxe` detects the host architecture (`${arch}`: `x86_64`, `arm64` or `riscv64`), used to find netboots, grub2 images and tools.
 ## Global instructions
 
 These settings will deploy all the needed files, binaries, and scripts to deploy
@@ -22,7 +24,7 @@ These settings take place just after the dhcp in the PXE deployment, and will
 configure all the iPXE chain needed after dhcp provided hosts with next-server
 ip address and filename to use.
 
-Note: if using another dhcp server role than the BlueBanquise one, ensure dhcp server target filename is (assuming x86_64) `x86/standard_snponly_ipxe.efi`, or if using a custom iPXE, that it chains to `http://yournextserverip/pxe/convergence.ipxe`.
+Note: if using another dhcp server role than the BlueBanquise one, ensure dhcp server target filename is `<arch>/standard_snponly_ipxe.efi` (`<arch>`: `x86_64`, `arm64` or `riscv64`), or if using a custom iPXE, that it chains to `http://yournextserverip/pxe/convergence.ipxe`.
 
 ### Role files location
 
@@ -31,7 +33,7 @@ Files installed by these settings are:
 * PXE HTTP files are located in `{{ pxe_stack_htdocs_path }}/pxe/` (typically `/var/www/html/pxe/` on RHEL/Debian/Ubuntu, `/srv/www/htdocs/pxe/` on Suse).
 * PXE TFTP files are located in `/var/lib/tftpboot/`.
    * `bin/` directory contains some needed bin files, typically grub2 files for EFI boot.
-   * `equipments/` directory contains equipments related files, i.e. ipxe file with group variables, and os configuration files (kickstart, preseed, autoyast).
+   * `equipment_profiles/` directory contains equipment profiles related files, i.e. ipxe file with group variables, and os configuration files (kickstart, preseed, autoyast).
    * `nodes/` directory contains hosts dedicated files, i.e. ipxe file with hosts dedicated variables (and current boot state). See "Host iPXE files and PXE Stack Daemon" below.
    * `osdeploy/` directory contains static files, with patterns to boot each kind of supported distributions.
 * Basic configuration files are located in /etc/bluebanquise/bootset.
@@ -46,7 +48,7 @@ Administrator is also in charge or providing needed OS images for diskfull deplo
 
 In order to deploy diskfull servers, these settings need administrator to provide OS images manually. Procedure depends of each OS.
 
-All these steps have to be done on the PXE server. You can mix OS distributions and architectures (deploy an Ubuntu 22.04 arm64 from an x86_64 RHEL 9 server).
+All these steps have to be done on the PXE server. You can mix OS distributions and architectures (deploy an Ubuntu 24.04 arm64 or a Debian 13 riscv64 from an x86_64 RHEL 9 server).
 Just be carefull of path, as on Suse servers, path is `/srv/www/htdocs` and not `/var/www/html`, adapt to your needs or deploy these settings first so it creates pxe folders for you.
 
 #### bluebanquise-netboots-installer
@@ -58,7 +60,11 @@ bluebanquise-netboots-installer list
 bluebanquise-netboots-installer install ubuntu_24.04 x86_64
 bluebanquise-netboots-installer install debian_13 x86_64 --netboot /path/to/local.iso   # airgapped, use a local ISO instead of downloading
 bluebanquise-netboots-installer uninstall ubuntu_24.04 x86_64
+bluebanquise-netboots-installer install debian_13 riscv64
 ```
+
+Architectures are `x86_64`, `arm64` and `riscv64`. riscv64 entries exist for `debian_13`, `ubuntu_24.04`, `ubuntu_26.04` (RVA23 processors only, as required by Ubuntu 26.04) and `rhel_10` (Rocky Linux 10): RHEL 9 and OpenSuse Leap 16 have no riscv64 version.
+As the catalog is never overwritten, clusters installed before riscv64 support need to add the riscv64 entries to their `/etc/bluebanquise/bootset/netboots_installer.yml` (copy them from the role `files/netboots_installer.yml`).
 
 Before downloading or copying an ISO, the tool checks that at least 20 GB of disk space is available on the target and aborts cleanly with a clear error otherwise, rather than filling the disk mid-transfer.
 
@@ -469,7 +475,7 @@ os_operating_system:
 The node boots the installer with `root=live:<iso>/LiveOS/squashfs.img inst.install_url=<iso>/install
 inst.auto=<profile>` (see `osdeploy/opensuse_16.ipxe`), installs, and reboots. The profile sets:
 
-* the product (`Leap_16.0`), language, keyboard and time zone,
+* the product (`openSUSE_Leap`), language, keyboard and time zone,
 * the root password and ssh keys (`pxe_stack_enable_root: true`), or the sudo user (first user of the installer, its
   uid, gid and home are then set by a post installation script) with its ssh keys and sudoers rule,
 * packages (`openssh-server`, `sudo`, `curl`, plus `os_autoinstall_packages`) and `os_autoinstall_custom_repositories`,
@@ -643,8 +649,8 @@ To be macroscopic:
 * The remote host boot over PXE, in EFI/legacy-bios, using its own PXE/iPXE rom.
 * The dhcp deployed by BlueBanquise (or your own) will provide the host with the **BlueBanquise** iPXE rom. This iPXE rom contains an EMBED script that will display the logo, get an ip from the dhcp server, show some information, and chain to file *convergence.ipxe*.
 * *convergence.ipxe* will simply get the current architecture. This operation cannot be done into the EMBED script has it needs some logic, that could bug. Sys admin need to easily debug this without the need to rebuild iPXE roms. Then iPXE chain to *nodes/${hostname}.ipxe*, with *hostname* the hostname provided by the dhcp server.
-* *nodes/${hostname}.ipxe* defines all host dedicated parameters and what host should do: boot on disk, deploy os, or boot in diskless (see "Host iPXE files and PXE Stack Daemon" above). Then iPXE chain to *equipments/${equipment-profile}.ipxe*.
-* *equipments/${equipment-profile}.ipxe* contains the host equipment profile group parameters, like operating system, console, kernel parameters, etc. Then iPXE chain to *menu.ipxe*.
+* *nodes/${hostname}.ipxe* defines all host dedicated parameters and what host should do: boot on disk, deploy os, or boot in diskless (see "Host iPXE files and PXE Stack Daemon" above). Then iPXE chain to *equipment_profiles/${equipment-profile}.ipxe*.
+* *equipment_profiles/${equipment-profile}.ipxe* contains the host equipment profile group parameters, like operating system, console, kernel parameters, etc. Then iPXE chain to *menu.ipxe*.
 * *menu.ipxe* will display a basic menu on screen, with default set to what host is expected to do (`menu-default`, from host file). Timeout is 10s by default before host execute the expected action. Each actionable entry first notifies the daemon (fire-and-forget `imgfetch`, does not block booting if the daemon is unreachable), then iPXE chain to:
    * *osdeploy/${eq-distribution}_${eq-distribution-major-version}.ipxe* if host needs to deploy/redeploy its operating system. These osdeploy files are dynamic, and adapt to parameters gathered in host dedicated file and host equipment file.
    * *diskless/images/${diskless-image}/boot.ipxe* if host needs to boot in diskless.

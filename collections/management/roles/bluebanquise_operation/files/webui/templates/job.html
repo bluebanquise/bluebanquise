@@ -1,0 +1,98 @@
+{% extends "webui_base.html" %}
+
+{% block title %}Job{% endblock %}
+
+{% block content %}
+<h1 class="title">Job</h1>
+
+<!-- Job: filled by loadJob() from GET api/jobs/<job>. The job id is given in data-job. -->
+<table class="table is-narrow mb-5" id="job" data-job="{{ job }}">
+  <tbody>
+    <tr><th>Action</th><td id="job-action"></td></tr>
+    <tr><th>Hosts</th><td id="job-hosts"></td></tr>
+    <tr><th>By</th><td id="job-by"></td></tr>
+    <tr><th>State</th><td><span class="tag" id="job-state"></span></td></tr>
+    <tr><th>Message</th><td id="job-message"></td></tr>
+    <tr><th>Started</th><td id="job-started"></td></tr>
+    <tr><th>Ended</th><td id="job-ended"></td></tr>
+    <tr><th>Id</th><td id="job-id"></td></tr>
+    <tr><th>Command</th><td><code id="job-command"></code></td></tr>
+  </tbody>
+</table>
+
+<h2 class="title is-4">Result per host</h2>
+<div class="table-container">
+  <table class="table is-striped is-narrow">
+    <thead>
+      <tr><th>Host</th><th>Result</th><th>Details</th></tr>
+    </thead>
+    <tbody id="job-results"></tbody>
+  </table>
+</div>
+
+<!-- Logs of the bluebanquise-power command (its stderr), from GET api/jobs/<job>/log -->
+<h2 class="title is-4">Logs of bluebanquise-power</h2>
+<pre class="command-output" id="job-output"></pre>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const JOB = document.getElementById('job').dataset.job;
+
+const JOB_TAGS = {
+  running: 'is-info',
+  success: 'is-success',
+  failed: 'is-danger',
+};
+
+
+async function loadJob() {
+  const job = await apiRequest('GET', 'api/jobs/' + JOB);
+  document.getElementById('job-action').textContent = job.action + ' ' + job.parameter;
+  document.getElementById('job-hosts').textContent = job.hosts;
+  document.getElementById('job-by').textContent = job.by;
+  const state = document.getElementById('job-state');
+  state.textContent = job.state;
+  state.className = 'tag ' + JOB_TAGS[job.state];
+  document.getElementById('job-message').textContent = job.message;
+  document.getElementById('job-started').textContent = new Date(job.started * 1000).toLocaleString();
+  document.getElementById('job-ended').textContent = '';
+  if (job.ended !== null) {
+    document.getElementById('job-ended').textContent = new Date(job.ended * 1000).toLocaleString();
+  }
+  document.getElementById('job-id').textContent = job.job;
+  document.getElementById('job-command').textContent = job.command || '';
+
+  const rows = document.getElementById('job-results');
+  rows.replaceChildren();
+  for (const host of Object.keys(job.results).sort()) {
+    const row = element('tr');
+    const hostCell = element('td');
+    const link = element('a', null, host);
+    link.href = 'hosts/' + encodeURIComponent(host);
+    hostCell.appendChild(link);
+    row.appendChild(hostCell);
+    const result = element('td');
+    if (job.results[host].ok) {
+      result.appendChild(element('span', 'tag is-success', 'ok'));
+    } else {
+      result.appendChild(element('span', 'tag is-danger', 'error'));
+    }
+    row.appendChild(result);
+    row.appendChild(element('td', null, job.results[host].detail));
+    rows.appendChild(row);
+  }
+
+  const log = await apiRequest('GET', 'api/jobs/' + JOB + '/log');
+  document.getElementById('job-output').textContent = log.text;
+
+  // Read again until the job ends
+  if (job.state === 'running') {
+    setTimeout(loadJob, 2000);
+  }
+}
+
+
+loadJob();
+</script>
+{% endblock %}

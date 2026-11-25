@@ -3,3 +3,9 @@
 # Precedence: bluebanquise_power_restrict_to_group > bb_restrict_to_group > all
 # Left commented on purpose: a default value here would always override bb_restrict_to_group.
 # bluebanquise_power_restrict_to_group: fn_compute
+
+# Users allowed to run bluebanquise-power without root: they join the bluebanquise-power group,
+# which reads the configuration file, so they read every BMC password. A user that does not exist
+# on the host is skipped. A user gets the group at its next login.
+bluebanquise_power_users:
+  - bluebanquise

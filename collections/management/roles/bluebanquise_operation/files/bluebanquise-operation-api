@@ -1,0 +1,444 @@
+#!/usr/lib/bluebanquise/venv/bin/python3
+"""
+bluebanquise-operation-api: REST API and WebUI daemon of bluebanquise-operation: power and next
+boot device of hosts through their BMC, and their console logs.
+
+Served by waitress (production WSGI server). Every request needs HTTP basic authentication, and
+the level given to each route in ROUTE_LEVELS (webui_auth.py, users of bluebanquise_webui_users).
+Every write action writes an AUDIT line in the journal.
+
+REST API (JSON):
+  GET  /api/summary                  power state of the cluster and of every host (federator contract)
+  GET  /api/hosts                    power state of all hosts, and counts per state
+  GET  /api/hosts/<host>             power state and BMC of a host
+  GET  /api/hosts/<host>/summary     power state of a host (federator contract)
+  GET  /api/hosts/<host>/console     console log, ?offset=<n>&inode=<n> to get only what is new
+  POST /api/power                    {"hosts": "c[001-004]", "action": "on|off|reset"}: answers 202 and a job
+  POST /api/boot                     {"hosts": "c[001-004]", "device": "pxe|disk|bios"}: answers 202 and a job
+  GET  /api/jobs                     last jobs, the newest first, ?host=<host> for the jobs of a host
+  GET  /api/jobs/<job>               state of a job: running, success or failed, and result per host
+  GET  /api/jobs/<job>/log           logs of the bluebanquise-power command of a job (stderr)
+POST requests must be sent as JSON (Content-Type: application/json): a browser can not send such
+a request from another web site (checked by webui_auth.py).
+
+WebUI (Jinja pages, Bulma, plain JavaScript using the REST API):
+  GET /              power state of all hosts, actions on a nodeset, last jobs
+  GET /hosts/<host>  host page: power, actions, console log
+  GET /jobs/<job>    job page: result per host, command and its logs
+  GET /static/...    CSS and JavaScript files
+
+The daemon listens on 127.0.0.1 only. Apache serves it under /webui/operation/ (url_prefix of the
+settings): waitress removes this prefix, so the routes above stay as written.
+
+The daemon never talks to a BMC: an action is a job file and a request file, run by the worker
+(bluebanquise-operation-worker) with bluebanquise-power. Power states are read from the file
+written by the worker.
+"""
+
+import argparse
+import logging
+import os
+import re
+import sys
+import threading
+import time
+
+from ClusterShell.NodeSet import NodeSet
+from flask import Flask, g, jsonify, render_template, request, send_from_directory
+from waitress import serve
+
+sys.path.insert(0, '/usr/lib/bluebanquise/bluebanquise-operation/lib')
+import common  # noqa: E402
+import webui_auth  # noqa: E402
+
+app = Flask(__name__, static_folder=None)
+
+# Loaded once at startup in main(), the role restarts the service when they change.
+# Users are not loaded here: webui_auth.py reads them at every request.
+settings = None
+hosts = None
+
+# Version of the federator contract (summary routes)
+CONTRACT = 1
+
+# From the worst to the best, for the state of the cluster
+STATES = ['error', 'unknown', 'ok', 'maintenance']
+
+# Characters allowed in a nodeset: names, ranges and lists (c[001-004],login1). No @group, no
+# wildcard, no space: only hosts of this pack, written in full.
+NODESET_CHARACTERS = re.compile(r'^[A-Za-z0-9_.\-\[\],]+$')
+
+# Jobs listed by GET /api/jobs
+MAX_JOBS_LISTED = 50
+
+# Taken while checking that no running job holds the hosts of a new job, then writing it: two
+# clicks at the same time on "reset" give one job, and one refusal.
+jobs_lock = threading.Lock()
+
+# Who can do what: minimum level (viewer, operator, admin) of each route below, by the name of
+# its function. A route missing here is refused to everyone.
+ROUTE_LEVELS = {
+    # REST API
+    'get_summary': 'viewer',
+    'get_hosts': 'operator',
+    'get_host': 'operator',
+    'get_host_summary': 'operator',
+    'get_host_console': 'operator',
+    'post_power': 'operator',
+    'post_boot': 'operator',
+    'get_jobs': 'operator',
+    'get_job': 'operator',
+    'get_job_log': 'operator',
+    # WebUI
+    'index_page': 'operator',
+    'host_page': 'operator',
+    'job_page': 'operator',
+    'static_file': 'viewer',
+}
+
+
+def error(message, code):
+    logging.info('%s %s -> %d %s', request.method, request.path, code, message)
+    return jsonify({'error': message}), code
+
+
+def host_answer(hostname, power):
+    """A host as the pages see it: its BMC, its power state, and the time it was read."""
+    state, text, power_state = common.host_power(power.get(hostname))
+    as_of = None
+    if hostname in power:
+        as_of = power[hostname]['as_of']
+    return {
+        'host': hostname,
+        'group': hosts[hostname]['group'],
+        'bmc': hosts[hostname]['bmc'],
+        'protocol': hosts[hostname]['protocol'],
+        'state': state,
+        'text': text,
+        'power': power_state,
+        'as_of': as_of,
+    }
+
+
+def contract_host(hostname, power):
+    """State of a host for the federator contract: state, text, url, as_of (time the power state
+    was read, now when never read)."""
+    answer = host_answer(hostname, power)
+    as_of = answer['as_of']
+    if as_of is None:
+        as_of = int(time.time())
+    return {'state': answer['state'], 'text': answer['text'], 'url': 'hosts/' + hostname, 'as_of': as_of}
+
+
+def nodeset_size(text):
+    """Number of hosts of a nodeset, counted from its text (c[001-004],login1: 5), or None when
+    it can not be counted. ClusterShell keeps every number of a range in memory: c[1-100000000]
+    takes gigabytes, so a nodeset is counted before it is given to ClusterShell."""
+    total = 0
+    # Elements are separated by commas outside brackets: c[1-2,5],login1 -> c[1-2,5] and login1
+    for element in re.split(r',(?![^\[]*\])', text):
+        size = 1
+        # Each bracket of an element multiplies its size: r[1-2]c[1-3] gives 6 hosts
+        for brackets in re.findall(r'\[([^\]]*)\]', element):
+            count = 0
+            for part in brackets.split(','):
+                numbers = part.split('-')
+                if len(numbers) == 1 and numbers[0].isdigit():
+                    count = count + 1
+                elif len(numbers) == 2 and numbers[0].isdigit() and numbers[1].isdigit():
+                    count = count + int(numbers[1]) - int(numbers[0]) + 1
+                else:
+                    return None
+            size = size * count
+        total = total + size
+    return total
+
+
+def nodeset_field(data):
+    """The "hosts" field of a request body, as a NodeSet of hosts of this pack. Returns
+    (nodeset, None), or (None, error message)."""
+    if not isinstance(data.get('hosts'), str) or data['hosts'].strip() == '':
+        return None, 'hosts is needed: a host or a nodeset, for example c[001-004]'
+    text = data['hosts'].strip()
+    if len(text) > 1000 or not NODESET_CHARACTERS.match(text):
+        return None, 'hosts must be host names, ranges and lists, for example c[001-004],login1'
+    size = nodeset_size(text)
+    if size is None:
+        return None, 'hosts is not a valid nodeset: {}'.format(text)
+    if size > len(hosts):
+        return None, 'hosts gives {} hosts, this pack knows {}'.format(size, len(hosts))
+    try:
+        nodes = NodeSet(text)
+    except Exception as e:
+        return None, 'hosts is not a valid nodeset: {}'.format(e)
+    unknown = []
+    for node in nodes:
+        if node not in hosts:
+            unknown.append(node)
+    if len(unknown) > 0:
+        return None, 'not hosts of this pack (no BMC in the inventory): {}'.format(NodeSet.fromlist(unknown))
+    return nodes, None
+
+
+def start_job(action, parameter, nodes):
+    """Write the job of an action, unless a running job already holds one of its hosts.
+    Answers 202 and the job, or 409."""
+    with jobs_lock:
+        busy = []
+        for job in common.list_jobs(settings):
+            if job['state'] != 'running':
+                continue
+            for host in common.job_hosts(job):
+                if host in nodes:
+                    busy.append(host)
+        if len(busy) > 0:
+            message = 'Already in a running job, wait for its end: {}'.format(NodeSet.fromlist(busy))
+            webui_auth.audit(action + '.' + parameter, str(nodes), 'failed', message)
+            return error(message, 409)
+        job = common.request_job(settings, action, parameter, str(nodes), g.user['name'])
+
+    webui_auth.audit(action + '.' + parameter, str(nodes), 'ok', 'Job ' + job['job'])
+    return jsonify({
+        'job': job['job'],
+        'url': 'api/jobs/' + job['job'],
+        'message': '{} {} requested on {}'.format(action, parameter, nodes),
+    }), 202
+
+
+@app.before_request
+def check_user():
+    """User, password and level of every request (webui_auth.py)."""
+    return webui_auth.check_request(ROUTE_LEVELS)
+
+
+# ─── REST API ───────────────────────────────────────────────────────────────────
+
+@app.route('/api/summary', methods=['GET'])
+def get_summary():
+    """Federator contract: one call gives the whole cluster map. as_of is the oldest data of all
+    hosts, refresh the seconds between two power state reads."""
+    power = common.read_power(settings)
+    hosts_contract = {}
+    counts = {'error': 0, 'unknown': 0, 'ok': 0, 'maintenance': 0}
+    powered = {'on': 0, 'off': 0}
+    for hostname in sorted(hosts):
+        hosts_contract[hostname] = contract_host(hostname, power)
+        state, text, power_state = common.host_power(power.get(hostname))
+        counts[state] = counts[state] + 1
+        if power_state == 'on' or power_state == 'off':
+            powered[power_state] = powered[power_state] + 1
+
+    # The worst state of a host is the state of the cluster
+    cluster_state = 'unknown'
+    for state in reversed(STATES):
+        if counts[state] > 0:
+            cluster_state = state
+    texts = []
+    if powered['on'] > 0:
+        texts.append('{} on'.format(powered['on']))
+    if powered['off'] > 0:
+        texts.append('{} off'.format(powered['off']))
+    if counts['error'] > 0:
+        texts.append('{} BMC error'.format(counts['error']))
+    if counts['unknown'] > 0:
+        texts.append('{} unknown'.format(counts['unknown']))
+    if len(texts) == 0:
+        texts.append('no host with a BMC')
+
+    as_of = int(time.time())
+    for hostname in hosts_contract:
+        as_of = min(as_of, hosts_contract[hostname]['as_of'])
+
+    return jsonify({
+        'contract': CONTRACT,
+        'pack': 'operation',
+        'version': settings['version'],
+        'as_of': as_of,
+        'refresh': settings['status_interval'],
+        'cluster': {'state': cluster_state, 'text': ', '.join(texts)},
+        'hosts': hosts_contract,
+    })
+
+
+@app.route('/api/hosts', methods=['GET'])
+def get_hosts():
+    power = common.read_power(settings)
+    answer = []
+    counts = {'on': 0, 'off': 0, 'error': 0, 'unknown': 0}
+    for hostname in sorted(hosts):
+        host = host_answer(hostname, power)
+        answer.append(host)
+        if host['power'] == 'on' or host['power'] == 'off':
+            counts[host['power']] = counts[host['power']] + 1
+        elif host['state'] == 'error':
+            counts['error'] = counts['error'] + 1
+        else:
+            counts['unknown'] = counts['unknown'] + 1
+    return jsonify({'hosts': answer, 'counts': counts, 'refresh': settings['status_interval']})
+
+
+@app.route('/api/hosts/<hostname>', methods=['GET'])
+def get_host(hostname):
+    if hostname not in hosts:
+        return error('{} has no BMC in the inventory'.format(hostname), 404)
+    answer = host_answer(hostname, common.read_power(settings))
+    answer['refresh'] = settings['status_interval']
+    return jsonify(answer)
+
+
+@app.route('/api/hosts/<hostname>/summary', methods=['GET'])
+def get_host_summary(hostname):
+    """Federator contract, for one host, plus its power state (on, off), for Automation."""
+    if hostname not in hosts:
+        return error('{} has no BMC in the inventory'.format(hostname), 404)
+    power = common.read_power(settings)
+    answer = contract_host(hostname, power)
+    answer['contract'] = CONTRACT
+    answer['refresh'] = settings['status_interval']
+    answer['power'] = host_answer(hostname, power)['power']
+    return jsonify(answer)
+
+
+@app.route('/api/hosts/<hostname>/console', methods=['GET'])
+def get_host_console(hostname):
+    # The host is checked before its name is used in a path
+    if hostname not in hosts:
+        return error('{} has no BMC in the inventory'.format(hostname), 404)
+    offset = None
+    inode = None
+    if request.args.get('offset') is not None:
+        try:
+            offset = int(request.args.get('offset'))
+            inode = int(request.args.get('inode'))
+        except (TypeError, ValueError):
+            return error('offset and inode must be numbers', 400)
+    try:
+        return jsonify(common.read_console(settings, hostname, offset, inode))
+    except FileNotFoundError:
+        return error('No console log for {}: {} does not exist (is the host in conman.conf, is conman running?)'.format(
+            hostname, common.console_file(settings, hostname)), 404)
+
+
+@app.route('/api/power', methods=['POST'])
+def post_power():
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict):
+        return error('The body must be a JSON object', 400)
+    if data.get('action') not in common.ACTIONS['power']:
+        return error('action must be one of: ' + ', '.join(common.ACTIONS['power']), 400)
+    nodes, message = nodeset_field(data)
+    if nodes is None:
+        return error(message, 400)
+    return start_job('power', data['action'], nodes)
+
+
+@app.route('/api/boot', methods=['POST'])
+def post_boot():
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict):
+        return error('The body must be a JSON object', 400)
+    if data.get('device') not in common.ACTIONS['boot']:
+        return error('device must be one of: ' + ', '.join(common.ACTIONS['boot']), 400)
+    nodes, message = nodeset_field(data)
+    if nodes is None:
+        return error(message, 400)
+    return start_job('boot', data['device'], nodes)
+
+
+@app.route('/api/jobs', methods=['GET'])
+def get_jobs():
+    hostname = request.args.get('host')
+    answer = []
+    for job in common.list_jobs(settings):
+        if hostname is not None and hostname not in common.job_hosts(job):
+            continue
+        answer.append(job)
+        if len(answer) == MAX_JOBS_LISTED:
+            break
+    return jsonify({'jobs': answer})
+
+
+@app.route('/api/jobs/<job_id>', methods=['GET'])
+def get_job(job_id):
+    job = None
+    if common.valid_job_id(job_id):
+        job = common.read_job(settings, job_id)
+    if job is None:
+        return error('No job {}'.format(job_id), 404)
+    return jsonify(job)
+
+
+@app.route('/api/jobs/<job_id>/log', methods=['GET'])
+def get_job_log(job_id):
+    if not common.valid_job_id(job_id) or common.read_job(settings, job_id) is None:
+        return error('No job {}'.format(job_id), 404)
+    try:
+        with open(common.job_log_file(settings, job_id), 'r', errors='replace') as f:
+            text = f.read()
+    except FileNotFoundError:
+        text = ''
+    return jsonify({'text': text})
+
+
+# ─── WebUI ──────────────────────────────────────────────────────────────────────
+
+def page(template, **values):
+    """Render a page of webui/templates/, with the values webui_base.html needs."""
+    return render_template(
+        template,
+        pack='operation',
+        version=settings['version'],
+        packs=settings['webui_packs'],
+        pack_menu=[],
+        user=g.user['name'],
+        level=g.user['role'],
+        **values,
+    )
+
+
+@app.route('/', methods=['GET'])
+def index_page():
+    return page('index.html')
+
+
+@app.route('/hosts/<hostname>', methods=['GET'])
+def host_page(hostname):
+    if hostname not in hosts:
+        return error('{} has no BMC in the inventory'.format(hostname), 404)
+    return page('host.html', host=hostname)
+
+
+@app.route('/jobs/<job_id>', methods=['GET'])
+def job_page(job_id):
+    if not common.valid_job_id(job_id) or common.read_job(settings, job_id) is None:
+        return error('No job {}'.format(job_id), 404)
+    return page('job.html', job=job_id)
+
+
+@app.route('/static/<path:filename>', methods=['GET'])
+def static_file(filename):
+    return send_from_directory(os.path.join(settings['webui_path'], 'static'), filename)
+
+
+def main():
+    global settings, hosts
+    parser = argparse.ArgumentParser(description='bluebanquise-operation REST API and WebUI daemon')
+    parser.add_argument('--settings', default=common.SETTINGS_FILE, help='Settings file')
+    parser.add_argument('--log-level', default=None, help='DEBUG, INFO, WARNING, ERROR')
+    args = parser.parse_args()
+
+    common.setup_logging(args.log_level or 'INFO')
+    settings = common.load_settings(args.settings)
+    common.setup_logging(args.log_level or settings['log_level'])
+    common.drop_privileges(settings['user'])
+    hosts = common.load_hosts(settings)
+    app.template_folder = os.path.join(settings['webui_path'], 'templates')
+
+    logging.info('bluebanquise-operation-api starting: %d host(s) with a BMC', len(hosts))
+    webui_auth.start('operation')
+    logging.info('Listening on %s:%d, under %s', settings['api_bind'], settings['api_port'], settings['url_prefix'])
+    serve(app, host=settings['api_bind'], port=settings['api_port'], url_prefix=settings['url_prefix'])
+
+
+if __name__ == '__main__':
+    main()

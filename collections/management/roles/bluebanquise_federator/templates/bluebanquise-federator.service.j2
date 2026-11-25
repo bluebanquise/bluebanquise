@@ -1,0 +1,25 @@
+#### Blue Banquise file ####
+## {{ ansible_managed }}
+
+[Unit]
+Description=bluebanquise-federator WebUI daemon (cluster overview)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User={{ bluebanquise_federator_user }}
+Group={{ bluebanquise_federator_user }}
+ExecStart=/usr/sbin/bluebanquise-federator
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+# Hardening: this daemon writes nothing
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

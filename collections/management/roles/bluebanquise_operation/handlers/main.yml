@@ -1,0 +1,31 @@
+---
+# Daemons read their configuration only at startup: any change restarts them all. Restarting the
+# worker stops the actions it runs (their jobs end failed): do not apply the role while a power
+# action runs.
+- name: service <|> Restart bluebanquise-operation services
+  ansible.builtin.service:
+    name: "{{ item }}"
+    state: restarted
+  loop: "{{ bluebanquise_operation_services }}"
+  when:
+    - "'service' not in ansible_skip_tags"
+    - bluebanquise_operation_start_services | default(bb_start_services) | default(true) | bool
+
+# Apache serves the WebUI. Handlers run in the order they are defined: the configuration is
+# checked first, so that an invalid configuration never stops a running Apache (which also serves
+# PXE files and repositories). A reload does not cut current downloads.
+- name: command <|> Check Apache configuration for bluebanquise-operation
+  ansible.builtin.command: "{{ bluebanquise_operation_apache_configtest_command }}"
+  changed_when: false
+  listen: service <|> Reload Apache for bluebanquise-operation
+  when:
+    - "'service' not in ansible_skip_tags"
+    - http_server_start_services | default(bb_start_services) | default(true) | bool
+
+- name: service <|> Reload Apache for bluebanquise-operation
+  ansible.builtin.service:
+    name: "{{ bluebanquise_operation_apache_service }}"
+    state: reloaded
+  when:
+    - "'service' not in ansible_skip_tags"
+    - http_server_start_services | default(bb_start_services) | default(true) | bool

@@ -1,5 +1,5 @@
 ---
-name: LP15
+name: U26
 on:
   push:
     branches:
@@ -8,7 +8,7 @@ on:
 
 jobs:
   roles_core:
-    name: lp15 core roles
+    name: U26 core roles
     runs-on: ubuntu-22.04
     env:
       ANSIBLE_CONFIG: /var/lib/bluebanquise/ansible.cfg
@@ -23,13 +23,14 @@ jobs:
 
       - name: Setup container
         run: |
-          docker build -t opensuseleap_15:systemd -f ./resources/docker/Dockerfile_OpenSUSELeap_15_systemd .
+          docker build -t ubuntu_26:systemd -f ./resources/docker/Dockerfile_Ubuntu_26_systemd .
           sudo modprobe -v dummy numdummies=2 && sudo ip addr add 10.10.0.1/16 dev dummy0 && sudo ip link set dev dummy0 up && ip a;
-          echo -e 'bb_repositories:\n  - name: bluebanquise\n    disable_gpg_check: true\n    repo: "https://bluebanquise.com/repository/releases/latest/osl15/x86_64/bluebanquise/"' > resources/workflow/inventory_standard/group_vars/all/repositories.yml
-          docker run -d --privileged --cgroupns=host --net=host --name mgt1 -v /sys/fs/cgroup:/sys/fs/cgroup:rw -v $PWD:/bluebanquise opensuseleap_15:systemd
+          echo -e 'bb_repositories:\n  - name: bluebanquise\n    trusted: true\n    uris: "https://bluebanquise.com/repository/releases/latest/u26/x86_64/bluebanquise/"\n    suites: resolute\n    components: main' > resources/workflow/inventory_standard/group_vars/all/repositories.yml
+          docker run -d --privileged --cgroupns=host --net=host --name mgt1 -v /sys/fs/cgroup:/sys/fs/cgroup:rw -v $PWD:/bluebanquise ubuntu_26:systemd
           docker exec mgt1 bash -c "/bluebanquise/bootstrap/online_bootstrap.sh --silent --skip_environment"
           docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'cd /bluebanquise/bootstrap/ && ./configure_environment.sh --bb_collections_local_path=/bluebanquise/collections/'"
-          # docker exec mgt1 bash -c "curl http://bluebanquise.com/repository/releases/latest/lp15/x86_64/bluebanquise/bluebanquise.repo --output /etc/zypp/repos.d/bluebanquise.repo"
+          # docker exec mgt1 bash -c "curl http://bluebanquise.com/repository/releases/latest/u26/x86_64/bluebanquise/bluebanquise.list --output /etc/apt/sources.list.d/bluebanquise.list"
+          docker exec mgt1 bash -c "apt update && DEBIAN_FRONTEND=noninteractive apt-get install apt-utils python3-apt -y"
 
       - name: Prepare run input files
         run: docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'cp -a /bluebanquise/resources/workflow/inventory_standard /var/lib/bluebanquise/inventory && cp -a /bluebanquise/resources/workflow/playbooks /var/lib/bluebanquise'"
@@ -38,11 +39,11 @@ jobs:
         run: |
           docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate &&  ansible-playbook /var/lib/bluebanquise/playbooks/infrastructure.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mgt1 --diff  --tags repositories'"
           docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate &&  ansible-playbook /var/lib/bluebanquise/playbooks/infrastructure.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mgt1 --diff --check --tags hosts_file,dns_client'"
-          docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate &&  ansible-playbook /var/lib/bluebanquise/playbooks/infrastructure.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mgt1 --diff --skip-tags local_configuration,conman,hosts_file,nic,dns_client,cloudinit,large_package,time'"
+          docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate &&  ansible-playbook /var/lib/bluebanquise/playbooks/infrastructure.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mgt1 --diff --skip-tags local_configuration,repositories,firewall,hosts_file,nic,dns_client,large_package,time'"
           docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate &&  ansible-playbook /var/lib/bluebanquise/playbooks/infrastructure.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mgt1 --diff --tags time --skip-tags service'"
 
   roles_addons:
-    name: lp15 addons roles
+    name: U26 addons roles
     runs-on: ubuntu-22.04
     env:
       ANSIBLE_CONFIG: /var/lib/bluebanquise/ansible.cfg
@@ -57,13 +58,14 @@ jobs:
 
       - name: Setup container
         run: |
-          docker build -t opensuseleap_15:systemd -f ./resources/docker/Dockerfile_OpenSUSELeap_15_systemd .
+          docker build -t ubuntu_26:systemd -f ./resources/docker/Dockerfile_Ubuntu_26_systemd .
           sudo modprobe -v dummy numdummies=2 && sudo ip addr add 10.10.0.1/16 dev dummy0 && sudo ip link set dev dummy0 up && ip a;
-          echo -e 'bb_repositories:\n  - name: bluebanquise\n    disable_gpg_check: true\n    repo: "https://bluebanquise.com/repository/releases/latest/osl15/x86_64/bluebanquise/"' > resources/workflow/inventory_standard/group_vars/all/repositories.yml
-          docker run -d --privileged --cgroupns=host --net=host --name mgt1 -v /sys/fs/cgroup:/sys/fs/cgroup:rw -v $PWD:/bluebanquise opensuseleap_15:systemd
+          echo -e 'bb_repositories:\n  - name: bluebanquise\n    trusted: true\n    uris: "https://bluebanquise.com/repository/releases/latest/u26/x86_64/bluebanquise/"\n    suites: resolute\n    components: main' > resources/workflow/inventory_standard/group_vars/all/repositories.yml
+          docker run -d --privileged --cgroupns=host --net=host --name mgt1 -v /sys/fs/cgroup:/sys/fs/cgroup:rw -v $PWD:/bluebanquise ubuntu_26:systemd
           docker exec mgt1 bash -c "/bluebanquise/bootstrap/online_bootstrap.sh --silent --skip_environment"
           docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'cd /bluebanquise/bootstrap/ && ./configure_environment.sh --bb_collections_local_path=/bluebanquise/collections/'"
-          # docker exec mgt1 bash -c "curl http://bluebanquise.com/repository/releases/latest/lp15/x86_64/bluebanquise/bluebanquise.repo --output /etc/zypp/repos.d/bluebanquise.repo"
+          # docker exec mgt1 bash -c "curl http://bluebanquise.com/repository/releases/latest/u26/x86_64/bluebanquise/bluebanquise.list --output /etc/apt/sources.list.d/bluebanquise.list"
+          docker exec mgt1 bash -c "apt update && DEBIAN_FRONTEND=noninteractive apt-get install apt-utils python3-apt -y"
 
       - name: Prepare run input files
         run: docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'cp -a /bluebanquise/resources/workflow/inventory_standard /var/lib/bluebanquise/inventory && cp -a /bluebanquise/resources/workflow/playbooks /var/lib/bluebanquise'"
@@ -78,10 +80,14 @@ jobs:
           docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate &&  ansible-playbook /var/lib/bluebanquise/playbooks/hpc.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mgt1 --diff --skip-tags service --tags slurm_controller,slurm_submitter'"
           docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate &&  ansible-playbook /var/lib/bluebanquise/playbooks/hpc.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mgt1 --diff --skip-tags service --tags slurm_compute,lmod'"
           docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate &&  ansible-playbook /var/lib/bluebanquise/playbooks/file_systems.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mgt1 --diff'"
-          docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate &&  ansible-playbook /var/lib/bluebanquise/playbooks/logging.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mgt1 --diff'"
-          docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate &&  ansible-playbook /var/lib/bluebanquise/playbooks/containers.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mgt1 --diff'"
+          docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate &&  ansible-playbook /var/lib/bluebanquise/playbooks/logging.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mgt1 --diff --skip-tags loki'"
+          docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate &&  ansible-playbook /var/lib/bluebanquise/playbooks/containers.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mgt1 --diff --skip-tags podman'"
           docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate &&  ansible-playbook /var/lib/bluebanquise/playbooks/hardware.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mgt1 --diff'"
           docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate &&  ansible-playbook /var/lib/bluebanquise/playbooks/monitoring.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mgt1 --diff'"
           docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate &&  ansible-playbook /var/lib/bluebanquise/playbooks/cluster_management.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mgt1 --diff --tags cluster_management --skip-tags service'"
           docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate &&  ansible-playbook /var/lib/bluebanquise/playbooks/cluster_playbooks.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mgt1 --diff --tags cluster_playbooks --skip-tags service'"
+          docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate &&  ansible-playbook /var/lib/bluebanquise/playbooks/bluebanquise_supervision.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mgt1 --diff --tags http_server,bluebanquise_supervision --skip-tags service'"
+          docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate &&  ansible-playbook /var/lib/bluebanquise/playbooks/bluebanquise_federator.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mgt1 --diff --tags http_server,bluebanquise_federator --skip-tags service'"
+          docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate &&  ansible-playbook /var/lib/bluebanquise/playbooks/bluebanquise_operation.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mgt1 --diff --tags http_server,conman,bluebanquise_power,bluebanquise_operation --skip-tags service'"
+          docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate &&  ansible-playbook /var/lib/bluebanquise/playbooks/bluebanquise_slurm.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mgt1 --diff --tags http_server,bluebanquise_slurm --skip-tags service'"
           docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate &&  ansible-playbook /var/lib/bluebanquise/playbooks/databases.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mgt1 --diff'"

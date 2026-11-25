@@ -1,22 +1,21 @@
-================
+===============
 Run a Slurm job
-================
+===============
 
-With :doc:`extensions` applied, the cluster has a standard user (``keats``) and a working Slurm
-controller. This page submits a first job as that user, from the login node - the same way a
-real cluster user would.
+Here we are: the cluster has a user, keats, and a working job scheduler. Let's submit a first job,
+from the login node, just like a real user of the cluster would.
 
 Connect as keats
-=================
+================
 
-From your workstation, or from mgt1:
+From your workstation (through the ``datacenter`` network), or from mgt1:
 
 .. code-block:: bash
 
   ssh keats@login
 
-Sanity check the cluster
-==========================
+Look around
+===========
 
 .. code-block:: bash
 
@@ -32,12 +31,12 @@ Sanity check the cluster
 
   squeue
 
-should return an empty queue (no jobs running yet).
+The queue is empty: no job is running yet.
 
-Submit a trivial job
-======================
+A first job
+===========
 
-Run a command across the whole ``cpu`` partition:
+Let's run a command on the 4 nodes of the ``cpu`` partition:
 
 .. code-block:: bash
 
@@ -50,23 +49,18 @@ Run a command across the whole ``cpu`` partition:
   c003
   c004
 
-And on the ``gpu`` partition:
+And let's ask for 2 GPUs on a GPU worker:
 
 .. code-block:: bash
 
-  srun --partition=gpu --nodes=4 hostname
+  srun --partition=gpu --gres=gpu:2 nvidia-smi -L
 
-.. code-block:: text
+Only the 2 GPUs allocated to the job are listed.
 
-  g001
-  g002
-  g003
-  g004
+A batch job
+===========
 
-Submit a batch job
-====================
-
-For anything longer than a one-liner, use ``sbatch``. Create ``~/hello_cluster.sh``:
+For anything longer than a single command, we use ``sbatch``. Create ``~/hello_cluster.sh``:
 
 .. code-block:: bash
 
@@ -79,7 +73,7 @@ For anything longer than a one-liner, use ``sbatch``. Create ``~/hello_cluster.s
   echo "Hello from $(hostname), running as $(whoami)"
   df -h /home /software
 
-Submit it and watch it run:
+Submit it, and watch it run:
 
 .. code-block:: bash
 
@@ -87,12 +81,14 @@ Submit it and watch it run:
   squeue
   cat hello_cluster-<jobid>.out
 
-The output should show the job landed on one of ``c001``-``c004``, running as ``keats``, with
-both ``/home`` and ``/software`` visible - confirming the compute worker, the Slurm scheduler,
-and the NFS share added in :doc:`extensions` are all working together.
+The output shows the job ran on one of the CPU workers, as keats, with ``/home`` and ``/software``
+available: compute workers, Slurm, users and NFS all work together.
 
 -----
 
-That completes the walkthrough: a 9-host, 3-network cluster taken from a bare RHEL 10 management
-server to a working Slurm job submitted by a standard user. From here, the rest of this
-documentation covers every role and setting used along the way in full detail.
+Congratulations, you made it! We went from a single RHEL 10 management server to a 9 hosts, 3
+networks cluster, running jobs for its users. Thank you for following along.
+
+From here, the rest of this documentation describes every role and setting we used in full detail,
+and many more: monitoring, logs, high availability, and so on. And :doc:`../../operations/operations`
+gathers the tools to take care of the cluster day to day. Have fun with your cluster!

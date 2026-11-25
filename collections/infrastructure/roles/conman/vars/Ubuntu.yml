@@ -2,6 +2,11 @@
 # conman >= 0.3 installs its scripts in /usr/share
 conman_execpath: "/usr/share/conman/exec"
 
+# expect runs the console scripts (ipmitool.exp, ssh.exp): the package only suggests it
 conman_packages_to_install:
   - conman
   - ipmitool
+  - expect
+
+# The package logrotate file is a commented example: console logs were never rotated
+conman_logrotate_replace_package_file: true

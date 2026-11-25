@@ -1,0 +1,12 @@
+#jinja2: lstrip_blocks: True
+#### Blue Banquise file ####
+## {{ ansible_managed }}
+# Hosts of the inventory and their function group, to group the Slurm nodes on the map. The
+# nodes themselves come from Slurm (sinfo).
+
+hosts:
+{% for host in groups['all'] | sort %}
+  {% set fn_groups = hostvars[host]['group_names'] | select('match', '^fn_') | sort %}
+  {{ host | to_json }}:
+    group: {{ fn_groups[0] | default('none') | to_json }}
+{% endfor %}

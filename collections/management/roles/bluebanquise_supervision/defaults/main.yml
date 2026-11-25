@@ -1,0 +1,59 @@
+---
+# What to check, per Ansible group (any group name). A host member of several of these groups
+# accumulates them: probes and actions are merged (later group wins for the same name), ssh
+# username and drift_check are taken from the last group defining them. See README for details.
+#
+# bluebanquise_supervision_checks:
+#   hw_server_A:
+#     ssh:
+#       username: bluebanquise
+#     drift_check: true
+#     probes:
+#       check_bmc:
+#       ssh_check_disk_smart: /dev/sda
+#     actions:
+#       on_fail: 'sudo scontrol update nodename=$SUPERVISION_HOST state=drain reason="supervision: $SUPERVISION_PROBES"'
+bluebanquise_supervision_checks: {}
+
+# Remote user the probes connect as, when no group of the host sets ssh.username.
+bluebanquise_supervision_ssh_username: bluebanquise
+
+# Probe daemon
+bluebanquise_supervision_loop_interval: 1800
+bluebanquise_supervision_thread_pool_size: 100
+bluebanquise_supervision_ssh_gate_timeout: 10
+bluebanquise_supervision_ssh_probe_timeout: 60
+bluebanquise_supervision_local_probe_timeout: 60
+bluebanquise_supervision_action_timeout: 60
+
+# REST API + WebUI daemon. It listens on 127.0.0.1 only: Apache (http_server role) serves it
+# under /webui/supervision/.
+bluebanquise_supervision_api_port: 8091
+
+# Packs shown in the left menu of the WebUI. Shared by all WebUI packs of the
+# bluebanquise.management collection: set it once in the inventory, for example in
+# group_vars/all. When not set, the menu shows only this pack.
+# bluebanquise_webui_packs:
+#   - name: supervision         # URL is /webui/<name>/
+#     label: Supervision
+
+# WebUI and REST API users, shared by all WebUI packs: set them once in the inventory, for example
+# in group_vars/all (preferably in an Ansible vault). Levels: viewer (cluster overview and packs
+# summaries only), operator (everything about hosts), admin. Generate a password hash with:
+#   bluebanquise-supervision hash-password
+# bluebanquise_webui_users:
+#   - name: jdoe
+#     password_hash: "scrypt:32768:8:1$..."
+#     role: operator
+
+# Prometheus exporter daemon
+bluebanquise_supervision_exporter_bind: 127.0.0.1
+bluebanquise_supervision_exporter_port: 9810
+
+# Commands the daemons user may run with sudo, without password (full paths). For example, to let
+# an on_fail action drain a node in Slurm:
+# bluebanquise_supervision_sudoers_commands:
+#   - /usr/bin/scontrol
+bluebanquise_supervision_sudoers_commands: []
+
+bluebanquise_supervision_log_level: INFO
