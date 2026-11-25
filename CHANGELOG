@@ -5,6 +5,7 @@ Format: <date> - <author (username or mail or both)> - [role] <change descriptio
 * To 3.4.2
 
 * 2026-11-02 - santos-lucas - [prometheus] add manage_service option. 
+* 2026-10-21 - santos-lucas - [prometheus] add possibility to use ansible group patterns (#1303)
 
 # To 3.4.1
 

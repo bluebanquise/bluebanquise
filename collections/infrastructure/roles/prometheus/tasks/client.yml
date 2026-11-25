@@ -7,7 +7,7 @@
   ansible.builtin.set_fact:
     prometheus_exporters_groups: "{{ prometheus_exporters_groups + item.value }}"
   loop: "{{ prometheus_exporters_groups_to_scrape | dict2items }}"
-  when: inventory_hostname in groups[item.key] | default([])
+  when: inventory_hostname in query('inventory_hostnames', item.key)
 
 - name: group <|> Add exporters needed groups
   ansible.builtin.group:
