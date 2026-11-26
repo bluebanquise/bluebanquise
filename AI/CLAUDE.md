@@ -120,6 +120,7 @@ state: "{{ (role_start_services | default(bb_start_services) | default(true) | b
   - Distribution files ship *commented examples* of active directives (`listen.conf`: `#Listen 80` example on line 16, `Listen 80` on line 19). A `lineinfile` that "restores" a directive by uncommenting `^#Directive$` hits the example and duplicates it: comment out with a role-specific marker (`#Listen 80  # Disabled by BlueBanquise http_server role`) and restore only that marker.
   - Agama creates the first user with a **group of the same name** (uid/gid 1000): post scripts renumbering that user must `groupmod` the existing group, not `groupadd` a new one (`groupadd` fails "already exists", then `usermod -g` fails, nothing changes). Failed Agama post scripts are only logged, the install still "succeeds"; their output is in `/run/agama/scripts/post/<name>.{log,err,out}` of the live installer, not in the copied logs tarball.
   - Minimal installs have no `hostname` command (use `uname -n` in scripts/tests).
+  - `apachectl` is only in `apache2-utils`, which `apache2` does not pull in (Leap 15 ships `apache2ctl` in `apache2`): `community.general.apache2_module` failed "Neither of apache2ctl nor apachectl found". `http_server` 1.4.1 installs it (2026-11-18, `94855b9f`). SUSE's `apachectl` runs `start_apache2`, which rebuilds the module list from `/etc/sysconfig/apache2`, so `a2enmod` changes are seen at once.
 
 #### Python tools
 
@@ -1051,6 +1052,24 @@ deprecated: users prefer small modular tools over one big tool). **No shared cod
   `~/cdp_slurm.py <user> <pw>` (operator 36, viewer 2). After a gabriel reboot: start the BMC emulators
   (ipmi_sim, sushy-tools) BEFORE testing Operation, then `systemctl restart conman` (conman's
   console retry delay grows while the BMC is down: no console line for minutes).
+- **sudo-rs (Ubuntu 26.04's default `sudo`, 2026-11-18)**: knows only about twenty `Defaults`
+  (its sudoers(5): log_allowed, noexec, use_pty, env_keep, secure_path, timestamp_timeout...),
+  no `pam_session`: its `visudo` refuses an unknown one ("unknown setting"), at runtime it warns
+  and skips the line. Any sudoers template must stay in that subset or detect the implementation:
+  `bluebanquise_slurm` runs `sudo --version` (`sudo-rs 0.2.2` vs `Sudo version 1.9...`) and writes
+  `!pam_session` only for classic sudo (`dce5dbef`). Offline check: Debian 13 packages sudo-rs
+  (`apt-get download sudo-rs`, `dpkg-deb -x`, binaries in `usr/lib/cargo/bin/`).
+- **WebUI status (2026-11-21)**: release 1 (steps 1a-5: supervision summary routes, federator,
+  operation, slurm) is done, merged (PR #1314) and in production at a first site (a small cluster
+  helped free of charge by the maintainer), which found the play-wide handler-name bug (fixed
+  `75965f8c`, see the handlers rule above). Next: step 6 Provisioning (release 2: steps 6
+  Provisioning, 7 Inventory, 8 Automation; design in `/claude/webui_architecture.md`, outside
+  the repo), and a logout (asked 2026-11-17: basic auth credentials stay cached in the browser
+  until it closes; plan: a menu entry to a route answering 401). The maintainer is reworking the
+  shared CSS (left menu entries keep a light background in dark mode); his result goes into the
+  four copies of the duplicated `bluebanquise-webui.css`. Static design sample of the federator
+  overview: `/claude/workdir/webui_sample/run.sh` (local tool: renders the real templates, runs the
+  page JS on sample data in a local Playwright headless shell, writes `/claude/sample/`).
 - **WebUI conventions**: Bulma 1.0.4 only (served locally from `files/webui/static/`, clusters are
   often offline) + plain JS. Dark mode is
   Bulma's own `data-theme` on `<html>`: no attribute = follow the system, the moon/sun button

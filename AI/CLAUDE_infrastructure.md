@@ -14,6 +14,42 @@ history stays useful; `steps/` and `steps_v2/` are legacy, ignore them.
 
 ---
 
+## Package builds (CI/ + Doreamon), state 2026-11-23
+
+- `Doreamon/doreamon.sh` builds all OS/arch couples of `CI/build_matrix` **in parallel**
+  (`run_step_parallel`: build phase for all couples, then repositories phase, exit 1 if any couple
+  fails, recap table `OS_ARCH BUILD REPOSITORIES`). Per-couple logs:
+  `~/doreamon_repositories_build_log_<os>_<arch>`. First production pass 2026-11-23: 15/15 green,
+  clamscan + upload OK (BlueBanquise 3.4.1 released on these packages).
+- 15 couples: el9/el10/osl16/u24/u26/deb13 on x86_64 + aarch64, plus riscv64 for el10, u26, deb13
+  (QEMU). riscv64 venv takes hours (Rust wheels + alien under QEMU); built packages are skipped on
+  the next pass, so a pass after a full build is mostly iPXE (rebuilt when the upstream commit
+  count changes, ~2 min x86_64, ~17 min aarch64 per distribution).
+- `CI/engine_qemu.sh` mounts the checkout's `packages/` read-only on `/infra/packages` and uses its
+  `build.sh` as entrypoint: containers never `git pull` their own copy (a failed pull used to run
+  the stale code of the image silently). Each couple works in `~/CI/tmp/wd_<os>_<arch>/`;
+  downloads are shared in `~/CI/tmp/sources/` through `download_locked` (flock).
+- **noarch packages are per OS, made by that OS's builds only.** `bluebanquise-ipxe-<arch>` exists
+  in an OS repository only if that OS has a build for `<arch>`: `bluebanquise-ipxe-riscv64` is
+  only in el10, u26 and deb13. Role vars listing a package must follow the repositories, not the
+  spec (pxe_stack `vars/RedHat_10.yml`, `Debian_13.yml`, `Ubuntu_26.yml`).
+- `~/CI` on the build host is a bind mount of `/data2/CI` (fstab `nofail`): check
+  `findmnt ~/CI` before a run.
+- Container-created git trees (`~/CI/tmp/wd_*/sources/ipxe`) are root-owned: read them with
+  `git -c safe.directory='*'`.
+
+## Reproducing BlueBanquise GitHub CI locally
+
+Run the steps of `.github/workflows/<os>.yml` (Setup container, Prepare run input files,
+Infrastructure roles execution, Other roles execution) on a fresh clone. Do not use `--net=host`:
+the firewall role then rewrites the host's iptables/Docker chains. Run `mgt1` in its own network
+namespace and create the `dummy0` 10.10.0.1/16 interface inside it with `nsenter`. Watch the
+container size: the CI applies both rsyslog server and client profiles to `mgt1`, which looped
+messages to itself until rsyslog 1.7.1 (clients forward only `fromhost-ip == 127.0.0.1`) and
+filled 44 GB ("No space left on device" on GitHub).
+
+---
+
 ## Validation V4 (current)
 
 **Result 2026-11-12: 6/6 distributions FULL PASS** - rhel9 (BIOS), rhel10, debian13, ubuntu24,
