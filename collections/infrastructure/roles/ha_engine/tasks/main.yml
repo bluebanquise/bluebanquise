@@ -1,0 +1,83 @@
+---
+# Register only on the cluster writer (first host of ha_engine_cluster_group)
+# and only when services are managed by Pacemaker (ha_engine_register):
+# a non-HA playbook run on an HA inventory, or the HA bootstrap, leaves the
+# cluster untouched. Callers include the role without any guard.
+- name: HA | {{ ha_engine_owner }} | Register resources on the cluster writer  # noqa: name[template]
+  when:
+    - ha_engine_register | bool
+    - inventory_hostname == (groups[ha_engine_cluster_group] | default([]) | first | default(''))
+  block:
+    - name: HA | {{ ha_engine_owner }} | Validate declaration  # noqa: name[template]
+      vars:
+        _decl: "{{ ha_engine_declaration | default([]) }}"
+        _res: >-
+          {{ ha_engine_declaration | default([])
+             | map(attribute='resources', default=[]) | flatten }}
+      ansible.builtin.assert:
+        that:
+          - _decl | type_debug == 'list'
+          - _decl | length > 0
+          - ha_engine_restart_handler is string or ha_engine_restart_handler is sequence
+          - _decl | rejectattr('group', 'defined') | list | length == 0
+          - _decl | map(attribute='group', default='') | reject('string') | list | length == 0
+          - _decl | rejectattr('resources', 'defined') | list | length == 0
+          - _res | length > 0
+          - _res | rejectattr('id', 'defined') | list | length == 0
+          - _res | rejectattr('type', 'defined') | list | length == 0
+          - _decl | selectattr('after', 'defined') | map(attribute='after')
+                  | reject('sequence') | list | length == 0
+          - _res | map(attribute='id') | unique | list | length == (_res | length)
+        fail_msg: >-
+          [{{ ha_engine_owner }}] ha_engine_declaration must be a non-empty list of
+          {group, resources[, after]} entries (legacy ha_resources.yml shape):
+          group is a string ('' = ungrouped), every resource needs id and type,
+          ids must be unique; ha_engine_restart_handler must be a handler name or
+          a list of names (empty = no restart) (got:
+          {{ _decl | map('to_json') | join(', ') }}, restart_handler=
+          {{ ha_engine_restart_handler | to_json }})
+
+    - name: HA | {{ ha_engine_owner }} | Validate constraints  # noqa: name[template]
+      vars:
+        _decl: "{{ ha_engine_declaration }}"
+        _with_cons: >-
+          {{ _decl | selectattr('order', 'defined') | list
+             + _decl | selectattr('colocations', 'defined') | list
+             + _decl | selectattr('locations', 'defined') | list }}
+        _order: "{{ _decl | map(attribute='order', default=[]) | flatten }}"
+        _coloc: "{{ _decl | map(attribute='colocations', default=[]) | flatten }}"
+        _loc: "{{ _decl | map(attribute='locations', default=[]) | flatten }}"
+      ansible.builtin.assert:
+        that:
+          - _with_cons | selectattr('group', 'equalto', '') | list | length == 0
+          - _order | rejectattr('start_after', 'defined') | list | length == 0
+          - _order | map(attribute='kind', default='Mandatory')
+                   | difference(['Mandatory', 'Optional', 'Serialize']) | length == 0
+          - _coloc | rejectattr('with', 'defined') | list | length == 0
+          - _coloc | map(attribute='with') | reject('string') | list | length == 0
+          - _coloc | map(attribute='with') | select('equalto', '') | list | length == 0
+          - _loc | map(attribute='type', default='') | difference(['prefers', 'avoids']) | length == 0
+          - _loc | rejectattr('nodes', 'defined') | list | length == 0
+          - _loc | map(attribute='nodes') | select('string') | list | length == 0
+          - _loc | map(attribute='nodes') | map('length') | select('equalto', 0) | list | length == 0
+        fail_msg: >-
+          [{{ ha_engine_owner }}] constraints are declared on a group entry (not
+          group: ''): order [{start_after, kind (Mandatory|Optional|Serialize),
+          symmetrical}], colocations [{with (non-empty string, the resource the
+          group is placed with), score}],
+          locations [{type (prefers|avoids), nodes (non-empty list), score}]
+          (got: order={{ _order | to_json }},
+          colocations={{ _coloc | to_json }}, locations={{ _loc | to_json }})
+        quiet: true
+
+    - name: HA | {{ ha_engine_owner }} | Load the generic restart handlers  # noqa: name[template]
+      ansible.builtin.include_tasks:
+        file: handlers.yml
+      tags: always
+
+    - name: HA | {{ ha_engine_owner }} | Register each declared group  # noqa: name[template]
+      ansible.builtin.include_tasks: entry.yml
+      loop: "{{ ha_engine_declaration }}"
+      loop_control:
+        loop_var: ha_entry
+        label: "{{ ha_engine_owner }} -> {{ ha_entry.group | default('(ungrouped)') }}"

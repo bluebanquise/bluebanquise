@@ -4,7 +4,7 @@ namespace: bluebanquise
 name: infrastructure
 
 # The version of the collection. Must be compatible with semantic versioning
-version: 3.2.8-smc2.3.12
+version: 3.2.8-smc3.0.0-20261124
 
 # The path to the Markdown (.md) readme file. This path is relative to the root of the collection
 readme: README.md
@@ -93,3 +93,4 @@ build_ignore:
   - roles/nhc
   - roles/slurm
   - roles/google_authenticator
+  - roles/ha_engine/tests

@@ -19,6 +19,7 @@ This collection regroups all roles related to basic deployment of nodes (servers
 * [roles/dns_client](roles/dns_client): configure `/etc/resolv.conf`. Note that this role should not be used when using NetworkManager or systemd-networkd as this file is managed by these services.
 * [roles/dns_server](roles/dns_server): configure and install a dns server.
 * [roles/firewall](roles/firewall): configure firewall. Role is currently limited to Firewalld.
+* [roles/ha_engine](roles/ha_engine): register role-owned HA resources in a Pacemaker cluster, and provide a generic service restart handler (systemd or Pacemaker).
 * [roles/hosts_file](roles/hosts_file): generate the `/etc/hosts` file.
 * [roles/http_server](roles/http_server): install and configure an http server.
 * [roles/kernel_config](roles/kernel_config): configure systctl and kernel command line.
